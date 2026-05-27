@@ -777,6 +777,9 @@ const BIOME_CREATURES = {
 let animalLookup = {};
 DB_ANIMALS.forEach(a => { animalLookup[a[0]] = a; });
 
+// Save original quiz overlay HTML so we can restore it after death/win screens
+var _QUIZ_HTML = document.getElementById('quiz-overlay').innerHTML;
+
 // ==================== CANVAS SETUP ====================
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
@@ -1794,14 +1797,19 @@ function startNewDay() {
   _graceTimer = 5;
   // Respawn creatures for the new daily words
   spawnCreatures();
-  // Close all overlays
+  // Close all overlays and restore quiz HTML (was destroyed by showWinScreen)
   document.getElementById('quiz-overlay').classList.remove('show');
-  document.getElementById('quiz-overlay').innerHTML = '';
+  document.getElementById('quiz-overlay').innerHTML = _QUIZ_HTML;
   document.getElementById('speak-overlay').classList.remove('show');
   document.getElementById('sentence-overlay').classList.remove('show');
   document.getElementById('food-btn').style.display = 'flex';
   updateHUD();
-  resumeBgMusic();
+  // Ensure music is playing (may have been stopped by quiz flow)
+  if (!bgMusic.playing || !bgMusic.audio) {
+    startBgMusic();
+  } else {
+    resumeBgMusic();
+  }
   showToast('☀️ 新的一天！新地图：' + currentLayout + ' ~ 收集20个新单词吧~');
 }
 
@@ -2245,14 +2253,40 @@ function showDeathScreen() {
 }
 
 function respawnPlayer() {
-  document.getElementById('quiz-overlay').classList.remove('show');
-  document.getElementById('quiz-overlay').innerHTML = '';
+  // ── Full state reset (same as startNewDay) ──
   gameOver = false;
+  gameWin = false;
+  reviewActive = false;
+  reviewSentences = [];
+  reviewIndex = 0;
+  quizActive = false;
+  quizCreature = null;
+  quizPhase = 'listen';
+  foodQuizActive = false;
+  _speakRetries = 0;
+  // Clear all held keys
+  for (const k in keys) { keys[k] = false; }
+  // Cancel any ongoing speech/recognition
+  stopRecognition();
+  if (reviewRecognition) { try { reviewRecognition.abort(); } catch(e) {} reviewRecognition = null; }
+  if (foodRecognition) { try { foodRecognition.abort(); } catch(e) {} }
+  foodRecognition = null;
+  foodRecognitionActive = false;
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  _joystick.wasTap = false;
+
+  // Restore original quiz HTML (was destroyed by showDeathScreen)
+  document.getElementById('quiz-overlay').innerHTML = _QUIZ_HTML;
+  document.getElementById('quiz-overlay').classList.remove('show');
+  document.getElementById('speak-overlay').classList.remove('show');
+  document.getElementById('sentence-overlay').classList.remove('show');
+
   _graceTimer = 5;
   // Respawn right of Christmas tree
   player.x = WORLD_W * TILE / 2 + 5 * TILE;
   player.y = WORLD_H * TILE / 2;
   spawnWolf();
+  resumeBgMusic();
   updateHUD();
 }
 
@@ -2797,15 +2831,17 @@ function stopRecognition() {
 }
 
 function getSentence(en, cn) {
-  const sentences = [
-    {en:'This is a ' + en + '.', zh:'这是一只' + cn + '。'},
-    {en:'I can see a ' + en + '.', zh:'我能看见一只' + cn + '。'},
-    {en:'Look! A ' + en + '!', zh:'看！一只' + cn + '！'},
-    {en:'The ' + en + ' is very cute.', zh:'这只' + cn + '非常可爱。'},
-    {en:'I like the ' + en + '.', zh:'我喜欢这只' + cn + '。'},
-    {en:'What a beautiful ' + en + '!', zh:'好漂亮的' + cn + '！'},
-    {en:'Here comes a ' + en + '.', zh:'来了一只' + cn + '。'},
-    {en:'Do you see the ' + en + '?', zh:'你看见那只' + cn + '了吗？'},
+  // Use 'a' or 'an' based on first letter sound
+  var article = /^[aeiou]/i.test(en) ? 'an' : 'a';
+  var sentences = [
+    {en:'I learned the word ' + en + '.', zh:'我学了"' + cn + '"这个单词。'},
+    {en:'Can you say ' + en + '?', zh:'你能说' + cn + '吗？'},
+    {en:'This is ' + article + ' ' + en + '.', zh:'这是一只' + cn + '。'},
+    {en:'I can see ' + article + ' ' + en + '.', zh:'我能看见一只' + cn + '。'},
+    {en:'Look! ' + article[0].toUpperCase() + article.slice(1) + ' ' + en + '!', zh:'看！一只' + cn + '！'},
+    {en:'The word of the day: ' + en + '.', zh:'今日单词：' + cn + '。'},
+    {en:en + ' is the word I learned.', zh:cn + '是我学到的单词。'},
+    {en:'I like the word ' + en + '.', zh:'我喜欢"' + cn + '"这个词。'},
   ];
   return sentences[Math.floor(Math.random() * sentences.length)];
 }
