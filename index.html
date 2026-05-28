@@ -2842,6 +2842,8 @@ function startWolfQuizRecognition() {
     }, 5000);
   } catch(e) { wolfQuizRecognition = null; }
 }
+
+function finishWolfQuiz() {
   if (wolfQuizRecognition) { try { wolfQuizRecognition.abort(); } catch(e) {} wolfQuizRecognition = null; }
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   wolfQuizActive = false;
