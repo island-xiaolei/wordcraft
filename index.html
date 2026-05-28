@@ -16,6 +16,9 @@ canvas{display:block;position:absolute;top:0;left:0}
 .hud-item{background:rgba(0,0,0,0.7);border:2px solid rgba(255,255,255,0.15);border-radius:14px;padding:8px 14px;
   color:var(--white);font-size:14px;backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px}
 .hud-item .val{color:var(--gold);font-weight:bold;font-size:18px}
+.hud-item.stats-btn{background:rgba(255,140,0,0.22);border-color:rgba(255,180,40,0.6);
+  animation:statsGlow 2s ease-in-out infinite;font-weight:bold}
+@keyframes statsGlow{0%,100%{box-shadow:0 0 8px rgba(255,180,40,0.3)}50%{box-shadow:0 0 20px rgba(255,180,40,0.7)}}
 .hud-pet{font-size:32px;animation:petBounce 1s ease-in-out infinite}
 @keyframes petBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
@@ -45,10 +48,13 @@ canvas{display:block;position:absolute;top:0;left:0}
 .quiz-opt:active{transform:scale(0.96)}
 .quiz-opt.correct{background:rgba(76,175,80,0.3)!important;border-color:var(--green)!important;animation:pulseOk 0.5s}
 .quiz-opt.wrong{background:rgba(244,67,54,0.3)!important;border-color:var(--red)!important;animation:shake 0.5s}
-.quiz-speak{display:inline-block;margin-top:14px;padding:10px 22px;border-radius:20px;border:2px solid rgba(255,215,0,0.4);
-  background:rgba(255,215,0,0.12);color:var(--gold);font-size:14px;cursor:pointer;font-family:inherit;transition:0.2s;font-weight:bold}
-.quiz-speak:hover{background:rgba(255,215,0,0.25);color:#fff;transform:scale(1.05)}
+.quiz-speak{display:inline-block;margin-top:14px;padding:14px 28px;border-radius:25px;border:none;
+  background:linear-gradient(135deg,#ff9800,#ff5722);color:#fff;font-size:17px;cursor:pointer;font-family:inherit;transition:0.2s;font-weight:bold;
+  box-shadow:0 0 20px rgba(255,152,0,0.5),0 4px 12px rgba(255,87,34,0.3);animation:speakGlow 1.5s ease-in-out infinite}
+.quiz-speak:hover{background:linear-gradient(135deg,#ffb040,#ff7043);transform:scale(1.08);box-shadow:0 0 32px rgba(255,152,0,0.7),0 6px 20px rgba(255,87,34,0.4)}
 .quiz-speak:active{transform:scale(0.95)}
+@keyframes speakGlow{0%,100%{box-shadow:0 0 20px rgba(255,152,0,0.5),0 4px 12px rgba(255,87,34,0.3)}50%{box-shadow:0 0 36px rgba(255,152,0,0.8),0 6px 24px rgba(255,87,34,0.5)}}
+.quiz-phonetic{font-size:18px;color:#ffb74d;margin:4px 0;font-style:italic;letter-spacing:1px}
 .quiz-word-en{font-size:32px;font-weight:bold;color:var(--gold);margin:8px 0;letter-spacing:2px}
 .quiz-word-cn{font-size:18px;color:var(--sub);margin-bottom:6px}
 .quiz-word-hidden{font-size:36px;font-weight:bold;color:rgba(255,255,255,0.2);margin:8px 0;letter-spacing:6px}
@@ -84,39 +90,46 @@ canvas{display:block;position:absolute;top:0;left:0}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 @keyframes pulseOk{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 
-/* Collection book */
-#book-overlay{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;
-  background:rgba(0,0,0,0.8);backdrop-filter:blur(6px)}
-#book-overlay.show{display:flex}
-.book-panel{background:linear-gradient(160deg,#1a1a3e,#1a2a1e);border:3px solid rgba(255,255,255,0.2);
-  border-radius:24px;padding:24px;max-width:700px;width:92%;max-height:80vh;overflow-y:auto;
-  box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:quizIn 0.3s ease-out}
-.book-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.book-header h2{color:var(--gold);font-size:24px}
-.book-close{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:12px;
-  color:#fff;font-size:18px;width:40px;height:40px;cursor:pointer;transition:0.2s}
-.book-close:hover{background:rgba(255,255,255,0.2)}
-.book-progress{color:var(--sub);font-size:14px;margin-bottom:12px}
-.book-progress .pct{color:var(--gold);font-weight:bold;font-size:18px}
-.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px}
-.book-entry{background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.1);border-radius:14px;
-  padding:10px 6px;text-align:center;transition:0.2s}
-.book-entry.collected{border-color:rgba(255,215,0,0.4);background:rgba(255,215,0,0.08)}
-.book-entry .emoji{font-size:36px;display:block}
-.book-entry .en{font-size:11px;color:var(--white);margin-top:4px;font-weight:bold;word-break:break-word}
-.book-entry .zh{font-size:10px;color:var(--sub);margin-top:2px}
-.book-entry .locked{font-size:28px;display:block;opacity:0.3}
-.book-section{margin-bottom:16px}
-.book-section h3{color:var(--blue);font-size:16px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.1)}
-
 /* Stats overlay */
 #stats-overlay{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;
   background:rgba(0,0,0,0.8);backdrop-filter:blur(6px)}
 #stats-overlay.show{display:flex}
 .stats-panel{background:linear-gradient(160deg,#1a1a2e,#2e1a1a);border:3px solid rgba(255,180,40,0.3);
-  border-radius:24px;padding:24px;max-width:520px;width:92%;max-height:80vh;overflow-y:auto;
+  border-radius:24px;padding:24px;max-width:520px;width:92%;max-height:85vh;overflow-y:auto;
   box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:quizIn 0.3s ease-out}
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.book-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.book-header h2{color:#ffcc66;font-size:20px;margin:0}
+.book-close{width:40px;height:40px;border-radius:50%;background:rgba(255,80,80,0.85);border:2px solid rgba(255,255,255,0.4);
+  color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:0.2s;flex-shrink:0;line-height:1}
+.book-close:hover{background:#ff3333;border-color:#fff;transform:scale(1.1)}
+.book-close:active{transform:scale(0.9)}
+.stats-summary-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:16px 0;
+  padding:12px;background:rgba(255,255,255,0.05);border-radius:14px}
+.stats-sum-item{color:var(--sub);font-size:14px}
+.stats-sum-item b{color:var(--gold);font-size:18px}
+.stats-word-section{display:flex;flex-direction:column;gap:16px;margin-bottom:12px}
+.stats-day-group{}
+.stats-day-label{color:var(--gold);font-size:13px;font-weight:bold;margin-bottom:8px;
+  padding:4px 12px;background:rgba(255,215,0,0.1);border-radius:10px;display:inline-block}
+.stats-word-chips{display:flex;flex-wrap:wrap;gap:8px}
+.stats-word-chip{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:14px;
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;
+  font-size:14px;cursor:pointer;transition:0.2s;font-family:inherit}
+.stats-word-chip:hover{background:rgba(255,215,0,0.15);border-color:rgba(255,215,0,0.5);transform:scale(1.05)}
+.stats-word-chip:active{transform:scale(0.95)}
+.stats-encourage{text-align:center;color:var(--gold);font-size:16px;font-weight:bold;padding:10px;
+  background:rgba(255,215,0,0.08);border-radius:14px;margin-top:8px}
+
+/* Word review overlay */
+#word-review-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.8);backdrop-filter:blur(4px)}
+#word-review-overlay.show{display:flex}
+.word-review-card{background:linear-gradient(160deg,#1a1a3e,#2a1a3e);border:3px solid rgba(255,255,255,0.2);
+  border-radius:24px;padding:30px 24px;text-align:center;max-width:380px;width:90%;position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:quizIn 0.3s ease-out}
+
+.old-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
 .stat-card{border-radius:16px;padding:14px 8px;text-align:center;background:rgba(255,255,255,0.05);
   border:2px solid rgba(255,255,255,0.1);transition:0.2s}
 .stat-card:hover{transform:scale(1.05)}
@@ -131,16 +144,88 @@ canvas{display:block;position:absolute;top:0;left:0}
 .stat-icon{font-size:28px;margin-bottom:4px}
 .stat-num{font-size:20px;font-weight:bold;color:var(--gold);margin-bottom:2px}
 .stat-label{font-size:11px;color:var(--sub)}
-.stats-encourage{text-align:center;color:var(--gold);font-size:16px;font-weight:bold;padding:10px;
-  background:rgba(255,215,0,0.08);border-radius:14px;margin-top:8px}
-@media(max-width:500px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.old-stats-grid{grid-template-columns:repeat(2,1fr)}}
 
 
 /* Toast */
 #toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:200;pointer-events:none;
   background:rgba(0,0,0,0.85);color:var(--gold);padding:10px 24px;border-radius:20px;font-size:15px;
   font-weight:bold;opacity:0;transition:opacity 0.3s;border:1px solid rgba(255,215,0,0.3)}
+
+/* Pause */
+#pause-btn{position:fixed;bottom:24px;left:16px;z-index:50;width:46px;height:46px;border-radius:50%;
+  background:rgba(0,0,0,0.55);border:2px solid rgba(255,255,255,0.35);color:#fff;font-size:24px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:0.2s}
+#pause-btn:hover{background:rgba(0,0,0,0.8);border-color:#fff;transform:scale(1.1)}
+#pause-btn:active{transform:scale(0.9)}
+#pause-overlay{position:fixed;inset:0;z-index:250;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.8);backdrop-filter:blur(8px)}
+#pause-overlay.show{display:flex}
+.pause-card{text-align:center;animation:quizIn 0.3s ease-out}
+.pause-icon{font-size:90px;line-height:1.1;animation:quizFloat 2s ease-in-out infinite}
+.pause-title{color:#fff;font-size:26px;font-weight:bold;margin:12px 0}
+.pause-sub{color:var(--sub);font-size:15px;margin-bottom:20px}
 #toast.show{opacity:1}
+
+/* Intro overlay */
+/* Name input overlay */
+#name-overlay{position:fixed;inset:0;z-index:310;display:none;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,rgba(10,10,40,0.92),rgba(20,5,30,0.92));backdrop-filter:blur(8px)}
+#name-overlay.show{display:flex}
+.name-card{background:linear-gradient(160deg,#1a1a3e,#2a1a4e);border:3px solid rgba(255,215,0,0.3);
+  border-radius:24px;padding:32px 24px;text-align:center;max-width:400px;width:90%;
+  box-shadow:0 20px 60px rgba(100,100,255,0.3);animation:quizIn 0.5s ease-out}
+.name-emoji{font-size:80px;line-height:1.1;animation:quizFloat 2s ease-in-out infinite}
+.name-title{color:#ffd54f;font-size:24px;font-weight:bold;margin:12px 0 6px}
+.name-subtitle{color:rgba(255,255,255,0.6);font-size:14px;margin-bottom:16px;line-height:1.6}
+.name-input{display:block;width:100%;max-width:260px;margin:0 auto 16px;padding:12px 16px;border-radius:14px;
+  border:2px solid rgba(255,215,0,0.4);background:rgba(255,255,255,0.08);color:#fff;font-size:18px;
+  text-align:center;font-family:inherit;outline:none;transition:0.2s}
+.name-input:focus{border-color:#ffd54f;box-shadow:0 0 16px rgba(255,215,0,0.3);background:rgba(255,255,255,0.12)}
+.name-input::placeholder{color:rgba(255,255,255,0.25)}
+.name-confirm{display:inline-block;padding:14px 36px;border-radius:25px;border:none;
+  background:linear-gradient(135deg,#ff9800,#f44336);color:#fff;font-size:18px;font-weight:bold;
+  cursor:pointer;font-family:inherit;transition:0.2s;box-shadow:0 6px 20px rgba(244,67,54,0.3)}
+.name-confirm:hover{transform:scale(1.06);box-shadow:0 8px 28px rgba(244,67,54,0.4)}
+.name-confirm:active{transform:scale(0.95)}
+.name-hint{color:rgba(255,255,255,0.3);font-size:11px;margin-top:10px}
+
+#intro-overlay{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.85);backdrop-filter:blur(8px)}
+#intro-overlay.show{display:flex}
+.intro-card{background:linear-gradient(160deg,#1a0a0a,#2a1a1a);border:3px solid rgba(244,67,54,0.5);
+  border-radius:24px;padding:28px 22px;text-align:center;max-width:440px;width:90%;
+  box-shadow:0 20px 60px rgba(244,67,54,0.3);animation:quizIn 0.5s ease-out}
+.intro-wolf{font-size:100px;line-height:1.1;animation:wolfIntroFloat 2s ease-in-out infinite}
+@keyframes wolfIntroFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.05)}}
+.intro-wolf-img{width:140px;height:auto;margin:0 auto;display:block;border-radius:16px;image-rendering:pixelated}
+.intro-title{color:#f44336;font-size:26px;font-weight:bold;margin:10px 0;text-shadow:0 0 20px rgba(244,67,54,0.5)}
+.intro-msg{color:var(--white);font-size:16px;line-height:1.6;margin:8px 0;padding:0 8px}
+.intro-countdown{color:var(--gold);font-size:48px;font-weight:bold;margin:10px 0;animation:countdownPulse 1s ease-in-out infinite}
+@keyframes countdownPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:0.7}}
+.intro-hint{color:var(--sub);font-size:13px;margin-top:6px}
+.intro-skip{display:inline-block;margin-top:10px;padding:6px 18px;border-radius:14px;border:1px solid rgba(255,255,255,0.2);
+  background:rgba(255,255,255,0.08);color:var(--sub);font-size:12px;cursor:pointer;font-family:inherit;transition:0.2s}
+.intro-skip:hover{background:rgba(255,255,255,0.18);color:#fff}
+@media(max-width:768px){.intro-wolf{font-size:72px}.intro-wolf-img{width:100px}.intro-title{font-size:22px}.intro-msg{font-size:14px}.intro-countdown{font-size:36px}}
+
+/* Wolf quiz overlay */
+#wolf-quiz-overlay{position:fixed;inset:0;z-index:110;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.82);backdrop-filter:blur(6px)}
+#wolf-quiz-overlay.show{display:flex}
+.wolf-quiz-card{background:linear-gradient(160deg,#1a0a0a,#2a1a2a);border:3px solid rgba(244,67,54,0.4);
+  border-radius:24px;padding:26px 20px;text-align:center;max-width:430px;width:90%;
+  box-shadow:0 20px 60px rgba(244,67,54,0.25);animation:quizIn 0.35s ease-out;max-height:90vh;overflow-y:auto}
+.wolf-quiz-header{color:#f44336;font-size:22px;font-weight:bold;margin-bottom:6px}
+.wolf-quiz-dialog{background:rgba(244,67,54,0.1);border:1px solid rgba(244,67,54,0.25);border-radius:14px;padding:12px 16px;margin:10px 0;color:var(--white);font-size:15px;line-height:1.5;text-align:left}
+.wolf-quiz-progress{color:var(--sub);font-size:14px;margin:8px 0}
+.wolf-quiz-progress .wq-cur{color:var(--gold);font-weight:bold;font-size:22px}
+.wolf-quiz-emoji{font-size:80px;line-height:1.2;animation:quizFloat 1.5s ease-in-out infinite}
+.wolf-quiz-cn{color:var(--white);font-size:22px;font-weight:bold;margin:6px 0}
+.wolf-quiz-hidden{font-size:28px;font-weight:bold;color:rgba(255,255,255,0.15);margin:4px 0;letter-spacing:4px}
+.wolf-quiz-success{color:var(--green);font-size:16px;font-weight:bold;margin:8px 0}
+.wolf-quiz-complete{font-size:70px;margin:10px 0}
+@media(max-width:768px){.wolf-quiz-card{max-width:95vw;padding:16px 12px}.wolf-quiz-emoji{font-size:56px}.wolf-quiz-header{font-size:18px}.wolf-quiz-cn{font-size:18px}}
 
 /* Mobile controls */
 #mobile-controls{position:fixed;bottom:max(20px, env(safe-area-inset-bottom, 10px));left:50%;transform:translateX(-50%);z-index:20;display:none;pointer-events:none;padding:8px}
@@ -161,6 +246,9 @@ canvas{display:block;position:absolute;top:0;left:0}
   #hud{padding:8px 10px;gap:5px}
   .hud-item{padding:6px 10px;font-size:13px;border-radius:10px}
   .hud-item .val{font-size:16px}
+  .hud-item.stats-btn{background:rgba(255,140,0,0.25);border-color:rgba(255,180,40,0.7);
+    animation:statsGlow 2s ease-in-out infinite;font-weight:bold}
+  @keyframes statsGlow{0%,100%{box-shadow:0 0 8px rgba(255,180,40,0.3)}50%{box-shadow:0 0 20px rgba(255,180,40,0.7)}}
   .hud-pet{font-size:28px}
   #toast{font-size:14px;padding:8px 18px;top:60px}
   #hint{display:none /* hidden on mobile — joystick replaces keyboard hints */}
@@ -170,24 +258,35 @@ canvas{display:block;position:absolute;top:0;left:0}
   .quiz-subtitle,.quiz-mic-status{font-size:12px !important}
   .quiz-opt{font-size:15px !important;padding:10px 8px !important}
   .quiz-action-btn{padding:11px 22px !important;font-size:15px !important}
-  .quiz-speak{font-size:14px !important}
+  .quiz-speak{font-size:15px !important;padding:12px 22px !important}
   .quiz-mic{font-size:48px !important}
   .quiz-speech-result{font-size:17px !important}
   .quiz-word-cn{font-size:14px !important}
+  .quiz-phonetic{font-size:15px !important}
   .speak-label{font-size:12px !important;margin-bottom:2px !important}
   .speak-no-subtitle{font-size:11px !important;margin-bottom:6px !important}
   .food-card{max-width:95vw !important;padding:16px 12px !important}
   .food-emoji{font-size:50px !important}
   .food-title{font-size:17px !important}
   .food-sentence .en-sent{font-size:15px !important}
-  #food-btn{width:48px !important;height:48px !important;font-size:22px !important}
+  #food-btn{width:52px !important;height:52px !important;font-size:24px !important}
+  #food-btn.no-stamina{width:auto !important;height:auto !important;font-size:24px !important}
+  /* Name overlay */
+  .name-card{padding:24px 16px !important}
+  .name-emoji{font-size:60px !important}
+  .name-title{font-size:20px !important}
+  .name-input{font-size:16px !important;padding:10px 14px !important}
+  .name-confirm{font-size:16px !important;padding:12px 28px !important}
   /* Book & stats for mobile */
   #book-grid{grid-template-columns:repeat(3, 1fr) !important}
   .book-entry{font-size:11px !important}
   .book-emoji{font-size:32px !important}
   /* Stats cards */
-  .stat-card{min-width:80px !important;padding:12px 8px !important;font-size:12px !important}
-  .stat-card .num{font-size:24px !important}
+  .stats-summary-row{gap:10px !important}
+  .stats-sum-item{font-size:12px !important}
+  .stats-sum-item b{font-size:16px !important}
+  .stats-word-chip{font-size:12px !important;padding:5px 10px !important}
+  #pause-btn{width:40px !important;height:40px !important;font-size:20px !important;bottom:16px !important;left:10px !important}
 }
 
 /* Stamina bar */
@@ -202,9 +301,14 @@ canvas{display:block;position:absolute;top:0;left:0}
 
 /* Food button - floating above player */
 #food-btn{position:fixed;z-index:15;display:none;align-items:center;justify-content:center;
-  width:52px;height:52px;border-radius:50%;background:rgba(255,152,0,0.85);border:3px solid #fff;
-  color:#fff;font-size:24px;cursor:pointer;pointer-events:auto;animation:foodBounce 1s ease-in-out infinite;
-  box-shadow:0 4px 16px rgba(255,152,0,0.5);transition:transform 0.15s}
+  width:56px;height:56px;border-radius:50%;background:rgba(255,152,0,0.85);border:3px solid #fff;
+  color:#fff;font-size:27px;cursor:pointer;pointer-events:auto;animation:foodBounce 1s ease-in-out infinite;
+  box-shadow:0 4px 16px rgba(255,152,0,0.5);transition:transform 0.15s;white-space:nowrap}
+#food-btn.no-stamina{width:auto;height:auto;border-radius:28px;padding:8px 16px;font-size:27px;gap:6px;
+  animation:foodBounce 1s ease-in-out infinite,foodGlow 0.8s ease-in-out infinite alternate}
+@keyframes foodGlow{0%{box-shadow:0 4px 16px rgba(255,152,0,0.5)}100%{box-shadow:0 4px 28px rgba(255,80,40,0.9),0 0 40px rgba(255,50,50,0.5)}}
+#food-btn .hint-text{display:none;font-size:14px;font-weight:700;color:#fff;text-shadow:0 0 6px rgba(255,0,0,0.6)}
+#food-btn.no-stamina .hint-text{display:inline}
 #food-btn:hover{transform:scale(1.15)}
 #food-btn:active{transform:scale(0.9)}
 @keyframes foodBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
@@ -263,14 +367,43 @@ canvas{display:block;position:absolute;top:0;left:0}
   </div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="hud-item" id="wolf-proximity" style="border-color:rgba(255,50,50,0.3)">🐺 <span class="val" style="color:#ff6666;font-size:13px" id="wolf-dist">--</span></div>
-    <div class="hud-item hud-pet" id="pet-icon" title="宠物伙伴">🥚</div>
-    <div class="hud-item" style="pointer-events:auto;cursor:pointer;border-color:rgba(255,180,40,0.5)" onclick="toggleStats()">📊 战绩</div>
-    <div class="hud-item" style="pointer-events:auto;cursor:pointer" onclick="toggleBook()">📖 图鉴</div>
+    <div class="hud-item hud-pet" id="pet-icon" title="宠物伙伴"><span id="pet-emoji">🥚</span> <span id="pet-label" style="font-size:11px;color:var(--sub)">宠物</span></div>
+    <div class="hud-item stats-btn" style="pointer-events:auto;cursor:pointer" onclick="toggleStats()">📝 已学单词表</div>
   </div>
 </div>
 
 <div id="hint">
-  <span class="key">WASD</span> 探索迷宫 &nbsp;<span class="key">空格</span> 发现单词学习 &nbsp;<span class="key">C</span> 吃食物恢复体力 &nbsp;<span class="key">B</span> 单词图鉴
+  <span class="key">WASD</span> 探索迷宫 &nbsp;<span class="key">空格</span> 发现单词学习 &nbsp;<span class="key">C</span> 吃食物恢复体力
+</div>
+
+<!-- Name input overlay (first-time only) -->
+<div id="name-overlay">
+  <div class="name-card">
+    <div class="name-emoji">🧙</div>
+    <div class="name-title">创建你的角色</div>
+    <div class="name-subtitle">欢迎来到单词我的世界！<br>请给你的角色取一个名字吧</div>
+    <input type="text" id="name-input" class="name-input" placeholder="请输入角色名" maxlength="12" autocomplete="off">
+    <button class="name-confirm" onclick="confirmName()">✨ 开始冒险</button>
+    <div class="name-hint">密码将自动设置为和账号相同</div>
+  </div>
+</div>
+
+<!-- Intro overlay -->
+<div id="intro-overlay">
+  <div class="intro-card">
+    <div class="intro-wolf">🐺</div>
+    <div class="intro-title">狼人来袭！</div>
+    <div class="intro-msg" id="intro-msg">欢迎来到狼人英语时间，小朋友！<br>找到地图上的 <b style="color:#ffd54f">20个英语单词</b> 并成功学习，<br>否则我将吃掉你，啊哈哈哈！~</div>
+    <div class="intro-countdown" id="intro-countdown">10</div>
+    <div class="intro-hint">倒计时结束后游戏开始</div>
+    <button class="intro-skip" onclick="skipIntro()">⏭ 跳过</button>
+  </div>
+</div>
+
+<!-- Wolf quiz overlay -->
+<div id="wolf-quiz-overlay">
+  <div class="wolf-quiz-card" id="wolf-quiz-card-inner">
+  </div>
 </div>
 
 <div id="quiz-overlay">
@@ -279,8 +412,9 @@ canvas{display:block;position:absolute;top:0;left:0}
     <div class="quiz-label">📖 听发音</div>
     <div class="quiz-emoji" id="quiz-emoji">🐱</div>
     <div class="quiz-word-en" id="quiz-word-en">cat</div>
+    <div class="quiz-phonetic" id="quiz-phonetic">/kæt/</div>
     <div class="quiz-word-cn" id="quiz-word-cn">猫</div>
-    <button class="quiz-speak" onclick="playQuizWord()">🔊 点击听发音</button>
+    <button class="quiz-speak" onclick="playQuizWord()">🔊 点击听正确发音 👈</button>
     <div style="margin-top:16px">
       <button class="quiz-action-btn" onclick="startSpeakingTest()">🎤 开始口语挑战</button>
     </div>
@@ -323,73 +457,49 @@ canvas{display:block;position:absolute;top:0;left:0}
   </div>
 </div>
 
-<div id="book-overlay">
-  <div class="book-panel">
+<div id="stats-overlay" onclick="if(event.target===this)toggleStats()">
+  <div class="stats-panel">
     <div class="book-header">
-      <h2>📖 单词图鉴</h2>
-      <button class="book-close" onclick="toggleBook()">✕</button>
+      <h2>📝 已学单词表</h2>
+      <button class="book-close" onclick="toggleStats()">✕</button>
     </div>
-    <div class="book-progress">收集进度：<span class="pct" id="book-pct">0%</span>（<span id="book-count">0</span>/<span id="book-total">0</span>）</div>
-    <div id="book-content"></div>
+    <div class="stats-summary-row">
+      <span class="stats-sum-item">📅 <b id="stat-days">0</b> 天</span>
+      <span class="stats-sum-item">📝 <b id="stat-words">0</b> 词</span>
+      <span class="stats-sum-item">⭐ <b id="stat-score">0</b> 分</span>
+    </div>
+    <div class="stats-word-section" id="stats-word-section"></div>
+    <div class="stats-encourage" id="stats-encourage"></div>
   </div>
 </div>
 
-<div id="stats-overlay">
-  <div class="stats-panel">
-    <div class="book-header">
-      <h2>📊 学习战绩</h2>
-      <button class="book-close" onclick="toggleStats()">✕</button>
-    </div>
-    <div class="stats-grid">
-      <div class="stat-card gold">
-        <div class="stat-icon">📅</div>
-        <div class="stat-num" id="stat-days">0</div>
-        <div class="stat-label">学习天数</div>
-      </div>
-      <div class="stat-card blue">
-        <div class="stat-icon">📝</div>
-        <div class="stat-num" id="stat-words">0</div>
-        <div class="stat-label">已学单词</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-icon">✅</div>
-        <div class="stat-num" id="stat-collected">0</div>
-        <div class="stat-label">收集单词</div>
-      </div>
-      <div class="stat-card purple">
-        <div class="stat-icon">📖</div>
-        <div class="stat-num" id="stat-sentences">0</div>
-        <div class="stat-label">完成句子</div>
-      </div>
-      <div class="stat-card orange">
-        <div class="stat-icon">⭐</div>
-        <div class="stat-num" id="stat-score">0</div>
-        <div class="stat-label">总得分</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-icon">🔥</div>
-        <div class="stat-num" id="stat-combo">0</div>
-        <div class="stat-label">最高连击</div>
-      </div>
-      <div class="stat-card cyan">
-        <div class="stat-icon">🐾</div>
-        <div class="stat-num" id="stat-pet">Lv.1</div>
-        <div class="stat-label">宠物等级</div>
-      </div>
-      <div class="stat-card pink">
-        <div class="stat-icon">🎯</div>
-        <div class="stat-num" id="stat-rate">0%</div>
-        <div class="stat-label">今日进度</div>
-      </div>
-    </div>
-    <div class="stats-encourage" id="stats-encourage"></div>
+<!-- Word review mini overlay -->
+<div id="word-review-overlay">
+  <div class="word-review-card">
+    <button class="sticky-close-btn" onclick="closeWordReview()">✕</button>
+    <div class="quiz-emoji" id="wr-emoji" style="font-size:80px">📝</div>
+    <div class="quiz-word-en" id="wr-en">word</div>
+    <div class="quiz-phonetic" id="wr-phonetic">/wɜːrd/</div>
+    <div class="quiz-word-cn" id="wr-cn">单词</div>
+    <button class="quiz-speak" onclick="reviewPlayWord()">🔊 点击听正确发音 👈</button>
   </div>
 </div>
 
 <div id="toast"></div>
 
+<!-- Pause button / overlay -->
+<button id="pause-btn" onclick="togglePause()" title="暂停游戏">⏸️</button>
+<div id="pause-overlay">
+  <div class="pause-card">
+    <div class="pause-icon">⏸️</div>
+    <div class="pause-title">游戏已暂停</div>
+    <div class="pause-sub">狼人和公主都在等你回来~</div>
+    <button class="quiz-action-btn" onclick="togglePause()">▶ 继续游戏</button>
+  </div>
+</div>
+
 <!-- Food button - floating near player -->
-<button id="food-btn" onclick="collectFood()" title="点击收集食物恢复体力">🍎</button>
+<button id="food-btn" onclick="collectFood()" title="点击收集食物恢复体力"><span class="hint-text">点击食物补充体力</span>🍎</button>
 
 <!-- Food quiz overlay -->
 <div id="food-overlay">
@@ -786,7 +896,7 @@ const ctx = canvas.getContext('2d');
 
 var _isMobile = false;
 try { _isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent); } catch(e) {}
-var _mobileZoom = (_isMobile ? 0.55 : 1);
+var _mobileZoom = (_isMobile ? 0.42 : 1);
 function resize() {
   canvas.width = Math.floor(window.innerWidth / _mobileZoom);
   canvas.height = Math.floor(window.innerHeight / _mobileZoom);
@@ -910,7 +1020,7 @@ function openFoodQuiz() {
   document.getElementById('food-word-cn').textContent = currentFood.cn;
   document.getElementById('food-sentence-en').textContent = _currentFoodSentence.en;
   document.getElementById('food-sentence-zh').textContent = _currentFoodSentence.zh;
-  document.getElementById('food-mic-status').textContent = '请说出食物的英文名';
+  document.getElementById('food-mic-status').textContent = '请说出完整的英文句子';
   document.getElementById('food-mic').className = 'quiz-mic';
   document.getElementById('food-speech-result').textContent = '';
   document.getElementById('food-speech-result').className = 'quiz-speech-result';
@@ -919,15 +1029,8 @@ function openFoodQuiz() {
   document.getElementById('food-replay-btn').style.display = 'none';
   document.getElementById('food-sentence-div').classList.add('show');
   overlay.classList.add('show');
-  // Auto-play food word pronunciation
-  setTimeout(() => {
-    if ('speechSynthesis' in window) {
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(currentFood.en);
-      u.lang = 'en-US'; u.rate = 0.75; u.pitch = 1;
-      speechSynthesis.speak(u);
-    }
-  }, 400);
+  // Auto-play food sentence pronunciation
+  setTimeout(() => { _speakEnglish(_currentFoodSentence.en); }, 400);
 }
 
 function closeFoodQuiz() {
@@ -959,11 +1062,14 @@ function startFoodRecognition() {
 
   foodRecognitionActive = true;
   document.getElementById('food-mic').classList.add('listening');
-  document.getElementById('food-mic-status').textContent = '🎤 说出食物英文名...';
+  document.getElementById('food-mic-status').textContent = '🎤 说出完整英文句子...';
 
-  const foodWord = currentFood.en.toLowerCase();
+  var foodWord = currentFood.en.toLowerCase();
+  var targetSentence = (_currentFoodSentence && _currentFoodSentence.en) ? _currentFoodSentence.en.toLowerCase().replace(/[^a-z\s]/g,'').trim() : foodWord;
+  var targetWords = targetSentence.split(/\s+/).filter(function(w) { return w.length >= 2; });
 
   foodRecognition.onresult = function(event) {
+    clearTimeout(_recogTimeout);
     const results = event.results[0];
     const heard = [];
     for (let i = 0; i < results.length; i++) {
@@ -977,7 +1083,15 @@ function startFoodRecognition() {
     const micEl = document.getElementById('food-mic');
     const statusEl = document.getElementById('food-mic-status');
 
-    const isCorrect = heard.some(h => fuzzyMatch(h, foodWord));
+    // Check if spoken text contains the food word AND at least half of target sentence words
+    var bestRaw = heard[heard.length - 1] || '';
+    var containsFood = heard.some(function(h) { return fuzzyMatch(h, foodWord); });
+    var matchedWords = 0;
+    for (var tw = 0; tw < targetWords.length; tw++) {
+      if (bestRaw.indexOf(targetWords[tw]) !== -1) matchedWords++;
+    }
+    var sentenceMatch = matchedWords >= Math.ceil(targetWords.length * 0.5);
+    var isCorrect = containsFood && (sentenceMatch || targetWords.length <= 2);
 
     if (isCorrect) {
       foodRecognitionActive = false;
@@ -993,24 +1107,71 @@ function startFoodRecognition() {
       document.getElementById('food-close-btn').style.display = 'inline-block';
       document.getElementById('food-replay-btn').style.display = 'inline-block';
     } else {
-      resultEl.textContent = '❌ 识别到: "' + heard[0] + '" (目标: ' + foodWord + ')';
+      resultEl.textContent = '❌ 识别到: "' + bestRaw + '" (请说: ' + targetSentence + ')';
       resultEl.className = 'quiz-speech-result wrong';
       micEl.className = 'quiz-mic';
-      statusEl.textContent = '请说出 ' + foodWord + '，再试一次';
+      statusEl.textContent = '请说出完整句子，再试一次';
       document.getElementById('food-retry-btn').style.display = 'inline-block';
       sfxWrong();
     }
   };
 
   foodRecognition.onerror = function(event) {
+    clearTimeout(_recogTimeout);
     foodRecognitionActive = false;
     document.getElementById('food-mic').classList.remove('listening');
     if (event.error === 'no-speech') {
       document.getElementById('food-mic-status').textContent = '未检测到声音，请再试一次';
-    } else if (event.error !== 'aborted') {
+      document.getElementById('food-retry-btn').style.display = 'inline-block';
+    } else if (event.error === 'aborted') {
+      // intentionally stopped
+    } else if (event.error === 'network' || event.error === 'service-not-allowed') {
+      document.getElementById('food-mic-status').textContent = '🎤 切换百度语音识别...';
+      _recordAndRecognize('food-mic-status', 4000).then(function(heard) {
+        if (heard.length > 0) {
+          var bestRaw = heard[0] || '';
+          var foodWord = currentFood.en.toLowerCase();
+          var targetSentence = (_currentFoodSentence && _currentFoodSentence.en) ? _currentFoodSentence.en.toLowerCase().replace(/[^a-z\s]/g,'').trim() : foodWord;
+          var targetWords = targetSentence.split(/\s+/).filter(function(w) { return w.length >= 2; });
+          var containsFood = heard.some(function(h) { return fuzzyMatch(h, foodWord); });
+          var matchedWords = 0;
+          for (var tw = 0; tw < targetWords.length; tw++) {
+            if (bestRaw.indexOf(targetWords[tw]) !== -1) matchedWords++;
+          }
+          var sentenceMatch = matchedWords >= Math.ceil(targetWords.length * 0.5);
+          var isCorrect = containsFood && (sentenceMatch || targetWords.length <= 2);
+          var resultEl = document.getElementById('food-speech-result');
+          var micEl = document.getElementById('food-mic');
+          var statusEl = document.getElementById('food-mic-status');
+          if (isCorrect) {
+            resultEl.textContent = '✅ 很棒！吃到了 ' + currentFood.emoji + '！';
+            resultEl.className = 'quiz-speech-result correct';
+            micEl.className = 'quiz-mic success';
+            statusEl.textContent = '+50 体力恢复！';
+            playerStamina = Math.min(MAX_STAMINA, playerStamina + 50);
+            sfxCollect();
+            updateHUD();
+            updateFoodButton();
+            document.getElementById('food-retry-btn').style.display = 'none';
+            document.getElementById('food-close-btn').style.display = 'inline-block';
+            document.getElementById('food-replay-btn').style.display = 'inline-block';
+          } else {
+            resultEl.textContent = '❌ 识别到: "' + bestRaw + '" (请说: ' + targetSentence + ')';
+            resultEl.className = 'quiz-speech-result wrong';
+            micEl.className = 'quiz-mic';
+            statusEl.textContent = '请说出完整句子，再试一次';
+            document.getElementById('food-retry-btn').style.display = 'inline-block';
+            sfxWrong();
+          }
+        } else {
+          document.getElementById('food-mic-status').textContent = '识别失败，请重试';
+          document.getElementById('food-retry-btn').style.display = 'inline-block';
+        }
+      });
+    } else {
       document.getElementById('food-mic-status').textContent = '识别出错，请重试';
+      document.getElementById('food-retry-btn').style.display = 'inline-block';
     }
-    document.getElementById('food-retry-btn').style.display = 'inline-block';
   };
 
   foodRecognition.onend = function() {
@@ -1018,7 +1179,59 @@ function startFoodRecognition() {
     document.getElementById('food-mic').classList.remove('listening');
   };
 
-  try { foodRecognition.start(); } catch(e) { foodRecognitionActive = false; }
+  try {
+    foodRecognition.start();
+    clearTimeout(_recogTimeout);
+    _recogTimeout = setTimeout(function() {
+      // Hung → Baidu fallback
+      try { foodRecognition.abort(); } catch(e) {}
+      foodRecognitionActive = false;
+      foodRecognition = null;
+      document.getElementById('food-mic').classList.remove('listening');
+      document.getElementById('food-mic-status').textContent = '🎤 切换百度语音识别...';
+      _recordAndRecognize('food-mic-status', 4000).then(function(heard) {
+        if (heard.length > 0) {
+          var bestRaw = heard[0] || '';
+          var foodWord = currentFood.en.toLowerCase();
+          var targetSentence = (_currentFoodSentence && _currentFoodSentence.en) ? _currentFoodSentence.en.toLowerCase().replace(/[^a-z\s]/g,'').trim() : foodWord;
+          var targetWords = targetSentence.split(/\s+/).filter(function(w) { return w.length >= 2; });
+          var containsFood = heard.some(function(h) { return fuzzyMatch(h, foodWord); });
+          var matchedWords = 0;
+          for (var tw = 0; tw < targetWords.length; tw++) {
+            if (bestRaw.indexOf(targetWords[tw]) !== -1) matchedWords++;
+          }
+          var sentenceMatch = matchedWords >= Math.ceil(targetWords.length * 0.5);
+          var isCorrect = containsFood && (sentenceMatch || targetWords.length <= 2);
+          var resultEl = document.getElementById('food-speech-result');
+          var micEl = document.getElementById('food-mic');
+          var statusEl = document.getElementById('food-mic-status');
+          if (isCorrect) {
+            resultEl.textContent = '✅ 很棒！吃到了 ' + currentFood.emoji + '！';
+            resultEl.className = 'quiz-speech-result correct';
+            micEl.className = 'quiz-mic success';
+            statusEl.textContent = '+50 体力恢复！';
+            playerStamina = Math.min(MAX_STAMINA, playerStamina + 50);
+            sfxCollect();
+            updateHUD();
+            updateFoodButton();
+            document.getElementById('food-retry-btn').style.display = 'none';
+            document.getElementById('food-close-btn').style.display = 'inline-block';
+            document.getElementById('food-replay-btn').style.display = 'inline-block';
+          } else {
+            resultEl.textContent = '❌ 识别到: "' + bestRaw + '" (请说: ' + targetSentence + ')';
+            resultEl.className = 'quiz-speech-result wrong';
+            micEl.className = 'quiz-mic';
+            statusEl.textContent = '请说出完整句子，再试一次';
+            document.getElementById('food-retry-btn').style.display = 'inline-block';
+            sfxWrong();
+          }
+        } else {
+          document.getElementById('food-mic-status').textContent = '识别失败，请重试';
+          document.getElementById('food-retry-btn').style.display = 'inline-block';
+        }
+      });
+    }, 5000);
+  } catch(e) { foodRecognitionActive = false; }
 }
 
 function retryFoodSpeaking() {
@@ -1035,18 +1248,16 @@ function retryFoodSpeaking() {
 function replayFoodSentence() {
   if (!currentFood) return;
   const sentenceEl = document.getElementById('food-sentence-en');
-  if (sentenceEl && sentenceEl.textContent && 'speechSynthesis' in window) {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(sentenceEl.textContent);
-    u.lang = 'en-US'; u.rate = 0.75; u.pitch = 1;
-    speechSynthesis.speak(u);
+  if (sentenceEl && sentenceEl.textContent) {
+    _speakEnglish(sentenceEl.textContent);
   }
 }
 
 function updateFoodButton() {
   const btn = document.getElementById('food-btn');
   if (foodAvailable && currentFood) {
-    btn.textContent = currentFood.emoji + ' 食物';
+    btn.innerHTML = '<span class="hint-text">点击食物补充体力</span>' + currentFood.emoji;
+    btn.classList.toggle('no-stamina', playerStamina <= 0);
     btn.style.display = 'flex';
   } else {
     btn.style.display = 'none';
@@ -1149,6 +1360,7 @@ function generateWorld(layout) {
       }
     }
   }
+  _invalidateMinimap();
 }
 
 function generateZonesWorld() {
@@ -1532,6 +1744,7 @@ let creatures = [];
 let dailyWords = []; // today's 20 words (english names)
 let dailyProgress = 0; // how many completed today
 let gameOver = false;
+let gamePaused = false;
 let gameWin = false;
 
 function spawnCreatures() {
@@ -1630,7 +1843,7 @@ let wolf = {
   dir: 'down',
   walking: false,
   animTimer: 0,
-  speed: TILE * 2.7, // ~49% of player speed — steady but not too fast
+  speed: TILE * 2.5, // ~45% of player speed — steady but not too fast
 };
 
 let _graceTimer = 0; // countdown seconds — wolf frozen while > 0
@@ -1685,6 +1898,16 @@ function generateDailyTask() {
   try {
     usedWords = JSON.parse(localStorage.getItem('wordcraft_used') || '[]');
   } catch(e) { usedWords = []; }
+
+  // Merge collected words into usedWords so truly learned words never repeat
+  for (const collectedWord of Object.keys(gameState.collected)) {
+    var lw = collectedWord.toLowerCase();
+    if (!usedWords.some(function(uw) { return uw.toLowerCase() === lw; })) {
+      usedWords.push(collectedWord);
+    }
+  }
+  // Save merged list back to localStorage
+  try { localStorage.setItem('wordcraft_used', JSON.stringify(usedWords)); } catch(e) {}
 
   const usedSet = new Set(usedWords.map(w => w.toLowerCase()));
   const totalLearned = usedWords.length;
@@ -1779,8 +2002,9 @@ function startNewDay() {
   if (reviewRecognition) { try { reviewRecognition.abort(); } catch(e) {} reviewRecognition = null; }
   if ('speechSynthesis' in window) speechSynthesis.cancel();
 
-  // Rotate to next map layout
+  // Rotate to next map layout and theme
   pickNextLayout();
+  cycleTheme();
   generateWorld(currentLayout);
   generateDailyTask();
   // Reset player to right of Christmas tree
@@ -1804,12 +2028,9 @@ function startNewDay() {
   document.getElementById('sentence-overlay').classList.remove('show');
   document.getElementById('food-btn').style.display = 'flex';
   updateHUD();
-  // Ensure music is playing (may have been stopped by quiz flow)
-  if (!bgMusic.playing || !bgMusic.audio) {
-    startBgMusic();
-  } else {
-    resumeBgMusic();
-  }
+  // Always restart music fresh for the new day
+  stopBgMusic();
+  startBgMusic();
   showToast('☀️ 新的一天！新地图：' + currentLayout + ' ~ 收集20个新单词吧~');
 }
 
@@ -1844,7 +2065,7 @@ function completeWord(en) {
       totalSents += (gameState.completedSentences ? gameState.completedSentences.length : 0);
       try { localStorage.setItem('wordcraft_sentences', totalSents.toString()); } catch(e) {}
     }
-    startSentenceReview();
+    startWolfQuiz();
   }
 }
 
@@ -1964,6 +2185,89 @@ const SENTENCE_LIBRARY = [
   { en:'My father is a cook.', zh:'我爸爸是厨师。', keys:['father','cook'] },
   { en:'I am a student.', zh:'我是一名学生。', keys:['student'] },
 ];
+// ── Adjective & verb sentences ──
+const SENTENCE_LIBRARY_EXTRA = [
+  // Weather adjectives
+  { en:'It is sunny today.', zh:'今天是晴天。', keys:['sunny','today'] },
+  { en:'It is rainy outside.', zh:'外面在下雨。', keys:['rainy'] },
+  { en:'It is cloudy today.', zh:'今天多云。', keys:['cloudy'] },
+  { en:'It is windy outside.', zh:'外面在刮风。', keys:['windy'] },
+  { en:'I feel hot.', zh:'我感觉很热。', keys:['hot'] },
+  { en:'I feel cold.', zh:'我感觉很冷。', keys:['cold'] },
+  { en:'It is warm today.', zh:'今天很温暖。', keys:['warm'] },
+  { en:'The weather is cool.', zh:'天气很凉爽。', keys:['cool','weather'] },
+  { en:'The ground is dry.', zh:'地面是干的。', keys:['dry'] },
+  { en:'The ground is wet.', zh:'地面是湿的。', keys:['wet'] },
+  { en:'It is snowy outside.', zh:'外面在下雪。', keys:['snowy'] },
+  // Feeling adjectives
+  { en:'I am happy today.', zh:'我今天很开心。', keys:['happy','today'] },
+  { en:'She is sad.', zh:'她很伤心。', keys:['sad'] },
+  { en:'He is angry.', zh:'他很生气。', keys:['angry'] },
+  { en:'I am brave.', zh:'我很勇敢。', keys:['brave'] },
+  { en:'She is shy.', zh:'她很害羞。', keys:['shy'] },
+  { en:'I am tired.', zh:'我很疲劳。', keys:['tired'] },
+  { en:'I am so excited!', zh:'我好兴奋！', keys:['excited'] },
+  { en:'He is proud.', zh:'他很自豪。', keys:['proud'] },
+  { en:'I am nervous.', zh:'我很紧张。', keys:['nervous'] },
+  { en:'She is very kind.', zh:'她很善良。', keys:['kind','very'] },
+  { en:'My cat is lazy.', zh:'我的猫很懒。', keys:['lazy','cat'] },
+  { en:'He is friendly.', zh:'他很友好。', keys:['friendly'] },
+  { en:'I am calm.', zh:'我很平静。', keys:['calm'] },
+  { en:'I am bored.', zh:'我很无聊。', keys:['bored'] },
+  { en:'She is a curious girl.', zh:'她是个好奇的女孩。', keys:['curious','girl'] },
+  // Color adjectives
+  { en:'I like the red one.', zh:'我喜欢红色的那个。', keys:['red','like'] },
+  { en:'The sky is blue.', zh:'天空是蓝色的。', keys:['blue','sky'] },
+  { en:'The grass is green.', zh:'草是绿色的。', keys:['green','grass'] },
+  { en:'She has a yellow hat.', zh:'她有一顶黄色的帽子。', keys:['yellow','hat'] },
+  { en:'I have a black cat.', zh:'我有一只黑猫。', keys:['black','cat'] },
+  { en:'Snow is white.', zh:'雪是白色的。', keys:['white','snow'] },
+  { en:'She likes pink.', zh:'她喜欢粉色。', keys:['pink','like'] },
+  { en:'He has a brown dog.', zh:'他有一只棕色的狗。', keys:['brown','dog'] },
+  // Verb sentences
+  { en:'I can run fast.', zh:'我能跑很快。', keys:['run','fast'] },
+  { en:'Let us sing a song.', zh:'我们来唱首歌吧。', keys:['sing','song'] },
+  { en:'I like to swim.', zh:'我喜欢游泳。', keys:['swim','like'] },
+  { en:'I can jump high.', zh:'我能跳很高。', keys:['jump','high'] },
+  { en:'She likes to dance.', zh:'她喜欢跳舞。', keys:['dance','like'] },
+  { en:'I can draw a cat.', zh:'我能画一只猫。', keys:['draw','cat'] },
+  { en:'He can ride a bike.', zh:'他会骑自行车。', keys:['ride','bike'] },
+  { en:'I like to skate.', zh:'我喜欢滑冰。', keys:['skate','like'] },
+  { en:'He can ski very well.', zh:'他滑雪很棒。', keys:['ski','well'] },
+  { en:'I like to paint.', zh:'我喜欢画画。', keys:['paint','like'] },
+  { en:'He can climb the tree.', zh:'他能爬树。', keys:['climb','tree'] },
+  { en:'I can throw the ball.', zh:'我能扔球。', keys:['throw','ball'] },
+  { en:'She can catch the ball.', zh:'她能接住球。', keys:['catch','ball'] },
+  { en:'He can kick the ball.', zh:'他能踢球。', keys:['kick','ball'] },
+  { en:'I like to surf.', zh:'我喜欢冲浪。', keys:['surf','like'] },
+];
+
+// ── Word type classification ──
+var _ADJ_SET = new Set([
+  'sunny','rainy','cloudy','windy','snowy','hot','cold','warm','cool','dry','wet','foggy',
+  'happy','sad','angry','scared','surprised','brave','shy','tired','excited','bored',
+  'proud','nervous','calm','confused','curious','kind','lazy','friendly','furious','lonely',
+  'red','blue','green','yellow','black','white','pink','purple','brown','gray','gold','silver',
+  'new','old','big','small','fast','slow','good','bad','nice','beautiful','pretty','ugly',
+  'soft','hard','sweet','sour','salty','spicy','delicious','hungry','thirsty','sick',
+  'clean','dirty','loud','quiet','bright','dark','light','heavy','strong','weak',
+  'tall','short','long','round','flat','sharp','thick','thin','wide','narrow',
+  'free','busy','rich','poor','young','early','late','easy','difficult','fun',
+  'sunny','rainy','cloudy','windy','snowy',
+]);
+var _VERB_SET = new Set([
+  'run','swim','jump','throw','kick','catch','climb','ride','skate','ski','surf','dive',
+  'sing','dance','draw','paint','cook','drive','fly','read','write','speak','listen',
+  'eat','drink','sleep','walk','sit','stand','open','close','push','pull',
+  'wash','clean','cut','mix','bake','boil','fry','freeze','melt',
+  'smile','laugh','cry','shout','whisper','think','learn','teach','study',
+  'play','work','help','love','hate','need','want','brush',
+]);
+function _getWordType(en) {
+  if (_ADJ_SET.has(en)) return 'adjective';
+  if (_VERB_SET.has(en)) return 'verb';
+  return 'noun';
+}
 
 function generateReviewSentences() {
   if (!dailyWords.length) {
@@ -1976,80 +2280,115 @@ function generateReviewSentences() {
     ];
   }
   // Build word data from the day's 20 learned words
-  const learnedArr = dailyWords.map(w => {
-    const data = animalLookup[w];
-    return data ? { en: data[0], cn: data[1], emoji: data[2] } : { en: w, cn: w, emoji: '📝' };
+  var learnedArr = dailyWords.map(function(w) {
+    var data = animalLookup[w];
+    return data ? { en: data[0], cn: data[1], emoji: data[2], type: _getWordType(data[0]) }
+                : { en: w, cn: w, emoji: '📝', type: _getWordType(w) };
   });
 
-  const shuffled = [...learnedArr].sort(() => Math.random() - 0.5);
+  // Separate by type so templates match grammar
+  var nouns = learnedArr.filter(function(w) { return w.type === 'noun'; });
+  var adjs = learnedArr.filter(function(w) { return w.type === 'adjective'; });
+  var verbs = learnedArr.filter(function(w) { return w.type === 'verb'; });
 
-  // Single-word sentence templates
-  const singleTemplates = [
-    (w) => ({ en: `I see a ${w.en}.`, zh: `我看见一只${w.cn}。` }),
-    (w) => ({ en: `I like the ${w.en}.`, zh: `我喜欢${w.cn}。` }),
-    (w) => ({ en: `This is a ${w.en}.`, zh: `这是一个${w.cn}。` }),
-    (w) => ({ en: `The ${w.en} is nice.`, zh: `${w.cn}很好。` }),
-    (w) => ({ en: `I have a ${w.en}.`, zh: `我有一个${w.cn}。` }),
-    (w) => ({ en: `Look at the ${w.en}.`, zh: `看那个${w.cn}。` }),
-    (w) => ({ en: `Where is the ${w.en}?`, zh: `${w.cn}在哪里？` }),
-    (w) => ({ en: `I want a ${w.en}.`, zh: `我想要一个${w.cn}。` }),
-    (w) => ({ en: `I found a ${w.en}.`, zh: `我找到了一个${w.cn}。` }),
-    (w) => ({ en: `Can you see the ${w.en}?`, zh: `你能看到${w.cn}吗？` }),
-    (w) => ({ en: `The ${w.en} is here.`, zh: `${w.cn}在这里。` }),
-    (w) => ({ en: `I love the ${w.en}.`, zh: `我很喜欢${w.cn}。` }),
+  // Shuffle each pool
+  function shuf(arr) { var a = arr.slice(); a.sort(function() { return Math.random() - 0.5; }); return a; }
+  var nounPool = shuf(nouns);
+  var adjPool = shuf(adjs);
+  var verbPool = shuf(verbs);
+
+  // ── Noun-only templates (countable, use a/an/the) ──
+  var nounTemplates = [
+    function(w) { return { en: 'I see a ' + w.en + '.', zh: '我看见一个' + w.cn + '。' }; },
+    function(w) { return { en: 'I like the ' + w.en + '.', zh: '我喜欢' + w.cn + '。' }; },
+    function(w) { return { en: 'This is a ' + w.en + '.', zh: '这是一个' + w.cn + '。' }; },
+    function(w) { return { en: 'I have a ' + w.en + '.', zh: '我有一个' + w.cn + '。' }; },
+    function(w) { return { en: 'Look at the ' + w.en + '.', zh: '看那个' + w.cn + '。' }; },
+    function(w) { return { en: 'Where is the ' + w.en + '?', zh: w.cn + '在哪里？' }; },
+    function(w) { return { en: 'I want a ' + w.en + '.', zh: '我想要一个' + w.cn + '。' }; },
+    function(w) { return { en: 'I found a ' + w.en + '.', zh: '我找到了一个' + w.cn + '。' }; },
+    function(w) { return { en: 'Can you see the ' + w.en + '?', zh: '你能看到' + w.cn + '吗？' }; },
+    function(w) { return { en: 'The ' + w.en + ' is here.', zh: w.cn + '在这里。' }; },
+    function(w) { return { en: 'I love the ' + w.en + '.', zh: '我很喜欢' + w.cn + '。' }; },
   ];
 
-  // Two-word sentence templates
-  const twoTemplates = [
-    (w1, w2) => ({ en: `I see a ${w1.en} and a ${w2.en}.`, zh: `我看见一只${w1.cn}和一只${w2.cn}。` }),
-    (w1, w2) => ({ en: `I like ${w1.en} and ${w2.en}.`, zh: `我喜欢${w1.cn}和${w2.cn}。` }),
-    (w1, w2) => ({ en: `The ${w1.en} is with the ${w2.en}.`, zh: `${w1.cn}和${w2.cn}在一起。` }),
-    (w1, w2) => ({ en: `I have a ${w1.en} and a ${w2.en}.`, zh: `我有一个${w1.cn}和一个${w2.cn}。` }),
+  // ── Adjective templates ──
+  var adjTemplates = [
+    function(w) { return { en: 'It is ' + w.en + ' today.', zh: '今天很' + w.cn + '。' }; },
+    function(w) { return { en: 'I feel ' + w.en + '.', zh: '我感觉很' + w.cn + '。' }; },
+    function(w) { return { en: 'The weather is ' + w.en + '.', zh: '天气很' + w.cn + '。' }; },
+    function(w) { return { en: 'I am ' + w.en + ' today.', zh: '我今天很' + w.cn + '。' }; },
+    function(w) { return { en: 'It is very ' + w.en + '.', zh: '非常' + w.cn + '。' }; },
   ];
 
-  const result = [];
-  const usedWords = new Set();
-  let wordIdx = 0;
+  // ── Verb templates ──
+  var verbTemplates = [
+    function(w) { return { en: 'I can ' + w.en + '.', zh: '我能' + w.cn + '。' }; },
+    function(w) { return { en: 'I like to ' + w.en + '.', zh: '我喜欢' + w.cn + '。' }; },
+    function(w) { return { en: 'Let us ' + w.en + '!', zh: '我们来' + w.cn + '吧！' }; },
+    function(w) { return { en: 'Can you ' + w.en + '?', zh: '你能' + w.cn + '吗？' }; },
+    function(w) { return { en: 'He can ' + w.en + ' well.', zh: '他' + w.cn + '很棒。' }; },
+  ];
 
-  for (let i = 0; i < 5; i++) {
-    // Pick 1-2 fresh words not yet used in any sentence
-    const picked = [];
-    while (picked.length < 2 && wordIdx < shuffled.length) {
-      const cand = shuffled[wordIdx];
-      if (!usedWords.has(cand.en)) {
-        picked.push(cand);
-        usedWords.add(cand.en);
+  // ── Combined library for matching ──
+  var allLib = SENTENCE_LIBRARY.concat(SENTENCE_LIBRARY_EXTRA);
+
+  var result = [];
+  var usedWords = {};
+
+  // First pass: try to match from the library
+  var matchedLib = [];
+  for (var li = 0; li < allLib.length; li++) {
+    var sent = allLib[li];
+    for (var ki = 0; ki < sent.keys.length; ki++) {
+      var key = sent.keys[ki];
+      if (dailyWords.indexOf(key) !== -1 && !usedWords[key]) {
+        matchedLib.push({ sent: sent, matchKey: key });
+        usedWords[key] = true;
+        break;
       }
-      wordIdx++;
     }
+  }
+  // Shuffle matched library sentences
+  matchedLib.sort(function() { return Math.random() - 0.5; });
 
-    if (picked.length === 0) {
-      // Wrap around — reuse a word
-      const w = shuffled[i % shuffled.length];
-      picked.push(w);
-    }
+  // Use up to 3 library matches
+  for (var mi = 0; mi < matchedLib.length && result.length < 3; mi++) {
+    var m = matchedLib[mi];
+    var matchedWord = learnedArr.find(function(w) { return w.en === m.matchKey; });
+    var tag = matchedWord || { en: m.matchKey, cn: m.matchKey, emoji: '📝' };
+    result.push({ en: m.sent.en, zh: m.sent.zh, tags: [tag] });
+  }
 
-    let sentence;
-    if (picked.length >= 2 && Math.random() < 0.4) {
-      const tmpl = twoTemplates[Math.floor(Math.random() * twoTemplates.length)];
-      sentence = tmpl(picked[0], picked[1]);
-    } else {
-      const tmpl = singleTemplates[Math.floor(Math.random() * singleTemplates.length)];
-      sentence = tmpl(picked[0]);
-    }
+  // Fill remaining slots with template-generated sentences (max 5 total)
+  // Mix word types proportionally
+  var typeQueue = [];
+  for (var ti = 0; ti < nounPool.length; ti++) typeQueue.push({ pool: nounPool, idx: ti, tmpl: nounTemplates });
+  for (var ai = 0; ai < adjPool.length; ai++) typeQueue.push({ pool: adjPool, idx: ai, tmpl: adjTemplates });
+  for (var vi = 0; vi < verbPool.length; vi++) typeQueue.push({ pool: verbPool, idx: vi, tmpl: verbTemplates });
+  typeQueue.sort(function() { return Math.random() - 0.5; });
 
-    result.push({ en: sentence.en, zh: sentence.zh, tags: picked });
+  for (var qi = 0; qi < typeQueue.length && result.length < 5; qi++) {
+    var q = typeQueue[qi];
+    var word = q.pool[q.idx];
+    if (!word || usedWords[word.en]) continue;
+    usedWords[word.en] = true;
+    var tmplFn = q.tmpl[Math.floor(Math.random() * q.tmpl.length)];
+    var sentence = tmplFn(word);
+    result.push({ en: sentence.en, zh: sentence.zh, tags: [word] });
   }
 
   return result;
 }
 
 function startSentenceReview() {
-  // Suppress music resume from closeSpeakOverlay/closeQuiz
-  bgMusic._wasPlaying = false;
+  // Remember music state before closeSpeakOverlay/closeQuiz destroy it
+  var _musicWasOn = bgMusic._wasPlaying || (bgMusic.playing && bgMusic.audio && !bgMusic.audio.paused);
   closeSpeakOverlay();
   closeQuiz();
+  // Pause music for review, force flag so finishSentenceReview can resume it
   pauseBgMusic();
+  bgMusic._wasPlaying = _musicWasOn;
   reviewSentences = generateReviewSentences();
   reviewIndex = 0;
   reviewActive = true;
@@ -2088,12 +2427,7 @@ function showReviewSentence(idx) {
 
 function speakReviewSentence() {
   if (!reviewActive || reviewIndex >= reviewSentences.length) return;
-  if ('speechSynthesis' in window) {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(reviewSentences[reviewIndex].en);
-    u.lang = 'en-US'; u.rate = 0.7; u.pitch = 1;
-    speechSynthesis.speak(u);
-  }
+  _speakEnglish(reviewSentences[reviewIndex].en);
 }
 
 function startReviewSpeaking() {
@@ -2115,6 +2449,7 @@ function startReviewSpeaking() {
   document.getElementById('s-speech-result').className = 'quiz-speech-result';
 
   reviewRecognition.onresult = function(event) {
+    clearTimeout(_recogTimeout);
     const results = event.results[0];
     const heard = [];
     for (let i = 0; i < results.length; i++) {
@@ -2153,9 +2488,45 @@ function startReviewSpeaking() {
   };
 
   reviewRecognition.onerror = function(event) {
+    clearTimeout(_recogTimeout);
     if (event.error === 'no-speech') {
       document.getElementById('s-speech-result').textContent = '未检测到声音，再试一次';
-    } else if (event.error !== 'aborted') {
+    } else if (event.error === 'aborted') {
+      // intentionally stopped
+    } else if (event.error === 'network' || event.error === 'service-not-allowed') {
+      document.getElementById('s-speech-result').textContent = '🎤 切换百度语音识别...';
+      _recordAndRecognize('s-speech-result', 4000).then(function(heard) {
+        if (heard.length > 0) {
+          var target = reviewSentences[reviewIndex].en.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+          var heardClean = heard[0] ? heard[0].replace(/[^a-z\s]/g, '').trim() : '';
+          var targetWords = target.split(/\s+/);
+          var heardWords = heardClean.split(/\s+/);
+          var matchCount = 0;
+          for (var ti = 0; ti < targetWords.length; ti++) {
+            if (heardWords.some(function(hw) { return fuzzyMatch(hw, targetWords[ti]); })) matchCount++;
+          }
+          var ratio = matchCount / targetWords.length;
+          var resultEl = document.getElementById('s-speech-result');
+          if (ratio >= 0.5) {
+            resultEl.textContent = '✅ 很棒！发音很好！';
+            resultEl.className = 'quiz-speech-result correct';
+            sfxCollect();
+            document.getElementById('s-replay-btn').style.display = 'inline-block';
+            document.getElementById('s-next-btn').style.display = 'inline-block';
+            if (reviewIndex >= reviewSentences.length - 1) {
+              document.getElementById('s-finish-btn').style.display = 'inline-block';
+              document.getElementById('s-next-btn').style.display = 'none';
+            }
+          } else {
+            resultEl.textContent = '❌ 再试一次吧！你说了: "' + heardClean + '"';
+            resultEl.className = 'quiz-speech-result wrong';
+            sfxWrong();
+          }
+        } else {
+          document.getElementById('s-speech-result').textContent = '语音识别失败，请重试';
+        }
+      });
+    } else {
       document.getElementById('s-speech-result').textContent = '识别出错(' + event.error + ')';
     }
   };
@@ -2164,7 +2535,46 @@ function startReviewSpeaking() {
     reviewRecognition = null;
   };
 
-  try { _startAudioRecording(); reviewRecognition.start(); } catch(e) { reviewRecognition = null; }
+  try {
+    _startAudioRecording(); reviewRecognition.start();
+    clearTimeout(_recogTimeout);
+    _recogTimeout = setTimeout(function() {
+      try { reviewRecognition.abort(); } catch(e) {}
+      reviewRecognition = null;
+      document.getElementById('s-speech-result').textContent = '🎤 切换百度语音识别...';
+      _recordAndRecognize('s-speech-result', 4000).then(function(heard) {
+        if (heard.length > 0) {
+          var target = reviewSentences[reviewIndex].en.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+          var heardClean = heard[0] ? heard[0].replace(/[^a-z\s]/g, '').trim() : '';
+          var targetWords = target.split(/\s+/);
+          var heardWords = heardClean.split(/\s+/);
+          var matchCount = 0;
+          for (var ti = 0; ti < targetWords.length; ti++) {
+            if (heardWords.some(function(hw) { return fuzzyMatch(hw, targetWords[ti]); })) matchCount++;
+          }
+          var ratio = matchCount / targetWords.length;
+          var resultEl = document.getElementById('s-speech-result');
+          if (ratio >= 0.5) {
+            resultEl.textContent = '✅ 很棒！发音很好！';
+            resultEl.className = 'quiz-speech-result correct';
+            sfxCollect();
+            document.getElementById('s-replay-btn').style.display = 'inline-block';
+            document.getElementById('s-next-btn').style.display = 'inline-block';
+            if (reviewIndex >= reviewSentences.length - 1) {
+              document.getElementById('s-finish-btn').style.display = 'inline-block';
+              document.getElementById('s-next-btn').style.display = 'none';
+            }
+          } else {
+            resultEl.textContent = '❌ 再试一次吧！你说了: "' + heardClean + '"';
+            resultEl.className = 'quiz-speech-result wrong';
+            sfxWrong();
+          }
+        } else {
+          document.getElementById('s-speech-result').textContent = '语音识别失败，请重试';
+        }
+      });
+    }, 5000);
+  } catch(e) { reviewRecognition = null; }
 }
 
 function nextReviewSentence() {
@@ -2180,6 +2590,268 @@ function finishSentenceReview() {
   reviewSentences = [];
   resumeBgMusic();
   showWinScreen();
+}
+
+// ==================== WOLF QUIZ SYSTEM ====================
+var wolfQuizWords = [];
+var wolfQuizIndex = 0;
+var wolfQuizActive = false;
+var wolfQuizRecognition = null;
+
+function startWolfQuiz() {
+  var _musicWasOn = bgMusic._wasPlaying || (bgMusic.playing && bgMusic.audio && !bgMusic.audio.paused);
+  closeSpeakOverlay();
+  closeQuiz();
+  pauseBgMusic();
+  bgMusic._wasPlaying = _musicWasOn;
+
+  // Build quiz from the 20 daily words
+  wolfQuizWords = dailyWords.map(function(w) {
+    var data = animalLookup[w];
+    return data ? { en: data[0], cn: data[1], emoji: data[2] } : { en: w, cn: w, emoji: '📝' };
+  });
+  // Shuffle so the order is unpredictable
+  wolfQuizWords.sort(function() { return Math.random() - 0.5; });
+  wolfQuizIndex = 0;
+  wolfQuizActive = true;
+
+  // Show wolf dialog first
+  var card = document.getElementById('wolf-quiz-card-inner');
+  card.innerHTML =
+    '<div class="wolf-quiz-emoji" style="font-size:90px">🐺</div>' +
+    '<div class="wolf-quiz-header">狼人的考验</div>' +
+    '<div class="wolf-quiz-dialog">嘿嘿嘿！今天的学习完成，现在我来考考你！<br><br>' +
+    '把今天学的 <b style="color:#ffd54f">20个单词</b> 全部用语音说出来，<br>' +
+    '<b style="color:#f44336">全部答对才算过关</b>哦！</div>' +
+    '<button class="quiz-action-btn" onclick="showWolfQuizWord(0)" style="margin-top:10px;background:linear-gradient(135deg,#f44336,#ff5722)">🎤 接受挑战</button>';
+  document.getElementById('wolf-quiz-overlay').classList.add('show');
+}
+
+function showWolfQuizWord(idx) {
+  if (idx >= wolfQuizWords.length) {
+    finishWolfQuiz();
+    return;
+  }
+  wolfQuizIndex = idx;
+  var w = wolfQuizWords[idx];
+  var card = document.getElementById('wolf-quiz-card-inner');
+  card.innerHTML =
+    '<div class="wolf-quiz-header">🐺 狼人的考验</div>' +
+    '<div class="wolf-quiz-progress">第 <span class="wq-cur" id="wq-idx">' + (idx + 1) + '</span> / ' + wolfQuizWords.length + ' 个单词</div>' +
+    '<div class="wolf-quiz-emoji">' + w.emoji + '</div>' +
+    '<div class="wolf-quiz-cn">' + w.cn + '</div>' +
+    '<div class="wolf-quiz-hidden">?????</div>' +
+    '<div class="quiz-mic" id="wq-mic" style="font-size:55px;margin:8px 0">🎤</div>' +
+    '<div class="quiz-mic-status" id="wq-mic-status">请对着麦克风说英文单词</div>' +
+    '<div class="quiz-speech-result" id="wq-result"></div>' +
+    '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px">' +
+      '<button class="quiz-action-btn" id="wq-speak-btn" onclick="startWolfQuizRecognition()">🎤 开始朗读</button>' +
+      '<button class="quiz-action-btn secondary" id="wq-retry-btn" style="display:none" onclick="startWolfQuizRecognition()">🔄 再试一次</button>' +
+      '<button class="quiz-speak" onclick="playWolfQuizWord()">🔊 听发音提示</button>' +
+    '</div>';
+
+  // Auto-start recognition after a short delay
+  setTimeout(function() { startWolfQuizRecognition(); }, 600);
+}
+
+function playWolfQuizWord() {
+  if (!wolfQuizActive || wolfQuizIndex >= wolfQuizWords.length) return;
+  _speakEnglish(wolfQuizWords[wolfQuizIndex].en);
+}
+
+function startWolfQuizRecognition() {
+  if (!wolfQuizActive || wolfQuizIndex >= wolfQuizWords.length) return;
+  if (!SpeechRecognition) { showToast('⚠️ 浏览器不支持语音识别'); return; }
+  if (wolfQuizRecognition) { try { wolfQuizRecognition.abort(); } catch(e) {} }
+
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  if (!_micStream || !_micStream.active) {
+    _ensureMicStream().then(function(ok) {
+      if (ok) startWolfQuizRecognition();
+    });
+    return;
+  }
+
+  wolfQuizRecognition = _createFreshSR();
+  if (!wolfQuizRecognition) return;
+
+  var micEl = document.getElementById('wq-mic');
+  var statusEl = document.getElementById('wq-mic-status');
+  var resultEl = document.getElementById('wq-result');
+  if (micEl) micEl.className = 'quiz-mic listening';
+  if (statusEl) statusEl.textContent = '正在听你说话...';
+  if (resultEl) { resultEl.textContent = ''; resultEl.className = 'quiz-speech-result'; }
+
+  wolfQuizRecognition.onresult = function(event) {
+    clearTimeout(_recogTimeout);
+    var results = event.results[0];
+    var heard = [];
+    for (var i = 0; i < results.length; i++) {
+      heard.push(results[i].transcript.trim().toLowerCase());
+    }
+    _stopAudioRecording();
+
+    var target = wolfQuizWords[wolfQuizIndex].en.toLowerCase().replace(/[^a-z]/g, '');
+    var heardClean = heard[0] ? heard[0].replace(/[^a-z\s]/g, '').trim() : '';
+    var correct = false;
+
+    // Check exact match or fuzzy match
+    if (heardClean === target) {
+      correct = true;
+    } else {
+      // Try fuzzy matching each heard candidate
+      for (var h = 0; h < heard.length; h++) {
+        var hc = heard[h].replace(/[^a-z\s]/g, '').trim();
+        if (hc === target || fuzzyMatch(hc, target)) { correct = true; break; }
+      }
+    }
+
+    var micEl2 = document.getElementById('wq-mic');
+    var statusEl2 = document.getElementById('wq-mic-status');
+    var resultEl2 = document.getElementById('wq-result');
+    var speakBtn = document.getElementById('wq-speak-btn');
+    var retryBtn = document.getElementById('wq-retry-btn');
+
+    if (correct) {
+      sfxCollect();
+      if (micEl2) micEl2.className = 'quiz-mic success';
+      if (statusEl2) statusEl2.textContent = '✅ 太棒了！发音很标准！';
+      if (resultEl2) { resultEl2.textContent = '✅ 正确！' + wolfQuizWords[wolfQuizIndex].en; resultEl2.className = 'quiz-speech-result correct'; }
+      if (speakBtn) speakBtn.style.display = 'none';
+      if (retryBtn) retryBtn.style.display = 'none';
+      // Auto advance after 1.2s
+      setTimeout(function() {
+        showWolfQuizWord(wolfQuizIndex + 1);
+      }, 1200);
+    } else {
+      sfxWrong();
+      if (micEl2) micEl2.className = 'quiz-mic';
+      if (statusEl2) statusEl2.textContent = '❌ 不对哦！识别到: "' + heard[0] + '"';
+      if (resultEl2) { resultEl2.textContent = '❌ 再试一次！目标: ' + wolfQuizWords[wolfQuizIndex].en + ' (你说了: ' + heard[0] + ')'; resultEl2.className = 'quiz-speech-result wrong'; }
+      if (speakBtn) speakBtn.style.display = 'none';
+      if (retryBtn) retryBtn.style.display = 'inline-block';
+    }
+  };
+
+  wolfQuizRecognition.onerror = function(event) {
+    clearTimeout(_recogTimeout);
+    if (event.error === 'no-speech') {
+      var statusEl3 = document.getElementById('wq-mic-status');
+      if (statusEl3) statusEl3.textContent = '未检测到声音，请再试一次';
+    } else if (event.error === 'aborted') {
+      // intentionally stopped
+    } else if (event.error === 'network' || event.error === 'service-not-allowed') {
+      var statusEl5 = document.getElementById('wq-mic-status');
+      if (statusEl5) statusEl5.textContent = '🎤 切换百度语音识别...';
+      _recordAndRecognize('wq-mic-status', 3000).then(function(heard) {
+        if (heard.length > 0) {
+          var target = wolfQuizWords[wolfQuizIndex].en.toLowerCase().replace(/[^a-z]/g, '');
+          var heardClean = heard[0] ? heard[0].replace(/[^a-z\s]/g, '').trim() : '';
+          var correct = false;
+          if (heardClean === target) {
+            correct = true;
+          } else {
+            for (var h = 0; h < heard.length; h++) {
+              var hc = heard[h].replace(/[^a-z\s]/g, '').trim();
+              if (hc === target || fuzzyMatch(hc, target)) { correct = true; break; }
+            }
+          }
+          var micEl2 = document.getElementById('wq-mic');
+          var statusEl2 = document.getElementById('wq-mic-status');
+          var resultEl2 = document.getElementById('wq-result');
+          var speakBtn = document.getElementById('wq-speak-btn');
+          var retryBtn = document.getElementById('wq-retry-btn');
+          if (correct) {
+            sfxCollect();
+            if (micEl2) micEl2.className = 'quiz-mic success';
+            if (statusEl2) statusEl2.textContent = '✅ 太棒了！发音很标准！';
+            if (resultEl2) { resultEl2.textContent = '✅ 正确！' + wolfQuizWords[wolfQuizIndex].en; resultEl2.className = 'quiz-speech-result correct'; }
+            if (speakBtn) speakBtn.style.display = 'none';
+            if (retryBtn) retryBtn.style.display = 'none';
+            setTimeout(function() { advanceWolfQuiz(); }, 800);
+          } else {
+            sfxWrong();
+            if (micEl2) micEl2.className = 'quiz-mic';
+            if (statusEl2) statusEl2.textContent = '❌ 识别到: "' + heardClean + '"';
+            if (resultEl2) { resultEl2.textContent = '❌ 再试一次！目标: ' + wolfQuizWords[wolfQuizIndex].en + ' (你说了: ' + heard[0] + ')'; resultEl2.className = 'quiz-speech-result wrong'; }
+            if (speakBtn) speakBtn.style.display = 'none';
+            if (retryBtn) retryBtn.style.display = 'inline-block';
+          }
+        } else {
+          var statusEl6 = document.getElementById('wq-mic-status');
+          if (statusEl6) statusEl6.textContent = '语音识别失败，请重试';
+        }
+      });
+    } else {
+      var statusEl4 = document.getElementById('wq-mic-status');
+      if (statusEl4) statusEl4.textContent = '识别出错(' + event.error + ')，请重试';
+    }
+  };
+
+  wolfQuizRecognition.onend = function() {
+    wolfQuizRecognition = null;
+  };
+
+  try {
+    _startAudioRecording(); wolfQuizRecognition.start();
+    clearTimeout(_recogTimeout);
+    _recogTimeout = setTimeout(function() {
+      try { wolfQuizRecognition.abort(); } catch(e) {}
+      wolfQuizRecognition = null;
+      var statusEl = document.getElementById('wq-mic-status');
+      if (statusEl) statusEl.textContent = '🎤 切换百度语音识别...';
+      _recordAndRecognize('wq-mic-status', 3000).then(function(heard) {
+        if (heard.length > 0) {
+          var target = wolfQuizWords[wolfQuizIndex].en.toLowerCase().replace(/[^a-z]/g, '');
+          var heardClean = heard[0] ? heard[0].replace(/[^a-z\s]/g, '').trim() : '';
+          var correct = false;
+          if (heardClean === target) {
+            correct = true;
+          } else {
+            for (var h = 0; h < heard.length; h++) {
+              var hc = heard[h].replace(/[^a-z\s]/g, '').trim();
+              if (hc === target || fuzzyMatch(hc, target)) { correct = true; break; }
+            }
+          }
+          var micEl = document.getElementById('wq-mic');
+          var statusEl2 = document.getElementById('wq-mic-status');
+          var resultEl = document.getElementById('wq-result');
+          var speakBtn = document.getElementById('wq-speak-btn');
+          var retryBtn = document.getElementById('wq-retry-btn');
+          if (correct) {
+            sfxCollect();
+            if (micEl) micEl.className = 'quiz-mic success';
+            if (statusEl2) statusEl2.textContent = '✅ 太棒了！发音很标准！';
+            if (resultEl) { resultEl.textContent = '✅ 正确！' + wolfQuizWords[wolfQuizIndex].en; resultEl.className = 'quiz-speech-result correct'; }
+            if (speakBtn) speakBtn.style.display = 'none';
+            if (retryBtn) retryBtn.style.display = 'none';
+            setTimeout(function() { advanceWolfQuiz(); }, 800);
+          } else {
+            sfxWrong();
+            if (micEl) micEl.className = 'quiz-mic';
+            if (statusEl2) statusEl2.textContent = '❌ 识别到: "' + heardClean + '"';
+            if (resultEl) { resultEl.textContent = '❌ 再试一次！目标: ' + wolfQuizWords[wolfQuizIndex].en + ' (你说了: ' + heard[0] + ')'; resultEl.className = 'quiz-speech-result wrong'; }
+            if (speakBtn) speakBtn.style.display = 'none';
+            if (retryBtn) retryBtn.style.display = 'inline-block';
+          }
+        } else {
+          var statusEl3 = document.getElementById('wq-mic-status');
+          if (statusEl3) statusEl3.textContent = '语音识别失败，请重试';
+        }
+      });
+    }, 5000);
+  } catch(e) { wolfQuizRecognition = null; }
+}
+  if (wolfQuizRecognition) { try { wolfQuizRecognition.abort(); } catch(e) {} wolfQuizRecognition = null; }
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  wolfQuizActive = false;
+
+  var card = document.getElementById('wolf-quiz-card-inner');
+  card.innerHTML =
+    '<div class="wolf-quiz-complete">🎉</div>' +
+    '<div class="wolf-quiz-header">全部通过！</div>' +
+    '<div class="wolf-quiz-dialog" style="text-align:center">太厉害了！20个单词你全部答对了！<br>现在让我们来复习句子吧~</div>' +
+    '<button class="quiz-action-btn" onclick="document.getElementById(\'wolf-quiz-overlay\').classList.remove(\'show\'); startSentenceReview();" style="margin-top:10px;background:linear-gradient(135deg,#4caf50,#2e7d32)">📖 开始句子复习</button>';
 }
 
 function _checkSentenceCompletion(en) {
@@ -2285,8 +2957,13 @@ function respawnPlayer() {
   // Respawn right of Christmas tree
   player.x = WORLD_W * TILE / 2 + 5 * TILE;
   player.y = WORLD_H * TILE / 2;
+  pet.x = player.x - TILE;
+  pet.y = player.y;
+  pet.trail = [];
+  pet.celebrateTimer = 0;
   spawnWolf();
-  resumeBgMusic();
+  stopBgMusic();
+  startBgMusic();
   updateHUD();
 }
 
@@ -2330,6 +3007,29 @@ let player = {
   animFrame: 0,
   animTimer: 0,
 };
+
+// ==================== PET COMPANION ====================
+let pet = {
+  x: WORLD_W * TILE / 2 - TILE,
+  y: WORLD_H * TILE / 2,
+  trail: [],
+  maxTrail: 15,
+  celebrateTimer: 0,
+  sparkles: [],
+};
+
+function triggerPetCelebrate() {
+  pet.celebrateTimer = 1.8;
+  pet.sparkles = [];
+  for (var i = 0; i < 8; i++) {
+    pet.sparkles.push({
+      angle: (Math.PI * 2 * i) / 8,
+      dist: 20 + Math.random() * 30,
+      life: 0.6 + Math.random() * 0.4,
+      size: 2 + Math.random() * 3,
+    });
+  }
+}
 
 // ==================== CAMERA ====================
 let camera = { x: 0, y: 0, tx: 0, ty: 0 };
@@ -2462,20 +3162,29 @@ function sfxLevelUp() {
 }
 
 // ==================== BACKGROUND MUSIC ====================
-let bgMusic = { audio: null, playing: false, activated: false };
+let bgMusic = { audio: null, playing: false };
+
+// Pre-create audio at page load so it's ready when user first taps
+(function() {
+  try {
+    var a = new Audio('bgm.mp3');
+    a.loop = true;
+    a.volume = 0.35;
+    a.preload = 'none';
+    bgMusic.audio = a;
+  } catch(e) {}
+})();
 
 function startBgMusic() {
-  if (bgMusic.playing) return;
-  bgMusic.audio = new Audio('Undead Funeral March-compressed.mp3');
-  bgMusic.audio.loop = true;
-  bgMusic.audio.volume = 0.35;
-  bgMusic.audio.play().catch(function() {});
-  bgMusic.playing = true;
+  if (!bgMusic.audio || bgMusic.playing) return;
+  bgMusic.audio.play().then(function() {
+    bgMusic.playing = true;
+  }).catch(function() {});
 }
 
 function stopBgMusic() {
   bgMusic.playing = false;
-  if (bgMusic.audio) { bgMusic.audio.pause(); bgMusic.audio = null; }
+  if (bgMusic.audio) { bgMusic.audio.pause(); bgMusic.audio.currentTime = 0; }
 }
 
 function pauseBgMusic() {
@@ -2500,15 +3209,14 @@ function updateMusicIntensity() {
   bgMusic.audio.volume = vol;
 }
 
-// Activate music on first user gesture
+// Start BGM on first user gesture
 function _tryActivateMusic() {
-  if (bgMusic.activated) return;
-  if (!bgMusic.playing) startBgMusic();
-  bgMusic.activated = true;
+  if (bgMusic.playing) return;
+  startBgMusic();
 }
 document.addEventListener('click', _tryActivateMusic);
 document.addEventListener('keydown', _tryActivateMusic);
-document.addEventListener('touchstart', _tryActivateMusic, {once: true});
+document.addEventListener('touchstart', _tryActivateMusic);
 
 // ==================== SPEECH ====================
 // ==================== PARTICLES ====================
@@ -2531,9 +3239,15 @@ function spawnParticles(x, y, count, color, spread) {
 }
 
 function spawnCollectParticles(x, y) {
-  spawnParticles(x, y, 20, '#ffd54f', 200);
-  spawnParticles(x, y, 15, '#4caf50', 180);
-  spawnParticles(x, y, 10, '#ff9800', 160);
+  if (_isMobile) {
+    spawnParticles(x, y, 8, '#ffd54f', 150);
+    spawnParticles(x, y, 5, '#4caf50', 130);
+    spawnParticles(x, y, 3, '#ff9800', 120);
+  } else {
+    spawnParticles(x, y, 20, '#ffd54f', 200);
+    spawnParticles(x, y, 15, '#4caf50', 180);
+    spawnParticles(x, y, 10, '#ff9800', 160);
+  }
 }
 
 // ==================== TOAST ====================
@@ -2555,6 +3269,7 @@ let quizPhase = 'listen'; // 'listen' | 'speaking' | 'result'
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
 let recognitionActive = false;
+let _recogTimeout = null; // timeout to detect hung recognition
 
 // ── Mic pre-auth: keep a live audio track so SpeechRecognition won't re-prompt ──
 let _micStream = null;
@@ -2587,6 +3302,7 @@ function _createFreshSR() {
 let _mediaRecorder = null;
 let _audioChunks = [];
 let _lastRecording = null;
+let _lastAudioBlob = null;
 
 function _startAudioRecording() {
   if (!_micStream || !_micStream.active) return;
@@ -2611,22 +3327,387 @@ function _startAudioRecording() {
 }
 
 function _stopAudioRecording() {
-  if (!_mediaRecorder || _mediaRecorder.state === 'inactive') return;
+  if (!_mediaRecorder || _mediaRecorder.state === 'inactive') return Promise.resolve(_lastAudioBlob);
   return new Promise(function(resolve) {
     _mediaRecorder.onstop = function() {
       const blob = new Blob(_audioChunks, { type: 'audio/webm' });
+      _lastAudioBlob = blob;
       if (_lastRecording) URL.revokeObjectURL(_lastRecording);
       _lastRecording = URL.createObjectURL(blob);
-      resolve();
+      resolve(blob);
     };
     _mediaRecorder.stop();
   });
 }
 
+// ═══════════════════════════════════════════
+// Baidu Speech Recognition (fallback when Google blocked in China)
+// ═══════════════════════════════════════════
+const BAIDU_API_KEY = '7KArEz1YWRoxSxcPdajvCEcm';
+const BAIDU_SECRET_KEY = 'vtIHirWGgQjwc7fEieGbELkCyT3YdZt9';
+let _baiduToken = null;
+let _baiduTokenExpiry = 0;
+
+function _getBaiduCuid() {
+  var key = '_baidu_cuid';
+  var id = localStorage.getItem(key);
+  if (!id) { id = 'wc_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); localStorage.setItem(key, id); }
+  return id;
+}
+
+async function _getBaiduToken() {
+  if (_baiduToken && Date.now() < _baiduTokenExpiry) return _baiduToken;
+  try {
+    var resp = await fetch('https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=' + BAIDU_API_KEY + '&client_secret=' + BAIDU_SECRET_KEY, { method: 'POST' });
+    var data = await resp.json();
+    if (data.access_token) {
+      _baiduToken = data.access_token;
+      _baiduTokenExpiry = Date.now() + (data.expires_in - 3600) * 1000;
+      return _baiduToken;
+    }
+    console.warn('[Baidu] token failed:', data);
+    return null;
+  } catch(e) {
+    console.warn('[Baidu] token error:', e.message);
+    return null;
+  }
+}
+
+async function _webmToWavBase64(blob) {
+  try {
+    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    var arrayBuffer = await blob.arrayBuffer();
+    var audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    audioCtx.close();
+
+    var sampleRate = 16000;
+    var offlineCtx = new OfflineAudioContext(1, Math.ceil(audioBuffer.duration * sampleRate), sampleRate);
+    var source = offlineCtx.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(offlineCtx.destination);
+    source.start();
+    var resampled = await offlineCtx.startRendering();
+
+    var pcmData = resampled.getChannelData(0);
+    var wavBuffer = new ArrayBuffer(44 + pcmData.length * 2);
+    var view = new DataView(wavBuffer);
+
+    // WAV header
+    function ws(v, o, s) { for (var i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); }
+    ws(view, 0, 'RIFF');
+    view.setUint32(4, 36 + pcmData.length * 2, true);
+    ws(view, 8, 'WAVE');
+    ws(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    ws(view, 36, 'data');
+    view.setUint32(40, pcmData.length * 2, true);
+
+    var offset = 44;
+    for (var i = 0; i < pcmData.length; i++) {
+      var s = Math.max(-1, Math.min(1, pcmData[i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      offset += 2;
+    }
+
+    var bytes = new Uint8Array(wavBuffer);
+    var binary = '';
+    for (var i2 = 0; i2 < bytes.byteLength; i2++) binary += String.fromCharCode(bytes[i2]);
+    return btoa(binary);
+  } catch(e) {
+    console.warn('[Baidu] audio conversion failed:', e.message);
+    return null;
+  }
+}
+
+async function _callBaiduASR(audioBlob) {
+  try {
+    var token = await _getBaiduToken();
+    if (!token) return [];
+    var speechBase64 = await _webmToWavBase64(audioBlob);
+    if (!speechBase64) return [];
+    var resp = await fetch('https://vop.baidu.com/server_api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        format: 'wav',
+        rate: 16000,
+        channel: 1,
+        cuid: _getBaiduCuid(),
+        token: token,
+        speech: speechBase64,
+        len: audioBlob.size
+      })
+    });
+    var data = await resp.json();
+    console.log('[BaiduASR]', data);
+    if (data.err_no === 0 && data.result && data.result.length > 0) {
+      return [data.result[0].toLowerCase().trim()];
+    }
+    if (data.err_no !== 0) console.warn('[BaiduASR] error:', data.err_no, data.err_msg);
+    return [];
+  } catch(e) {
+    console.warn('[BaiduASR] failed:', e.message);
+    return [];
+  }
+}
+
+async function _recordAndRecognize(statusElId, durationMs) {
+  var statusEl = document.getElementById(statusElId);
+  if (statusEl) statusEl.textContent = '🎤 正在听你说...';
+  var ok = await _ensureMicStream();
+  if (!ok) {
+    if (statusEl) statusEl.textContent = '麦克风未就绪，请重试';
+    return [];
+  }
+  _startAudioRecording();
+  await new Promise(function(r) { setTimeout(r, durationMs || 3000); });
+  var blob = await _stopAudioRecording();
+  if (!blob) {
+    if (statusEl) statusEl.textContent = '录音失败，请重试';
+    return [];
+  }
+  if (statusEl) statusEl.textContent = '⏳ 识别中...';
+  var result = await _callBaiduASR(blob);
+  if (statusEl) statusEl.textContent = '';
+  return result;
+}
+
+// ── Baidu TTS: speak English text via Baidu on Android (no en-US voices) ──
+var _isAndroid = /android/i.test(navigator.userAgent);
+
+async function _baiduTTS(text) {
+  var token = await _getBaiduToken();
+  if (!token) return false;
+  var url = 'https://tsn.baidu.com/text2audio?tex=' + encodeURIComponent(text) +
+    '&tok=' + token + '&cuid=' + _getBaiduCuid() +
+    '&ctp=1&lan=en&spd=3&pit=5&vol=9&per=0&aue=3';
+  try {
+    var resp = await fetch(url);
+    var contentType = resp.headers.get('content-type');
+    if (contentType && contentType.indexOf('application/json') !== -1) {
+      var errData = await resp.json();
+      console.warn('[BaiduTTS] error:', errData);
+      return false;
+    }
+    var blob = await resp.blob();
+    var audioUrl = URL.createObjectURL(blob);
+    var audio = new Audio(audioUrl);
+    audio.onended = function() { URL.revokeObjectURL(audioUrl); };
+    await audio.play();
+    return true;
+  } catch(e) {
+    console.warn('[BaiduTTS] failed:', e.message);
+    return false;
+  }
+}
+
+// Unified English speech: on Android use Baidu TTS, otherwise speechSynthesis
+function _speakEnglish(text, onend) {
+  if (_isAndroid) {
+    _baiduTTS(text).then(function(ok) {
+      if (onend) onend();
+      if (!ok) console.warn('[TTS] Baidu TTS failed, text:', text);
+    });
+    return;
+  }
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = 0.75; u.pitch = 1;
+    if (onend) u.onend = onend;
+    speechSynthesis.speak(u);
+  }
+}
+
+// ═══════════════════════════════════════════
+// ── original code continues ──
+
 function _playMyRecording() {
   if (!_lastRecording) return;
   const a = new Audio(_lastRecording);
   a.play().catch(function(e) { console.warn('Play recording failed:', e.message); });
+}
+
+// ── Phonetic dictionary (IPA) ──
+const _PHONETIC = {
+cat:'/kæt/',dog:'/dɔːɡ/',bird:'/bɜːrd/',fish:'/fɪʃ/',rabbit:'/ˈræbɪt/',
+horse:'/hɔːrs/',pig:'/pɪɡ/',cow:'/kaʊ/',sheep:'/ʃiːp/',duck:'/dʌk/',
+chicken:'/ˈtʃɪkɪn/',mouse:'/maʊs/',elephant:'/ˈelɪfənt/',lion:'/ˈlaɪən/',
+tiger:'/ˈtaɪɡər/',bear:'/ber/',monkey:'/ˈmʌŋki/',frog:'/frɔːɡ/',snake:'/sneɪk/',
+turtle:'/ˈtɜːrtl/',panda:'/ˈpændə/',penguin:'/ˈpeŋɡwɪn/',whale:'/weɪl/',
+shark:'/ʃɑːrk/',dolphin:'/ˈdɑːlfɪn/',butterfly:'/ˈbʌtərflaɪ/',bee:'/biː/',
+ant:'/ænt/',spider:'/ˈspaɪdər/',owl:'/aʊl/',parrot:'/ˈpærət/',eagle:'/ˈiːɡəl/',
+wolf:'/wʊlf/',fox:'/fɑːks/',deer:'/dɪr/',goat:'/ɡoʊt/',donkey:'/ˈdɑːŋki/',
+crab:'/kræb/',seal:'/siːl/',crocodile:'/ˈkrɑːkədaɪl/',kangaroo:'/ˌkæŋɡəˈruː/',
+giraffe:'/dʒɪˈræf/',zebra:'/ˈziːbrə/',hippo:'/ˈhɪpoʊ/',camel:'/ˈkæməl/',
+squirrel:'/ˈskwɜːrəl/',hedgehog:'/ˈhedʒhɔːɡ/',bat:'/bæt/',peacock:'/ˈpiːkɑːk/',
+swan:'/swɑːn/',dove:'/dʌv/',turkey:'/ˈtɜːrki/',goose:'/ɡuːs/',ladybug:'/ˈleɪdibʌɡ/',
+dragon:'/ˈdræɡən/',unicorn:'/ˈjuːnɪkɔːrn/',dinosaur:'/ˈdaɪnəsɔːr/',apple:'/ˈæpəl/',
+banana:'/bəˈnænə/',orange:'/ˈɔːrɪndʒ/',grape:'/ɡreɪp/',watermelon:'/ˈwɔːtərmelən/',
+strawberry:'/ˈstrɔːberi/',mango:'/ˈmæŋɡoʊ/',peach:'/piːtʃ/',pear:'/per/',
+cherry:'/ˈtʃeri/',lemon:'/ˈlemən/',pineapple:'/ˈpaɪnæpəl/',blueberry:'/ˈbluːberi/',
+kiwi:'/ˈkiːwi/',bread:'/bred/',milk:'/mɪlk/',egg:'/eɡ/',rice:'/raɪs/',
+cake:'/keɪk/',pizza:'/ˈpiːtsə/',burger:'/ˈbɜːrɡər/',cheese:'/tʃiːz/',soup:'/suːp/',
+salad:'/ˈsæləd/',chicken_food:'/ˈtʃɪkɪn/',cookie:'/ˈkʊki/',candy:'/ˈkændi/',
+chocolate:'/ˈtʃɔːklət/',sandwich:'/ˈsænwɪtʃ/',noodle:'/ˈnuːdəl/',water:'/ˈwɔːtər/',
+juice:'/dʒuːs/',tea:'/tiː/',coffee:'/ˈkɔːfi/',school:'/skuːl/',hospital:'/ˈhɑːspɪtl/',
+park:'/pɑːrk/',library:'/ˈlaɪbreri/',zoo:'/zuː/',beach:'/biːtʃ/',garden:'/ˈɡɑːrdn/',
+farm:'/fɑːrm/',market:'/ˈmɑːrkɪt/',airport:'/ˈerpɔːrt/',station:'/ˈsteɪʃən/',
+restaurant:'/ˈrestərɑːnt/',museum:'/mjuːˈziːəm/',cinema:'/ˈsɪnəmə/',church:'/tʃɜːrtʃ/',
+hotel:'/hoʊˈtel/',bridge:'/brɪdʒ/',castle:'/ˈkæsəl/',supermarket:'/ˈsuːpərmɑːrkɪt/',
+house:'/haʊs/',room:'/ruːm/',kitchen:'/ˈkɪtʃɪn/',bedroom:'/ˈbedruːm/',
+bathroom:'/ˈbæθruːm/',door:'/dɔːr/',window:'/ˈwɪndoʊ/',table:'/ˈteɪbəl/',
+chair:'/tʃer/',bed:'/bed/',sofa:'/ˈsoʊfə/',lamp:'/læmp/',clock:'/klɑːk/',
+mirror:'/ˈmɪrər/',phone:'/foʊn/',computer:'/kəmˈpjuːtər/',television:'/ˈtelɪvɪʒən/',
+book:'/bʊk/',pen:'/pen/',pencil:'/ˈpensəl/',bag:'/bæɡ/',cup:'/kʌp/',
+plate:'/pleɪt/',spoon:'/spuːn/',fork:'/fɔːrk/',knife:'/naɪf/',key:'/kiː/',
+shirt:'/ʃɜːrt/',pants:'/pænts/',shoes:'/ʃuːz/',hat:'/hæt/',socks:'/sɑːks/',
+coat:'/koʊt/',dress:'/dres/',skirt:'/skɜːrt/',jacket:'/ˈdʒækɪt/',sweater:'/ˈswetər/',
+scarf:'/skɑːrf/',gloves:'/ɡlʌvz/',boots:'/buːts/',umbrella:'/ʌmˈbrelə/',
+watch:'/wɑːtʃ/',ring:'/rɪŋ/',necklace:'/ˈneklɪs/',car:'/kɑːr/',bus:'/bʌs/',
+train:'/treɪn/',plane:'/pleɪn/',boat:'/boʊt/',bike:'/baɪk/',truck:'/trʌk/',
+helicopter:'/ˈhelɪkɑːptər/',ship:'/ʃɪp/',rocket:'/ˈrɑːkɪt/',taxi:'/ˈtæksi/',
+ambulance:'/ˈæmbjələns/',fire_truck:'/ˈfaɪər trʌk/',sun:'/sʌn/',moon:'/muːn/',
+star:'/stɑːr/',cloud:'/klaʊd/',rain:'/reɪn/',snow:'/snoʊ/',wind:'/wɪnd/',
+tree:'/triː/',flower:'/ˈflaʊər/',river:'/ˈrɪvər/',mountain:'/ˈmaʊntən/',
+ocean:'/ˈoʊʃən/',rainbow:'/ˈreɪnboʊ/',lightning:'/ˈlaɪtnɪŋ/',thunder:'/ˈθʌndər/',
+island:'/ˈaɪlənd/',forest:'/ˈfɔːrɪst/',desert:'/ˈdezərt/',volcano:'/vɑːlˈkeɪnoʊ/',
+red:'/red/',blue:'/bluː/',green:'/ɡriːn/',yellow:'/ˈjeloʊ/',pink:'/pɪŋk/',
+purple:'/ˈpɜːrpəl/',orange_color:'/ˈɔːrɪndʒ/',black:'/blæk/',white:'/waɪt/',
+brown:'/braʊn/',gray:'/ɡreɪ/',circle:'/ˈsɜːrkəl/',square:'/skwer/',
+triangle:'/ˈtraɪæŋɡəl/',heart:'/hɑːrt/',diamond:'/ˈdaɪmənd/',star_shape:'/stɑːr/',
+day:'/deɪ/',night:'/naɪt/',morning:'/ˈmɔːrnɪŋ/',evening:'/ˈiːvnɪŋ/',
+today:'/təˈdeɪ/',tomorrow:'/təˈmɔːroʊ/',yesterday:'/ˈjestərdeɪ/',week:'/wiːk/',
+month:'/mʌnθ/',year:'/jɪr/',spring:'/sprɪŋ/',summer:'/ˈsʌmər/',autumn:'/ˈɔːtəm/',
+winter:'/ˈwɪntər/',happy:'/ˈhæpi/',sad:'/sæd/',angry:'/ˈæŋɡri/',
+scared:'/skerd/',brave:'/breɪv/',tired:'/ˈtaɪərd/',excited:'/ɪkˈsaɪtɪd/',
+surprised:'/sərˈpraɪzd/',teacher:'/ˈtiːtʃər/',doctor:'/ˈdɑːktər/',
+nurse:'/nɜːrs/',police:'/pəˈliːs/',firefighter:'/ˈfaɪərfaɪtər/',
+farmer:'/ˈfɑːrmər/',chef:'/ʃef/',pilot:'/ˈpaɪlət/',astronaut:'/ˈæstrənɔːt/',
+singer:'/ˈsɪŋər/',artist:'/ˈɑːrtɪst/',engineer:'/ˌendʒɪˈnɪr/',driver:'/ˈdraɪvər/',
+soldier:'/ˈsoʊldʒər/',dentist:'/ˈdentɪst/',vet:'/vet/',sunny:'/ˈsʌni/',
+rainy:'/ˈreɪni/',cloudy:'/ˈklaʊdi/',windy:'/ˈwɪndi/',snowy:'/ˈsnoʊi/',
+stormy:'/ˈstɔːrmi/',hot:'/hɑːt/',cold:'/koʊld/',warm:'/wɔːrm/',cool:'/kuːl/',
+football:'/ˈfʊtbɔːl/',basketball:'/ˈbæskɪtbɔːl/',baseball:'/ˈbeɪsbɔːl/',
+tennis:'/ˈtenɪs/',swimming:'/ˈswɪmɪŋ/',running:'/ˈrʌnɪŋ/',dancing:'/ˈdænsɪŋ/',
+singing:'/ˈsɪŋɪŋ/',jumping:'/ˈdʒʌmpɪŋ/',skiing:'/ˈskiːɪŋ/',skating:'/ˈskeɪtɪŋ/',
+boxing:'/ˈbɑːksɪŋ/',yoga:'/ˈjoʊɡə/',golf:'/ɡɑːlf/',surfing:'/ˈsɜːrfɪŋ/',
+volleyball:'/ˈvɑːlibɔːl/',badminton:'/ˈbædmɪntən/',head:'/hed/',face:'/feɪs/',
+eye:'/aɪ/',ear:'/ɪr/',nose:'/noʊz/',mouth:'/maʊθ/',hand:'/hænd/',
+foot:'/fʊt/',arm:'/ɑːrm/',leg:'/leɡ/',finger:'/ˈfɪŋɡər/',tooth:'/tuːθ/',
+hair:'/her/',knee:'/niː/',shoulder:'/ˈʃoʊldər/',stomach:'/ˈstʌmək/',
+back:'/bæk/',tongue:'/tʌŋ/',mother:'/ˈmʌðər/',father:'/ˈfɑːðər/',
+sister:'/ˈsɪstər/',brother:'/ˈbrʌðər/',baby:'/ˈbeɪbi/',friend:'/frend/',
+family:'/ˈfæməli/',grandma:'/ˈɡrænmɑː/',grandpa:'/ˈɡrænpɑː/',aunt:'/ænt/',
+uncle:'/ˈʌŋkəl/',cousin:'/ˈkʌzən/',queen:'/kwiːn/',king:'/kɪŋ/',
+princess:'/ˈprɪnses/',prince:'/prɪns/',hero:'/ˈhɪroʊ/',santa:'/ˈsæntə/',
+robot:'/ˈroʊbɑːt/',alien:'/ˈeɪliən/',monster:'/ˈmɑːnstər/',ghost:'/ɡoʊst/',
+fairy:'/ˈferi/',mermaid:'/ˈmɜːrmeɪd/',wizard:'/ˈwɪzərd/',pirate:'/ˈpaɪrət/',
+clown:'/klaʊn/',angel:'/ˈeɪndʒəl/',devil:'/ˈdevəl/',ninja:'/ˈnɪndʒə/',
+spy:'/spaɪ/',detective:'/dɪˈtektɪv/',one:'/wʌn/',two:'/tuː/',three:'/θriː/',
+four:'/fɔːr/',five:'/faɪv/',six:'/sɪks/',seven:'/ˈsevən/',eight:'/eɪt/',
+nine:'/naɪn/',ten:'/ten/',big:'/bɪɡ/',small:'/smɔːl/',tall:'/tɔːl/',
+short:'/ʃɔːrt/',long:'/lɔːŋ/',fast:'/fæst/',slow:'/sloʊ/',new:'/nuː/',
+old:'/oʊld/',beautiful:'/ˈbjuːtɪfəl/',ugly:'/ˈʌɡli/',strong:'/strɔːŋ/',
+weak:'/wiːk/',thick:'/θɪk/',thin:'/θɪn/',clean:'/kliːn/',dirty:'/ˈdɜːrti/',
+open:'/ˈoʊpən/',closed:'/kloʊzd/',full:'/fʊl/',empty:'/ˈempti/',
+sweet:'/swiːt/',sour:'/ˈsaʊər/',salty:'/ˈsɔːlti/',soft:'/sɔːft/',hard:'/hɑːrd/',
+wet:'/wet/',dry:'/draɪ/',light:'/laɪt/',dark:'/dɑːrk/',loud:'/laʊd/',
+quiet:'/ˈkwaɪət/',sing:'/sɪŋ/',dance:'/dæns/',run:'/rʌn/',jump:'/dʒʌmp/',
+walk:'/wɔːk/',swim:'/swɪm/',fly:'/flaɪ/',eat:'/iːt/',drink:'/drɪŋk/',
+sleep:'/sliːp/',read:'/riːd/',write:'/raɪt/',draw:'/drɔː/',paint:'/peɪnt/',
+cook:'/kʊk/',drive:'/draɪv/',climb:'/klaɪm/',laugh:'/læf/',cry:'/kraɪ/',
+smile:'/smaɪl/',think:'/θɪŋk/',speak:'/spiːk/',listen:'/ˈlɪsən/',
+ice_cream:'/ˈaɪs kriːm/',lollipop:'/ˈlɑːlipɑːp/',fries:'/fraɪz/',popcorn:'/ˈpɑːpkɔːrn/',
+donut:'/ˈdoʊnʌt/',hamburger:'/ˈhæmbɜːrɡər/',carrot:'/ˈkærət/',potato:'/pəˈteɪtoʊ/',
+tomato:'/təˈmeɪtoʊ/',onion:'/ˈʌnjən/',corn:'/kɔːrn/',broccoli:'/ˈbrɑːkəli/',
+cucumber:'/ˈkjuːkʌmbər/',pepper:'/ˈpepər/',mushroom:'/ˈmʌʃruːm/',garlic:'/ˈɡɑːrlɪk/',
+pumpkin:'/ˈpʌmpkɪn/',lettuce:'/ˈletɪs/',spinach:'/ˈspɪnɪtʃ/',coconut:'/ˈkoʊkənʌt/',
+avocado:'/ˌævəˈkɑːdoʊ/',celery:'/ˈseləri/',radish:'/ˈrædɪʃ/',peanut:'/ˈpiːnʌt/',
+bean:'/biːn/',pea:'/piː/',beef:'/biːf/',pork:'/pɔːrk/',ham:'/hæm/',
+sausage:'/ˈsɔːsɪdʒ/',bacon:'/ˈbeɪkən/',yogurt:'/ˈjoʊɡərt/',butter:'/ˈbʌtər/',
+cream:'/kriːm/',sugar:'/ˈʃʊɡər/',salt:'/sɔːlt/',honey:'/ˈhʌni/',jam:'/dʒæm/',
+toast:'/toʊst/',cereal:'/ˈsɪriəl/',pancake:'/ˈpænkeɪk/',waffle:'/ˈwɑːfəl/',
+muffin:'/ˈmʌfɪn/',pie:'/paɪ/',crackers:'/ˈkrækərz/',pretzel:'/ˈpretsəl/',
+chips:'/tʃɪps/',lemonade:'/ˌleməˈneɪd/',smoothie:'/ˈsmuːði/',milkshake:'/ˈmɪlkʃeɪk/',
+crab_seafood:'/kræb/',lobster:'/ˈlɑːbstər/',shrimp:'/ʃrɪmp/',squid:'/skwɪd/',
+octopus:'/ˈɑːktəpʊs/',jellyfish:'/ˈdʒelifɪʃ/',seahorse:'/ˈsiːhɔːrs/',starfish:'/ˈstɑːrfɪʃ/',
+seashell:'/ˈsiːʃel/',coral:'/ˈkɔːrəl/',penguin_bird:'/ˈpeŋɡwɪn/',flamingo:'/fləˈmɪŋɡoʊ/',
+ostrich:'/ˈɑːstrɪtʃ/',hummingbird:'/ˈhʌmɪŋbɜːrd/',woodpecker:'/ˈwʊdpekər/',caterpillar:'/ˈkætərpɪlər/',
+dragonfly:'/ˈdræɡənflaɪ/',ladybird:'/ˈleɪdibɜːrd/',firefly:'/ˈfaɪərflaɪ/',mosquito:'/məˈskiːtoʊ/',
+beetle:'/ˈbiːtəl/',grasshopper:'/ˈɡræshɑːpər/',scorpion:'/ˈskɔːrpiən/',
+earthquake:'/ˈɜːrθkweɪk/',tornado:'/tɔːrˈneɪdoʊ/',hurricane:'/ˈhɜːrɪkeɪn/',
+icicle:'/ˈaɪsɪkəl/',thermometer:'/θərˈmɑːmɪtər/',compass:'/ˈkʌmpəs/',magnet:'/ˈmæɡnɪt/',
+microscope:'/ˈmaɪkrəskoʊp/',telescope:'/ˈtelɪskoʊp/',camera:'/ˈkæmərə/',
+headphones:'/ˈhedfoʊnz/',keyboard:'/ˈkiːbɔːrd/',calculator:'/ˈkælkjuleɪtər/',
+calendar:'/ˈkælɪndər/',toothbrush:'/ˈtuːθbrʌʃ/',toothpaste:'/ˈtuːθpeɪst/',
+soap:'/soʊp/',towel:'/ˈtaʊəl/',blanket:'/ˈblæŋkɪt/',pillow:'/ˈpɪloʊ/',
+broom:'/bruːm/',hammer:'/ˈhæmər/',scissors:'/ˈsɪzərz/',ladder:'/ˈlædər/',
+glue:'/ɡluː/',tape:'/teɪp/',ruler:'/ˈruːlər/',eraser:'/ɪˈreɪsər/',
+sharpener:'/ˈʃɑːrpənər/',backpack:'/ˈbækpæk/',notebook:'/ˈnoʊtbʊk/',
+crayon:'/ˈkreɪɑːn/',marker:'/ˈmɑːrkər/',chalk:'/tʃɔːk/',blackboard:'/ˈblækbɔːrd/',
+desk:'/desk/',playground:'/ˈpleɪɡraʊnd/',classroom:'/ˈklæsruːm/',principal:'/ˈprɪnsəpəl/',
+bully:'/ˈbʊli/',homework:'/ˈhoʊmwɜːrk/',recess:'/ˈriːses/',globe:'/ɡloʊb/',
+map:'/mæp/',flag:'/flæɡ/',bell:'/bel/',whistle:'/ˈwɪsəl/',drum:'/drʌm/',
+guitar:'/ɡɪˈtɑːr/',piano:'/piˈænoʊ/',violin:'/ˌvaɪəˈlɪn/',trumpet:'/ˈtrʌmpɪt/',
+flute:'/fluːt/',microphone:'/ˈmaɪkrəfoʊn/',palette:'/ˈpælɪt/',easel:'/ˈiːzəl/',
+statue:'/ˈstætʃuː/',costume:'/ˈkɑːstuːm/',mask:'/mæsk/',puppet:'/ˈpʌpɪt/',
+balloon:'/bəˈluːn/',kite:'/kaɪt/',yo_yo:'/ˈjoʊjoʊ/',puzzle:'/ˈpʌzəl/',
+doll:'/dɑːl/',teddy_bear:'/ˈtedi ber/',blocks:'/blɑːks/',slide:'/slaɪd/',
+swing:'/swɪŋ/',seesaw:'/ˈsiːsɔː/',tricycle:'/ˈtraɪsɪkəl/',skateboard:'/ˈskeɪtbɔːrd/',
+scooter:'/ˈskuːtər/',rollerskate:'/ˈroʊləskeɪt/',snowman:'/ˈsnoʊmæn/',
+sandcastle:'/ˈsændkæsəl/',bucket:'/ˈbʌkɪt/',shovel:'/ˈʃʌvəl/',rake:'/reɪk/',
+hose:'/hoʊz/',watering_can:'/ˈwɔːtərɪŋ kæn/',wheelbarrow:'/ˈwiːlbæroʊ/',
+axe:'/æks/',saw:'/sɔː/',screwdriver:'/ˈskruːdraɪvər/',wrench:'/rentʃ/',
+drill:'/drɪl/',nail:'/neɪl/',screw:'/skruː/',bolt:'/boʊlt/',nut:'/nʌt/',
+wire:'/waɪər/',battery:'/ˈbætəri/',plug:'/plʌɡ/',switch_btn:'/swɪtʃ/',
+remote:'/rɪˈmoʊt/',antenna:'/ænˈtenə/',satellite:'/ˈsætəlaɪt/',dish:'/dɪʃ/',
+oven:'/ˈʌvən/',stove:'/stoʊv/',fridge:'/frɪdʒ/',freezer:'/ˈfriːzər/',
+microwave:'/ˈmaɪkrəweɪv/',toaster:'/ˈtoʊstər/',blender:'/ˈblendər/',kettle:'/ˈketəl/',
+pan:'/pæn/',pot:'/pɑːt/',ladle:'/ˈleɪdəl/',whisk:'/wɪsk/',apron:'/ˈeɪprən/',
+mop:'/mɑːp/',vacuum:'/ˈvækjuːm/',iron:'/ˈaɪərn/',hanger:'/ˈhæŋər/',
+drawer:'/drɔːr/',cabinet:'/ˈkæbɪnət/',curtain:'/ˈkɜːrtən/',carpet:'/ˈkɑːrpɪt/',
+cushion:'/ˈkʊʃən/',fireplace:'/ˈfaɪərpleɪs/',chimney:'/ˈtʃɪmni/',roof:'/ruːf/',
+fence:'/fens/',gate:'/ɡeɪt/',mailbox:'/ˈmeɪlbɑːks/',sidewalk:'/ˈsaɪdwɔːk/',
+driveway:'/ˈdraɪvweɪ/',garage:'/ɡəˈrɑːʒ/',attic:'/ˈætɪk/',basement:'/ˈbeɪsmənt/',
+balcony:'/ˈbælkəni/',elevator:'/ˈelɪveɪtər/',escalator:'/ˈeskəleɪtər/',
+crosswalk:'/ˈkrɔːswɔːk/',intersection:'/ˈɪntərsekʃən/',highway:'/ˈhaɪweɪ/',
+tunnel:'/ˈtʌnəl/',subway:'/ˈsʌbweɪ/',ferry:'/ˈferi/',canoe:'/kəˈnuː/',
+kayak:'/ˈkaɪæk/',raft:'/ræft/',surfboard:'/ˈsɜːrfbɔːrd/',parachute:'/ˈpærəʃuːt/',
+blimp:'/blɪmp/',hot_air_balloon:'/hɑːt er bəˈluːn/',crane:'/kreɪn/',
+bulldozer:'/ˈbʊldoʊzər/',tractor:'/ˈtræktər/',van:'/væn/',scooter_vehicle:'/ˈskuːtər/',
+motorcycle:'/ˈmoʊtərsaɪkəl/',wheelchair:'/ˈwiːltʃer/',crutches:'/ˈkrʌtʃɪz/',
+stretcher:'/ˈstretʃər/',cast:'/kæst/',bandage:'/ˈbændɪdʒ/',medicine:'/ˈmedɪsɪn/',
+pill:'/pɪl/',syrup:'/ˈsɪrəp/',cough:'/kɔːf/',sneeze:'/sniːz/',fever:'/ˈfiːvər/',
+planet:'/ˈplænɪt/',galaxy:'/ˈɡæləksi/',comet:'/ˈkɑːmɪt/',asteroid:'/ˈæstərɔɪd/',
+eclipse:'/ɪˈklɪps/',gravity:'/ˈɡrævɪti/',oxygen:'/ˈɑːksɪdʒən/',molecule:'/ˈmɑːlɪkjuːl/',
+atom:'/ˈætəm/',laboratory:'/ˈlæbrətɔːri/',experiment:'/ɪkˈsperɪmənt/',
+formula:'/ˈfɔːrmjələ/',equation:'/ɪˈkweɪʒən/',triangle_shape:'/ˈtraɪæŋɡəl/',
+rectangle:'/ˈrektæŋɡəl/',oval:'/ˈoʊvəl/',cube:'/kjuːb/',sphere:'/sfɪr/',
+pyramid:'/ˈpɪrəmɪd/',cylinder:'/ˈsɪlɪndər/',cone:'/koʊn/',crescent:'/ˈkresənt/',
+zigzag:'/ˈzɪɡzæɡ/',pattern:'/ˈpætərn/',shadow:'/ˈʃædoʊ/',reflection:'/rɪˈflekʃən/',
+rainbow_nature:'/ˈreɪnboʊ/',sunrise:'/ˈsʌnraɪz/',sunset:'/ˈsʌnset/',
+horizon:'/həˈraɪzən/',cliff:'/klɪf/',cave:'/keɪv/',waterfall:'/ˈwɔːtərfɔːl/',
+pond:'/pɑːnd/',lake:'/leɪk/',stream:'/striːm/',swamp:'/swɑːmp/',
+meadow:'/ˈmedoʊ/',plain:'/pleɪn/',hill:'/hɪl/',valley:'/ˈvæli/',
+canyon:'/ˈkænjən/',glacier:'/ˈɡleɪʃər/',iceberg:'/ˈaɪsbɜːrɡ/',north:'/nɔːrθ/',
+south:'/saʊθ/',east:'/iːst/',west:'/west/',compass_direction:'/ˈkʌmpəs/',
+earth:'/ɜːrθ/',jupiter:'/ˈdʒuːpɪtər/',mars:'/mɑːrz/',venus:'/ˈviːnəs/',
+mercury:'/ˈmɜːrkjəri/',saturn:'/ˈsætərn/',uranus:'/ˈjʊrənəs/',neptune:'/ˈneptuːn/',
+corner:'/ˈkɔːrnər/',edge:'/edʒ/',dot:'/dɑːt/',line:'/laɪn/',curve:'/kɜːrv/',
+cross:'/krɔːs/',arrow:'/ˈæroʊ/',check:'/tʃek/',x_mark:'/eks/',
+question:'/ˈkwestʃən/',exclamation:'/ˌekskləˈmeɪʃən/',
+};
+function getPhonetic(word) {
+  if (!word) return '';
+  const w = word.toLowerCase().replace(/[^a-z_]/g,'');
+  return _PHONETIC[w] || _PHONETIC[w.replace(/_/g,' ')] || '';
 }
 
 function openQuiz(creature) {
@@ -2638,6 +3719,7 @@ function openQuiz(creature) {
 
   document.getElementById('quiz-emoji').textContent = creature.emoji;
   document.getElementById('quiz-word-en').textContent = creature.en;
+  document.getElementById('quiz-phonetic').textContent = getPhonetic(creature.en);
   document.getElementById('quiz-word-cn').textContent = creature.cn;
   document.getElementById('quiz-overlay').classList.add('show');
 
@@ -2691,17 +3773,11 @@ function playQuizWord() {
     document.getElementById('quiz-mic-status').textContent = '正在播放发音...';
     document.getElementById('quiz-retry-btn').style.display = 'inline-block';
   }
-  if ('speechSynthesis' in window) {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(quizCreature.en);
-    u.lang = 'en-US'; u.rate = 0.8; u.pitch = 1;
-    u.onend = function() {
-      if (quizPhase === 'speaking') {
-        document.getElementById('quiz-mic-status').textContent = '请点击"再试一次"重新挑战';
-      }
-    };
-    speechSynthesis.speak(u);
-  }
+  _speakEnglish(quizCreature.en, function() {
+    if (quizPhase === 'speaking') {
+      document.getElementById('quiz-mic-status').textContent = '请点击"再试一次"重新挑战';
+    }
+  });
 }
 
 function startSpeakingTest() {
@@ -2754,6 +3830,7 @@ function startRecognition() {
   document.getElementById('quiz-mic-status').textContent = '🎤 请说出英文单词...';
 
   recognition.onresult = function(event) {
+    clearTimeout(_recogTimeout);
     const results = event.results[0];
     const heard = [];
     for (let i = 0; i < results.length; i++) {
@@ -2781,6 +3858,7 @@ function startRecognition() {
   };
 
   recognition.onerror = function(event) {
+    clearTimeout(_recogTimeout);
     recognitionActive = false;
     document.getElementById('quiz-mic').classList.remove('listening');
     if (event.error === 'no-speech') {
@@ -2792,16 +3870,24 @@ function startRecognition() {
       document.getElementById('quiz-mic-status').textContent = '麦克风权限未授权，请在浏览器设置中允许麦克风';
       document.getElementById('quiz-retry-btn').style.display = 'inline-block';
     } else if (event.error === 'network' || event.error === 'service-not-allowed') {
-      // Network/service blocked (e.g. Google speech API blocked in China) → auto-switch to text input
-      quizPhase = 'dictation';
-      document.getElementById('quiz-mic').style.display = 'none';
-      document.getElementById('quiz-mic-status').textContent = '语音服务不可用，请用打字模式 👇';
-      document.getElementById('dictation-area').style.display = 'block';
-      document.getElementById('dictation-input').value = '';
-      document.getElementById('dictation-input').focus();
-      document.getElementById('speak-actions').style.display = 'none';
-      document.getElementById('quiz-retry-btn').style.display = 'none';
-      document.getElementById('quiz-skip-btn').style.display = 'inline-block';
+      // Google speech API blocked in China → try Baidu ASR first
+      document.getElementById('quiz-mic-status').textContent = '🎤 切换百度语音识别...';
+      _recordAndRecognize('quiz-mic-status', 2500).then(function(heard) {
+        if (heard.length > 0) {
+          handleSpeechResult(heard);
+        } else {
+          // Baidu also failed → text input fallback
+          quizPhase = 'dictation';
+          document.getElementById('quiz-mic').style.display = 'none';
+          document.getElementById('quiz-mic-status').textContent = '语音服务不可用，请用打字模式 👇';
+          document.getElementById('dictation-area').style.display = 'block';
+          document.getElementById('dictation-input').value = '';
+          document.getElementById('dictation-input').focus();
+          document.getElementById('speak-actions').style.display = 'none';
+          document.getElementById('quiz-retry-btn').style.display = 'none';
+          document.getElementById('quiz-skip-btn').style.display = 'inline-block';
+        }
+      });
     } else {
       document.getElementById('quiz-mic-status').textContent = '识别出错(' + event.error + ')，请重试';
       document.getElementById('quiz-retry-btn').style.display = 'inline-block';
@@ -2815,6 +3901,28 @@ function startRecognition() {
 
   try {
     recognition.start();
+    clearTimeout(_recogTimeout);
+    _recogTimeout = setTimeout(function() {
+      // Recognition hung (Google servers unreachable) → abort and try Baidu
+      stopRecognition();
+      document.getElementById('quiz-mic').classList.remove('listening');
+      document.getElementById('quiz-mic-status').textContent = '🎤 切换百度语音识别...';
+      _recordAndRecognize('quiz-mic-status', 2500).then(function(heard) {
+        if (heard.length > 0) {
+          handleSpeechResult(heard);
+        } else {
+          quizPhase = 'dictation';
+          document.getElementById('quiz-mic').style.display = 'none';
+          document.getElementById('quiz-mic-status').textContent = '语音服务不可用，请用打字模式 👇';
+          document.getElementById('dictation-area').style.display = 'block';
+          document.getElementById('dictation-input').value = '';
+          document.getElementById('dictation-input').focus();
+          document.getElementById('speak-actions').style.display = 'none';
+          document.getElementById('quiz-retry-btn').style.display = 'none';
+          document.getElementById('quiz-skip-btn').style.display = 'inline-block';
+        }
+      });
+    }, 5000);
   } catch(e) {
     recognitionActive = false;
     document.getElementById('quiz-mic-status').textContent = '语音启动失败，请重试';
@@ -2847,12 +3955,7 @@ function getSentence(en, cn) {
 }
 
 function speakSentence(text) {
-  if ('speechSynthesis' in window) {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US'; u.rate = 0.75; u.pitch = 1;
-    speechSynthesis.speak(u);
-  }
+  _speakEnglish(text);
 }
 
 function fuzzyMatch(str, target) {
@@ -2933,6 +4036,7 @@ function handleSpeechResult(heard) {
     quizCreature.dailyDone = true;
     gameState.collected[quizCreature.en] = Date.now();
     completeWord(quizCreature.en);
+    triggerPetCelebrate();
     gameState.combo++;
     if (gameState.combo > gameState.maxCombo) gameState.maxCombo = gameState.combo;
     gameState.score += 100 + gameState.combo * 20;
@@ -3005,6 +4109,7 @@ function skipCurrentWord() {
   quizCreature.dailyDone = true;
   gameState.collected[quizCreature.en] = Date.now();
   completeWord(quizCreature.en);
+  triggerPetCelebrate();
   gameState.score += 50; // half points for skip
   updateHUD();
   saveGame();
@@ -3030,14 +4135,7 @@ function showDictationMode() {
   input.value = '';
   input.focus();
 
-  // Play TTS so user can hear the word
-  if ('speechSynthesis' in window) {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(quizCreature.en);
-    u.lang = 'en-US'; u.rate = 0.75; u.pitch = 1;
-    u.onend = function() { input.focus(); };
-    speechSynthesis.speak(u);
-  }
+  _speakEnglish(quizCreature.en, function() { input.focus(); });
 
   // Allow Enter key to submit
   input.onkeydown = function(e) {
@@ -3073,6 +4171,7 @@ function checkDictation() {
     quizCreature.dailyDone = true;
     gameState.collected[quizCreature.en] = Date.now();
     completeWord(quizCreature.en);
+    triggerPetCelebrate();
     gameState.combo++;
     if (gameState.combo > gameState.maxCombo) gameState.maxCombo = gameState.combo;
     gameState.score += 100 + gameState.combo * 20;
@@ -3116,6 +4215,7 @@ function checkDictation() {
     quizCreature.dailyDone = true;
     gameState.collected[quizCreature.en] = Date.now();
     completeWord(quizCreature.en);
+    triggerPetCelebrate();
     gameState.score += 50;
     updateHUD();
     saveGame();
@@ -3134,22 +4234,8 @@ function resetDictationUI() {
   quizPhase = 'listen';
 }
 
-// ==================== COLLECTION BOOK ====================
-function toggleBook() {
-  // Close stats if open
-  document.getElementById('stats-overlay').classList.remove('show');
-  const overlay = document.getElementById('book-overlay');
-  if (overlay.classList.contains('show')) {
-    overlay.classList.remove('show');
-  } else {
-    buildBook();
-    overlay.classList.add('show');
-  }
-}
-
+// ==================== STATS OVERLAY ====================
 function toggleStats() {
-  // Close book if open
-  document.getElementById('book-overlay').classList.remove('show');
   const overlay = document.getElementById('stats-overlay');
   if (overlay.classList.contains('show')) {
     overlay.classList.remove('show');
@@ -3159,27 +4245,57 @@ function toggleStats() {
   }
 }
 
+let _reviewWord = null;
+
 function updateStatsOverlay() {
-  let days = 0, totalSents = 0;
+  let days = 0;
   try { days = parseInt(localStorage.getItem('wordcraft_days') || '0'); } catch(e) {}
-  try { totalSents = parseInt(localStorage.getItem('wordcraft_sentences') || '0'); } catch(e) {}
-  let usedWords = [];
-  try { usedWords = JSON.parse(localStorage.getItem('wordcraft_used') || '[]'); } catch(e) {}
-  const totalCollected = Object.keys(gameState.collected).length;
-  const completedSentences = gameState.completedSentences ? gameState.completedSentences.length : 0;
+  const allCollected = Object.entries(gameState.collected); // [word, timestamp]
 
   document.getElementById('stat-days').textContent = days;
-  document.getElementById('stat-words').textContent = usedWords.length;
-  document.getElementById('stat-collected').textContent = totalCollected;
-  document.getElementById('stat-sentences').textContent = completedSentences + totalSents;
+  document.getElementById('stat-words').textContent = allCollected.length;
   document.getElementById('stat-score').textContent = gameState.score;
-  document.getElementById('stat-combo').textContent = gameState.maxCombo;
-  document.getElementById('stat-pet').textContent = 'Lv.' + gameState.petLevel;
-  document.getElementById('stat-rate').textContent = dailyWords.length > 0
-    ? Math.round(dailyProgress / dailyWords.length * 100) + '%' : '0%';
 
-  // Encouragement message
-  let msg = '';
+  // Group words by calendar date (all days, newest first)
+  const dayMap = {};
+  for (var i = 0; i < allCollected.length; i++) {
+    var entry = allCollected[i];
+    var d = new Date(entry[1]);
+    var dateKey = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+    if (!dayMap[dateKey]) dayMap[dateKey] = [];
+    dayMap[dateKey].push(entry);
+  }
+  var dayKeys = Object.keys(dayMap).sort(function(a, b) { return b.localeCompare(a); }); // newest first
+  var dayGroups = [];
+  for (var dk = 0; dk < dayKeys.length; dk++) {
+    var parts = dayKeys[dk].split('-');
+    var dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    dayGroups.push({ label: formatDayLabel(dateObj), words: dayMap[dayKeys[dk]] });
+  }
+
+  var section = document.getElementById('stats-word-section');
+  if (dayGroups.length === 0) {
+    section.innerHTML = '<div style="text-align:center;color:var(--sub);padding:20px">还没有学习单词哦，快去地图中探索吧！</div>';
+  } else {
+    var html = '';
+    for (var g = 0; g < dayGroups.length; g++) {
+      html += '<div class="stats-day-group">';
+      html += '<div class="stats-day-label">' + dayGroups[g].label + '</div>';
+      html += '<div class="stats-word-chips">';
+      for (var w = 0; w < dayGroups[g].words.length; w++) {
+        var wordEn = dayGroups[g].words[w][0];
+        var entry = findWordEntry(wordEn);
+        var emoji = entry ? entry.emoji : '📝';
+        var cn = entry ? entry.cn : wordEn;
+        html += '<button class="stats-word-chip" onclick="reviewWord(\'' + wordEn.replace(/'/g, "\\'") + '\')" title="' + cn + '">' + emoji + ' ' + wordEn + '</button>';
+      }
+      html += '</div></div>';
+    }
+    section.innerHTML = html;
+  }
+
+  // Encouragement
+  var msg = '';
   if (days === 0) msg = '🌟 刚开始冒险！每天学习20个单词，加油！';
   else if (days < 3) msg = '🌱 萌芽阶段，保持每天学习的习惯！';
   else if (days < 7) msg = '🌿 坚持一周！英文水平正在悄然提升~';
@@ -3189,46 +4305,45 @@ function updateStatsOverlay() {
   document.getElementById('stats-encourage').textContent = msg;
 }
 
-function buildBook() {
-  const content = document.getElementById('book-content');
-  const allAnimals = [];
-  for (const [biomeKey, names] of Object.entries(BIOME_CREATURES)) {
-    for (const name of names) {
-      const data = animalLookup[name];
-      if (data) allAnimals.push({en: data[0], cn: data[1], emoji: data[2], biome: biomeKey});
+function formatDayLabel(dateObj) {
+  return '📅 ' + (dateObj.getMonth() + 1) + '月' + dateObj.getDate() + '日';
+}
+
+function findWordEntry(wordEn) {
+  for (var cat in WORD_DB) {
+    for (var i = 0; i < WORD_DB[cat].length; i++) {
+      if (WORD_DB[cat][i][0] === wordEn) return { en: WORD_DB[cat][i][0], cn: WORD_DB[cat][i][1], emoji: WORD_DB[cat][i][2] };
     }
   }
-
-  const collected = Object.keys(gameState.collected);
-  const total = allAnimals.length;
-  const pct = total > 0 ? Math.round(collected.length / total * 100) : 0;
-
-  document.getElementById('book-pct').textContent = pct + '%';
-  document.getElementById('book-count').textContent = collected.length;
-  document.getElementById('book-total').textContent = total;
-
-  // Group by biome
-  const grouped = {};
-  allAnimals.forEach(a => {
-    if (!grouped[a.biome]) grouped[a.biome] = [];
-    grouped[a.biome].push(a);
-  });
-
-  let html = '';
-  for (const [biomeKey, animals] of Object.entries(grouped)) {
-    const biomeName = BIOMES[biomeKey] ? BIOMES[biomeKey].name : biomeKey;
-    html += '<div class="book-section"><h3>' + biomeName + '</h3><div class="book-grid">';
-    animals.forEach(a => {
-      const isCollected = gameState.collected[a.en];
-      if (isCollected) {
-        html += '<div class="book-entry collected"><span class="emoji">' + a.emoji + '</span><div class="en">' + a.en + '</div><div class="zh">' + a.cn + '</div></div>';
-      } else {
-        html += '<div class="book-entry"><span class="locked">🔒</span><div class="en" style="opacity:0.4">???</div></div>';
-      }
-    });
-    html += '</div></div>';
+  // Check DB_FOODS too
+  for (var j = 0; j < DB_FOODS.length; j++) {
+    if (DB_FOODS[j][0] === wordEn) return { en: DB_FOODS[j][0], cn: DB_FOODS[j][1], emoji: DB_FOODS[j][2] };
   }
-  content.innerHTML = html;
+  return null;
+}
+
+function reviewWord(wordEn) {
+  var entry = findWordEntry(wordEn);
+  if (!entry) return;
+  _reviewWord = entry;
+  document.getElementById('wr-emoji').textContent = entry.emoji;
+  document.getElementById('wr-en').textContent = entry.en;
+  document.getElementById('wr-phonetic').textContent = getPhonetic(entry.en);
+  document.getElementById('wr-cn').textContent = entry.cn;
+  document.getElementById('word-review-overlay').classList.add('show');
+  // Auto-play pronunciation
+  setTimeout(function() { reviewPlayWord(); }, 300);
+}
+
+function closeWordReview() {
+  document.getElementById('word-review-overlay').classList.remove('show');
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  _reviewWord = null;
+}
+
+function reviewPlayWord() {
+  if (!_reviewWord) return;
+  _speakEnglish(_reviewWord.en);
 }
 
 // ==================== HUD ====================
@@ -3236,7 +4351,10 @@ function updateHUD() {
   document.getElementById('score-val').textContent = gameState.score;
   document.getElementById('combo-val').textContent = gameState.combo;
   document.getElementById('coll-val').textContent = Object.keys(gameState.collected).length;
-  document.getElementById('pet-icon').textContent = getPetEmoji();
+  document.getElementById('pet-emoji').textContent = getPetEmoji();
+  var pname = loadPlayerName() || '小公主';
+  document.getElementById('pet-label').textContent = pname + '的宠物';
+  document.getElementById('pet-icon').title = pname + '的宠物';
   document.getElementById('daily-val').textContent = dailyProgress + '/' + dailyWords.length;
   // Show current category
   const catName = CATEGORY_ORDER[(currentCategory - 1 + CATEGORY_ORDER.length) % CATEGORY_ORDER.length];
@@ -3350,7 +4468,13 @@ function drawCartoonGround(x, y, color, biomeKey) {
   const sx = x * TILE - camera.x;
   const sy = y * TILE - camera.y;
   const seed = x * 31 + y * 17;
-  // Rounded tile with soft gradient
+  // Mobile: flat fill to avoid gradient GC pressure (~300 tiles/frame)
+  if (_isMobile) {
+    ctx.fillStyle = color;
+    ctx.fillRect(sx + 1, sy + 1, TILE - 2, TILE - 2);
+    return;
+  }
+  // Desktop: rounded tile with soft gradient
   const g = ctx.createLinearGradient(sx, sy, sx, sy + TILE);
   g.addColorStop(0, lightenColor(color, 18));
   g.addColorStop(0.4, color);
@@ -3433,29 +4557,54 @@ function drawMazeWall(x, y, color, biomeKey, wallType) {
   const sx = x * TILE - camera.x;
   const sy = y * TILE - camera.y;
 
+  if (_isMobile) {
+    // Very dark base — clearly different from walkable ground
+    ctx.fillStyle = '#4a3a2a';
+    ctx.fillRect(sx + 1, sy + 1, TILE - 2, TILE - 2);
+    // Red danger stripe at top — unmistakable "can't walk here" signal
+    ctx.fillStyle = '#cc3333';
+    ctx.fillRect(sx + 1, sy + 1, TILE - 2, (TILE - 2) * 0.15);
+    // White highlight under stripe for 3D pop
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.fillRect(sx + 1, sy + (TILE - 2) * 0.15, TILE - 2, 2);
+    // Cross pattern — bold X
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(sx + 8, sy + 10);
+    ctx.lineTo(sx + TILE - 8, sy + TILE - 6);
+    ctx.moveTo(sx + TILE - 8, sy + 10);
+    ctx.lineTo(sx + 8, sy + TILE - 6);
+    ctx.stroke();
+    // Bottom shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillRect(sx + 1, sy + TILE - 5, TILE - 2, 4);
+    return;
+  }
+
   // ── Floor shadow ──
-  ctx.fillStyle = 'rgba(0,0,0,0.25)';
-  ctx.fillRect(sx + 4, sy + TILE - 3, TILE - 8, 6);
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(sx + 3, sy + TILE - 3, TILE - 6, 7);
 
   const inset = 2;
   const bx = sx + inset, by = sy + inset;
   const bw = TILE - inset*2, bh = TILE - inset*2;
 
-  // ── Main brick block (stone gray) ──
+  // ── Main brick block — darker stone for better contrast ──
   const blockGrad = ctx.createLinearGradient(sx, sy, sx, sy + TILE);
-  blockGrad.addColorStop(0, '#c8b898');
-  blockGrad.addColorStop(0.25, '#b8a888');
-  blockGrad.addColorStop(0.5, '#a89878');
-  blockGrad.addColorStop(0.75, '#988868');
-  blockGrad.addColorStop(1, '#887858');
+  blockGrad.addColorStop(0, '#b8a080');
+  blockGrad.addColorStop(0.25, '#a89070');
+  blockGrad.addColorStop(0.5, '#988060');
+  blockGrad.addColorStop(0.75, '#887050');
+  blockGrad.addColorStop(1, '#786040');
   ctx.fillStyle = blockGrad;
   ctx.beginPath();
   ctx.roundRect(bx, by, bw, bh, 2);
   ctx.fill();
 
   // ── Brick pattern — horizontal mortar lines ──
-  ctx.strokeStyle = '#6b5c4a';
-  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = '#5a4a38';
+  ctx.lineWidth = 1.3;
   const brickH = bh / 3;
   for (let r = 1; r < 3; r++) {
     const ly = by + r * brickH;
@@ -3465,10 +4614,10 @@ function drawMazeWall(x, y, color, biomeKey, wallType) {
     ctx.stroke();
   }
   // ── Vertical mortar lines (staggered per row) ──
-  ctx.lineWidth = 0.9;
+  ctx.lineWidth = 1;
   for (let r = 0; r < 3; r++) {
     const rowY = by + r * brickH;
-    const offset = r % 2 === 0 ? 0 : bw * 0.25; // stagger alternating rows
+    const offset = r % 2 === 0 ? 0 : bw * 0.25;
     const vCount = r % 2 === 0 ? 2 : 3;
     for (let c = 1; c < vCount; c++) {
       const lx = bx + offset + (c / vCount) * bw;
@@ -3481,50 +4630,39 @@ function drawMazeWall(x, y, color, biomeKey, wallType) {
     }
   }
 
-  // ── Top ledge highlight (stone cap, like Mario walls) ──
-  const capGrad = ctx.createLinearGradient(sx, sy, sx, sy + bh * 0.3);
-  capGrad.addColorStop(0, '#e8dcc8');
-  capGrad.addColorStop(0.5, '#d4c8b0');
-  capGrad.addColorStop(1, '#c0b498');
+  // ── Top ledge highlight (stone cap) ──
+  const capGrad = ctx.createLinearGradient(sx, sy, sx, sy + bh * 0.28);
+  capGrad.addColorStop(0, '#e0d0b8');
+  capGrad.addColorStop(0.5, '#c8b898');
+  capGrad.addColorStop(1, '#b0a080');
   ctx.fillStyle = capGrad;
   ctx.beginPath();
-  ctx.roundRect(bx + 1, by + 1, bw - 2, bh * 0.3, [2, 2, 0, 0]);
+  ctx.roundRect(bx + 1, by + 1, bw - 2, bh * 0.28, [2, 2, 0, 0]);
   ctx.fill();
 
   // ── Left / Top edge bright highlight ──
-  ctx.fillStyle = 'rgba(255,255,255,0.25)';
-  ctx.fillRect(bx + 1, by + 1, bw * 0.25, bh * 0.25);
-  ctx.fillRect(bx + 1, by + 1, 3, bh * 0.5);
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.fillRect(bx + 1, by + 1, bw * 0.2, bh * 0.22);
+  ctx.fillRect(bx + 1, by + 1, 3, bh * 0.45);
 
-  // ── Bottom shadow (deeper) ──
-  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  // ── Bottom shadow ──
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
   ctx.fillRect(bx + 1, sy + TILE - inset - 5, bw - 2, 5);
 
   // ── Right edge shadow ──
-  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
   ctx.fillRect(bx + bw - 4, by + 2, 3, bh - 2);
 
-  // ── Wall type overlay icon (small, bottom-right) ──
-  ctx.font = Math.floor(TILE*0.35) + 'px serif';
+  // ── Wall icon overlay ──
+  ctx.font = Math.floor(TILE*0.32) + 'px serif';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'bottom';
-  const cx = sx + TILE - 6;
-  const cy = sy + TILE - 4;
-  if (wallType === 'tree' || wallType === 'bush') ctx.fillText('🌳', cx, cy);
-  else if (wallType === 'cactus') ctx.fillText('🌵', cx, cy);
-  else if (wallType === 'ice') ctx.fillText('🧊', cx, cy);
-  else if (wallType === 'rock') ctx.fillText('🪨', cx, cy);
-  else if (wallType === 'fence') {
-    ctx.fillStyle = '#6b4c1e';
-    for (let fx = sx + 8; fx < sx + TILE - 4; fx += 12) {
-      ctx.fillRect(fx - 1.5, sy + 4, 3, TILE - 8);
-    }
-    ctx.fillRect(sx + 6, sy + TILE*0.3, TILE - 12, 3);
-    ctx.fillRect(sx + 6, sy + TILE*0.6, TILE - 12, 3);
-  }
+  ctx.fillText('🧱', sx + TILE - 4, sy + TILE - 3);
 }
 
 let _waveTime = 0;
+let _skyGrad = null, _skyGradW = 0, _skyGradH = 0;
+let _vigGrad = null, _vigW = 0, _vigH = 0;
 
 function drawWorld() {
   _waveTime += 0.016;
@@ -3540,27 +4678,22 @@ function drawWorld() {
       const isWater = BIOMES[tile.biome] && BIOMES[tile.biome].water;
 
       if (isWater) {
-        // Pokemon-style water with flowing wave lines
+        // Water tile
         const sx = tx * TILE - camera.x;
         const sy = ty * TILE - camera.y;
-        const wave = Math.sin(_waveTime * 2.5 + tx * 0.6 + ty * 0.4) * 0.06;
-        const wGrad = ctx.createLinearGradient(sx, sy, sx, sy + TILE);
-        wGrad.addColorStop(0, lightenColor(tile.color, 12));
-        wGrad.addColorStop(0.5, tile.color);
-        wGrad.addColorStop(1, darkenColor(tile.color, 6));
-        ctx.fillStyle = wGrad;
-        ctx.beginPath();
-        ctx.roundRect(sx + 1, sy + 1, TILE - 2, TILE - 2, 6);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,' + (0.2 + wave) + ')';
-        ctx.lineWidth = 1.8;
-        ctx.lineCap = 'round';
-        for (let w = 0; w < 3; w++) {
+        ctx.fillStyle = tile.color;
+        ctx.fillRect(sx + 1, sy + 1, TILE - 2, TILE - 2);
+        // Skip wave lines on mobile
+        if (!_isMobile) {
+          const wave = Math.sin(_waveTime * 2.5 + tx * 0.6 + ty * 0.4) * 0.06;
+          ctx.strokeStyle = 'rgba(255,255,255,' + (0.25 + wave) + ')';
+          ctx.lineWidth = 2;
+          ctx.lineCap = 'round';
           ctx.beginPath();
-          const wy = sy + TILE*0.25 + w*TILE*0.22;
+          const wy = sy + TILE * 0.45;
           ctx.moveTo(sx + 8, wy);
-          for (let wx = 0; wx < TILE - 16; wx += 10) {
-            ctx.lineTo(sx + 8 + wx + 5, wy + Math.sin(_waveTime*3.5 + tx + wx*0.4)*3.5);
+          for (let wx = 0; wx < TILE - 16; wx += 16) {
+            ctx.lineTo(sx + 8 + wx + 8, wy + Math.sin(_waveTime*3.5 + tx + wx*0.5)*4);
           }
           ctx.stroke();
         }
@@ -3632,17 +4765,22 @@ function drawPlayer() {
   const pct = Math.max(0, playerStamina / 100);
   const isLow = playerStamina < 20;
   const isMid = playerStamina >= 20 && playerStamina < 50;
-  const pulse = isLow ? 0.7 + 0.3 * Math.sin(Date.now() / 200) : 1;
+  const pulse = isLow ? 0.7 + 0.3 * Math.sin(_renderTime / 200) : 1;
 
-  if (isLow) {
+  if (isLow && !_isMobile) {
     ctx.shadowColor = 'rgba(255,40,40,0.7)';
     ctx.shadowBlur = 12 * S * pulse;
   }
 
-  const panelGrad = ctx.createLinearGradient(px, staminaY - 20 * S, px, staminaY + barH + 8 * S);
-  panelGrad.addColorStop(0, 'rgba(20,10,30,0.85)');
-  panelGrad.addColorStop(1, 'rgba(10,5,20,0.9)');
-  ctx.fillStyle = panelGrad;
+  // Flat color on mobile to avoid gradient GC pressure
+  if (_isMobile) {
+    ctx.fillStyle = 'rgba(15,8,25,0.88)';
+  } else {
+    var panelGrad = ctx.createLinearGradient(px, staminaY - 20 * S, px, staminaY + barH + 8 * S);
+    panelGrad.addColorStop(0, 'rgba(20,10,30,0.85)');
+    panelGrad.addColorStop(1, 'rgba(10,5,20,0.9)');
+    ctx.fillStyle = panelGrad;
+  }
   ctx.strokeStyle = isLow ? 'rgba(255,80,80,0.8)' : isMid ? 'rgba(255,180,60,0.6)' : 'rgba(100,220,100,0.5)';
   ctx.lineWidth = 2 * S;
   ctx.beginPath();
@@ -3664,10 +4802,14 @@ function drawPlayer() {
   if (isLow) { c1 = '#ff3333'; c2 = '#cc0000'; }
   else if (isMid) { c1 = '#ff9900'; c2 = '#e67600'; }
   else { c1 = '#5cff5c'; c2 = '#20b820'; }
-  const fillGrad = ctx.createLinearGradient(px, staminaY, px, staminaY + barH);
-  fillGrad.addColorStop(0, c1);
-  fillGrad.addColorStop(1, c2);
-  ctx.fillStyle = fillGrad;
+  if (_isMobile) {
+    ctx.fillStyle = c1;
+  } else {
+    const fillGrad = ctx.createLinearGradient(px, staminaY, px, staminaY + barH);
+    fillGrad.addColorStop(0, c1);
+    fillGrad.addColorStop(1, c2);
+    ctx.fillStyle = fillGrad;
+  }
   ctx.beginPath();
   ctx.roundRect(px - barW / 2, staminaY, barW * pct, barH, 3 * S);
   ctx.fill();
@@ -3685,7 +4827,7 @@ function drawPlayer() {
   ctx.roundRect(px - barW / 2, staminaY, barW * pct, barH * 0.4, [3 * S, 3 * S, 0, 0]);
   ctx.fill();
 
-  if (isLow && Math.floor(Date.now() / 350) % 2 === 0) {
+  if (isLow && Math.floor(_renderTime / 350) % 2 === 0) {
     ctx.fillStyle = '#ff2222';
     ctx.font = 'bold ' + (11 * S) + 'px sans-serif';
     ctx.textAlign = 'center';
@@ -3723,22 +4865,24 @@ function drawPlayer() {
   ctx.drawImage(_princessReady, drawX, drawY, imgW, imgH);
   ctx.restore();
 
-  // Fairy sparkles around princess
-  const sparkle = Math.sin(Date.now() / 1000 * 2.5) * 0.5;
-  for (let i = 0; i < 5; i++) {
-    const sAngle = Date.now() / 1500 + i * Math.PI * 0.4;
-    const sx = px + Math.cos(sAngle) * 13 * S;
-    const sy = drawY + imgH * 0.1 + Math.sin(sAngle * 2) * 8 * S + i * 3 * S;
-    const alpha = 0.3 + sparkle * 0.25;
-    ctx.fillStyle = 'rgba(255,255,220,' + alpha + ')';
-    ctx.beginPath();
-    const ss = 1.5 * S;
-    ctx.moveTo(sx, sy - ss); ctx.lineTo(sx + ss * 0.3, sy - ss * 0.3);
-    ctx.lineTo(sx + ss, sy); ctx.lineTo(sx + ss * 0.3, sy + ss * 0.3);
-    ctx.lineTo(sx, sy + ss); ctx.lineTo(sx - ss * 0.3, sy + ss * 0.3);
-    ctx.lineTo(sx - ss, sy); ctx.lineTo(sx - ss * 0.3, sy - ss * 0.3);
-    ctx.closePath();
-    ctx.fill();
+  // Fairy sparkles around princess — skip on mobile to save GPU
+  if (!_isMobile) {
+    const sparkle = Math.sin(_renderTime / 1000 * 2.5) * 0.5;
+    for (let i = 0; i < 5; i++) {
+      const sAngle = _renderTime / 1500 + i * Math.PI * 0.4;
+      const sx = px + Math.cos(sAngle) * 13 * S;
+      const sy = drawY + imgH * 0.1 + Math.sin(sAngle * 2) * 8 * S + i * 3 * S;
+      const alpha = 0.3 + sparkle * 0.25;
+      ctx.fillStyle = 'rgba(255,255,220,' + alpha + ')';
+      ctx.beginPath();
+      const ss = 1.5 * S;
+      ctx.moveTo(sx, sy - ss); ctx.lineTo(sx + ss * 0.3, sy - ss * 0.3);
+      ctx.lineTo(sx + ss, sy); ctx.lineTo(sx + ss * 0.3, sy + ss * 0.3);
+      ctx.lineTo(sx, sy + ss); ctx.lineTo(sx - ss * 0.3, sy + ss * 0.3);
+      ctx.lineTo(sx - ss, sy); ctx.lineTo(sx - ss * 0.3, sy - ss * 0.3);
+      ctx.closePath();
+      ctx.fill();
+    }
   }
 }
 
@@ -3822,271 +4966,93 @@ function drawPlayerFallback() {
   ctx.fill();
 }
 
+function drawPet() {
+  var emoji = getPetEmoji();
+  var px = pet.x - camera.x;
+  var py = pet.y - camera.y;
+  var S = TILE / 44;
+  // Pet size scales with level
+  var lv = gameState.petLevel;
+  var sizeScale = 1.0 + lv * 0.012;
+  var fontSize = Math.round(28 * S * sizeScale);
+  // Celebrate bounce
+  var bounce = 0;
+  if (pet.celebrateTimer > 0) {
+    bounce = Math.abs(Math.sin(pet.celebrateTimer * 10)) * 14 * S;
+  }
+  var drawY = py + TILE * 0.3 - bounce;
+
+  // Skip if off screen
+  if (px < -60 || px > canvas.width + 60 || drawY < -60 || drawY > canvas.height + 60) return;
+
+  // Ground shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  ctx.beginPath();
+  ctx.ellipse(px, py + TILE * 0.42, fontSize * 0.35, fontSize * 0.06, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Celebrate sparkles
+  if (pet.celebrateTimer > 0) {
+    for (var si = 0; si < pet.sparkles.length; si++) {
+      var sp = pet.sparkles[si];
+      sp.life -= 0.016;
+      if (sp.life <= 0) continue;
+      var sx = px + Math.cos(sp.angle) * sp.dist * (1 - sp.life);
+      var sy = drawY - fontSize * 0.4 + Math.sin(sp.angle + pet.celebrateTimer * 3) * sp.dist * (1 - sp.life);
+      var alpha = sp.life;
+      ctx.fillStyle = 'rgba(255,255,100,' + alpha + ')';
+      ctx.beginPath();
+      ctx.arc(sx, sy, sp.size * S, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Pet emoji
+  ctx.font = fontSize + 'px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  // Subtle outline for visibility
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.fillText(emoji, px + 1, drawY + 1);
+  ctx.fillText(emoji, px - 1, drawY - 1);
+  ctx.fillStyle = '#fff';
+  ctx.fillText(emoji, px, drawY);
+
+  // Celebrate hearts above pet
+  if (pet.celebrateTimer > 0) {
+    var heartY = drawY - fontSize * 0.7 - Math.abs(Math.sin(pet.celebrateTimer * 6)) * 18 * S;
+    ctx.font = Math.round(16 * S) + 'px "Segoe UI Emoji","Apple Color Emoji",sans-serif';
+    ctx.fillText('💕', px, heartY);
+  }
+
+  ctx.textAlign = 'start';
+  ctx.textBaseline = 'alphabetic';
+}
+
 function drawChristmasTree() {
+  if (!_treeImg || !_treeImg.complete || _treeImg.naturalWidth === 0) return;
+
   var cx = (WORLD_W / 2) * TILE + TILE / 2 - camera.x;
   var cy = (WORLD_H / 2) * TILE + TILE / 2 - camera.y;
 
-  var treeH = TILE * 4.2;
-  var treeW = TILE * 1.8;
-  var baseY = cy + TILE * 0.52;
+  // Larger tree: ~6 tiles tall
+  var treeH = TILE * 6;
+  var scale = treeH / _treeImg.naturalHeight;
+  var treeW = _treeImg.naturalWidth * scale;
+  var drawX = cx - treeW / 2;
+  var drawY = cy - treeH + TILE * 0.55;
 
-  if (cx + treeW < -80 || cx - treeW > canvas.width + 80 ||
-      baseY - treeH > canvas.height + 80 || baseY < -80) return;
+  if (drawX > canvas.width + 80 || drawX + treeW < -80 ||
+      drawY > canvas.height + 80 || drawY + treeH < -80) return;
 
-  var t = Date.now() / 1000;
-
-  // ---- Ground shadow (oval) ----
-  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  // Ground shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
   ctx.beginPath();
-  ctx.ellipse(cx, baseY + 2, treeW * 0.34, treeW * 0.06, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx, cy + TILE * 0.52, treeW * 0.35, treeW * 0.06, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // ---- Ambient glow from star ----
-  var glow = ctx.createRadialGradient(cx, baseY - treeH * 0.3, treeW * 0.04, cx, baseY - treeH * 0.3, treeW * 0.6);
-  glow.addColorStop(0, 'rgba(255,215,80,0.10)');
-  glow.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = glow;
-  ctx.beginPath();
-  ctx.ellipse(cx, baseY - treeH * 0.3, treeW * 0.6, treeH * 0.5, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // ============ TRUNK (3D cylinder) ============
-  var trunkW = TILE * 0.24, trunkH = TILE * 0.6;
-  var trunkTop = baseY - trunkH;
-
-  // Trunk body with cylindrical gradient
-  var tGrad = ctx.createLinearGradient(cx - trunkW/2, 0, cx + trunkW/2, 0);
-  tGrad.addColorStop(0, '#3E1F0F');
-  tGrad.addColorStop(0.15, '#5C2E15');
-  tGrad.addColorStop(0.35, '#8B5A3C');
-  tGrad.addColorStop(0.55, '#A0724A');
-  tGrad.addColorStop(0.75, '#8B5A3C');
-  tGrad.addColorStop(0.9, '#4A2510');
-  tGrad.addColorStop(1, '#2E1508');
-  ctx.fillStyle = tGrad;
-  ctx.beginPath();
-  ctx.roundRect(cx - trunkW/2, trunkTop, trunkW, trunkH, 3);
-  ctx.fill();
-
-  // Trunk bark texture lines
-  ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-  ctx.lineWidth = 0.8;
-  for (var bi = 0; bi < 5; bi++) {
-    var bx = cx - trunkW*0.3 + bi * trunkW*0.15;
-    ctx.beginPath();
-    ctx.moveTo(bx, trunkTop + 2);
-    ctx.lineTo(bx + (bi%2)*2 - 1, trunkTop + trunkH);
-    ctx.stroke();
-  }
-
-  // ============ THREE CONE TIERS (3D) ============
-  var tiers = [
-    { top: baseY - TILE * 1.55,  bot: baseY - trunkH + 2, halfW: treeW * 0.46, cDark: '#0F3D0F', cMid: '#1E6E1E', cLit: '#3A9A3A' },
-    { top: baseY - TILE * 2.55,  bot: baseY - TILE * 1.15,  halfW: treeW * 0.36, cDark: '#154515', cMid: '#247A24', cLit: '#40A840' },
-    { top: baseY - TILE * 3.55,  bot: baseY - TILE * 2.10,  halfW: treeW * 0.26, cDark: '#1B5A1B', cMid: '#2E8B2E', cLit: '#48B848' },
-  ];
-
-  tiers.forEach(function(tier) {
-    // 3D cone — split into left (lit), front (mid), right (dark)
-    var halfW = tier.halfW;
-    var topY = tier.top, botY = tier.bot;
-    var midY = (topY + botY) / 2;
-
-    // LEFT half — lighter (light coming from top-left)
-    var lGrad = ctx.createLinearGradient(cx - halfW, 0, cx, 0);
-    lGrad.addColorStop(0, '#1A4A1A');
-    lGrad.addColorStop(0.4, tier.cMid);
-    lGrad.addColorStop(1, tier.cLit);
-    ctx.fillStyle = lGrad;
-    ctx.beginPath();
-    ctx.moveTo(cx, topY);
-    ctx.lineTo(cx, botY);
-    ctx.lineTo(cx - halfW, botY);
-    ctx.closePath();
-    ctx.fill();
-
-    // RIGHT half — darker (in shadow)
-    var rGrad = ctx.createLinearGradient(cx, 0, cx + halfW, 0);
-    rGrad.addColorStop(0, tier.cMid);
-    rGrad.addColorStop(0.6, tier.cDark);
-    rGrad.addColorStop(1, '#0A2A0A');
-    ctx.fillStyle = rGrad;
-    ctx.beginPath();
-    ctx.moveTo(cx, topY);
-    ctx.lineTo(cx + halfW, botY);
-    ctx.lineTo(cx, botY);
-    ctx.closePath();
-    ctx.fill();
-
-    // Bottom edge shadow (occlusion where tier overlaps)
-    var edgeGrad = ctx.createLinearGradient(0, botY - 4, 0, botY + 4);
-    edgeGrad.addColorStop(0, 'rgba(0,0,0,0)');
-    edgeGrad.addColorStop(0.5, 'rgba(0,0,0,0.35)');
-    edgeGrad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = edgeGrad;
-    ctx.beginPath();
-    ctx.rect(cx - halfW, botY - 4, halfW * 2, 8);
-    ctx.fill();
-
-    // Needle texture — small strokes along the cone surface
-    ctx.fillStyle = 'rgba(0,0,0,0.08)';
-    for (var ni = 0; ni < 8; ni++) {
-      var frac = (ni + 0.5) / 8;
-      var ny = topY + frac * (botY - topY);
-      var nHalfW = halfW * frac;
-      ctx.beginPath();
-      ctx.ellipse(cx, ny, nHalfW * 0.7, 1.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Tiny highlights on needles
-    ctx.fillStyle = 'rgba(255,255,255,0.04)';
-    for (var hi = 0; hi < 5; hi++) {
-      var hFrac = (hi + 0.3) / 5;
-      var hy = topY + hFrac * (botY - topY);
-      var hHalfW = halfW * hFrac;
-      ctx.beginPath();
-      ctx.ellipse(cx - hHalfW * 0.3, hy, hHalfW * 0.15, 1, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  });
-
-  // ============ SNOW CAPS ============
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  tiers.forEach(function(tier) {
-    var snowW = tier.halfW * 0.85;
-    var snowY = tier.bot - 2;
-    for (var si = 0; si < 7; si++) {
-      var sx2 = cx - snowW + snowW * 2 * (si + 0.5) / 7;
-      var sy2 = snowY + Math.sin(si * 1.1) * 2;
-      ctx.beginPath();
-      ctx.ellipse(sx2, sy2, treeW * 0.045, treeW * 0.02, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  });
-
-  // ============ 3D GOLDEN STAR ============
-  var starY = baseY - treeH + TILE * 0.55;
-  var starR = TILE * 0.18;
-
-  // Outer glow
-  var sg = ctx.createRadialGradient(cx, starY, 0, cx, starY, starR * 2);
-  sg.addColorStop(0, 'rgba(255,255,220,0.7)');
-  sg.addColorStop(0.3, 'rgba(255,215,0,0.35)');
-  sg.addColorStop(0.6, 'rgba(255,180,0,0.1)');
-  sg.addColorStop(1, 'rgba(255,150,0,0)');
-  ctx.fillStyle = sg;
-  ctx.beginPath();
-  ctx.arc(cx, starY, starR * 2, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Star with 3D metallic gradient
-  ctx.fillStyle = '#FFD700';
-  ctx.beginPath();
-  var pts = 5, innerR = starR * 0.42;
-  for (var i = 0; i < pts * 2; i++) {
-    var r = i % 2 === 0 ? starR : innerR;
-    var a = -Math.PI / 2 + i * Math.PI / pts;
-    var sx3 = cx + Math.cos(a) * r, sy3 = starY + Math.sin(a) * r;
-    i === 0 ? ctx.moveTo(sx3, sy3) : ctx.lineTo(sx3, sy3);
-  }
-  ctx.closePath();
-  ctx.fill();
-
-  // Star inner highlight
-  var starGrad = ctx.createRadialGradient(cx - starR*0.2, starY - starR*0.25, starR*0.05, cx, starY, starR);
-  starGrad.addColorStop(0, '#FFF8C0');
-  starGrad.addColorStop(0.5, '#FFD700');
-  starGrad.addColorStop(1, '#CC8800');
-  ctx.fillStyle = starGrad;
-  ctx.fill();
-
-  // ============ 3D ORNAMENTS (spheres with radial gradient) ============
-  var ornDefs = [
-    { color: '#FF3333', light: '#FF8888', dark: '#991111' },
-    { color: '#FF8800', light: '#FFBB55', dark: '#994400' },
-    { color: '#FFDD00', light: '#FFEE66', dark: '#997700' },
-    { color: '#3388FF', light: '#88BBFF', dark: '#114499' },
-    { color: '#FF44AA', light: '#FF88CC', dark: '#991155' },
-    { color: '#00CCBB', light: '#55EEE0', dark: '#007766' },
-    { color: '#FF3333', light: '#FF8888', dark: '#991111' },
-    { color: '#FF8800', light: '#FFBB55', dark: '#994400' },
-  ];
-  var ornPositions = [
-    [0.28,-1.30],[0.34,-1.02],[-0.24,-1.18],[-0.30,-0.92],[0.18,-0.72],[-0.20,-0.58],[0.30,-0.36],[-0.12,-0.22],
-    [0.18,-2.15],[-0.16,-1.98],[0.08,-1.88],[-0.12,-1.72],[0.22,-2.58],[-0.10,-2.35],[0.0,-2.88],
-  ];
-
-  ornPositions.forEach(function(pos, i) {
-    var ox = cx + pos[0] * treeW;
-    var oy = baseY + pos[1] * TILE;
-    var or2 = TILE * 0.062;
-    var twinkle = 0.55 + 0.45 * Math.sin(t * 2 + i * 1.35);
-
-    // Shadow beneath ornament
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.beginPath();
-    ctx.arc(ox + 0.5, oy + 1.5, or2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 3D sphere
-    var d = ornDefs[i % ornDefs.length];
-    var ornGrad = ctx.createRadialGradient(ox - or2*0.3, oy - or2*0.35, or2*0.05, ox, oy, or2);
-    ornGrad.addColorStop(0, d.light);
-    ornGrad.addColorStop(0.5, d.color);
-    ornGrad.addColorStop(1, d.dark);
-    ctx.fillStyle = ornGrad;
-    ctx.globalAlpha = twinkle;
-    ctx.beginPath();
-    ctx.arc(ox, oy, or2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Glossy specular highlight
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.beginPath();
-    ctx.arc(ox - or2*0.25, oy - or2*0.3, or2*0.22, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  ctx.globalAlpha = 1;
-
-  // ============ GARLAND (spiral string with tiny lights) ============
-  for (var gi = 0; gi < 35; gi++) {
-    var gFrac = gi / 35;
-    var gY = baseY - trunkH - 2 - gFrac * (treeH - trunkH - TILE * 0.35);
-    var gHalfW = (1 - gFrac) * treeW * 0.42;
-    var gX = cx + Math.sin(gFrac * Math.PI * 2.5 + t * 0.2) * gHalfW;
-    var bright = 0.3 + 0.7 * Math.abs(Math.sin(gFrac * 15 + t * 2));
-    ctx.fillStyle = 'rgba(255,255,220,' + bright + ')';
-    ctx.beginPath();
-    ctx.arc(gX, gY, 1.3, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // ============ PRESENT BOXES at base ============
-  drawPresentBox(cx - treeW * 0.25, baseY - 4, TILE * 0.28, TILE * 0.22, '#DD3333', '#FFD700');
-  drawPresentBox(cx + treeW * 0.15, baseY - 2, TILE * 0.24, TILE * 0.18, '#3366DD', '#FFAA00');
-}
-
-function drawPresentBox(bx, by, bw, bh, color, ribbonColor) {
-  // Box body
-  var boxGrad = ctx.createLinearGradient(bx - bw/2, 0, bx + bw/2, 0);
-  boxGrad.addColorStop(0, color);
-  boxGrad.addColorStop(1, 'rgba(0,0,0,0.3)');
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.roundRect(bx - bw/2, by - bh, bw, bh, 2);
-  ctx.fill();
-
-  // Ribbon vertical
-  ctx.fillStyle = ribbonColor;
-  ctx.fillRect(bx - bw*0.1, by - bh, bw*0.2, bh);
-  // Ribbon horizontal
-  ctx.fillRect(bx - bw/2, by - bh*0.55, bw, bh*0.18);
-  // Bow
-  ctx.beginPath();
-  ctx.arc(bx - bw*0.22, by - bh*0.6, bw*0.15, 0, Math.PI*2);
-  ctx.arc(bx + bw*0.22, by - bh*0.6, bw*0.15, 0, Math.PI*2);
-  ctx.fill();
+  // Draw tree image
+  ctx.drawImage(_treeImg, drawX, drawY, treeW, treeH);
 }
 
 function drawWolf() {
@@ -4102,7 +5068,7 @@ function drawWolf() {
   const sway = isWalking ? Math.sin(stride * 0.5) * 3 : 0;
   const tilt = isWalking ? Math.sin(stride) * 0.07 : 0;
   const stomp = isWalking ? 1 + Math.abs(Math.sin(stride)) * 0.15 : 1;
-  const t = Date.now() / 1000;
+  const t = _renderTime / 1000;
 
   // Image is 1536x1024, scale to fit game world
   const imgH = TILE * 4.2;
@@ -4114,23 +5080,25 @@ function drawWolf() {
   if (drawX > canvas.width + 60 || drawX + imgW < -60 ||
       drawY > canvas.height + 60 || drawY + imgH < -60) return;
 
-  // Dark aura — pulses more when walking
-  const auraBase = 0.12 + (isWalking ? 0.04 : 0);
-  const ap = auraBase + Math.sin(t*2.2)*0.05 + Math.sin(t*3.7)*0.03;
-  const ag = ctx.createRadialGradient(wx, wy-imgH*0.3, imgW*0.18, wx, wy-imgH*0.15, imgW*0.7);
-  ag.addColorStop(0,'rgba(50,8,18,'+(ap*2.5)+')');
-  ag.addColorStop(0.4,'rgba(25,0,8,'+(ap*1.2)+')');
-  ag.addColorStop(0.7,'rgba(8,0,3,'+(ap*0.4)+')');
-  ag.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=ag;
-  ctx.beginPath(); ctx.ellipse(wx,wy-imgH*0.2,imgW*0.55,imgH*0.4,0,0,Math.PI*2); ctx.fill();
+  // Dark aura — skip on mobile to save GPU (radial gradient is expensive)
+  if (!_isMobile) {
+    const auraBase = 0.12 + (isWalking ? 0.04 : 0);
+    const ap = auraBase + Math.sin(t*2.2)*0.05 + Math.sin(t*3.7)*0.03;
+    const ag = ctx.createRadialGradient(wx, wy-imgH*0.3, imgW*0.18, wx, wy-imgH*0.15, imgW*0.7);
+    ag.addColorStop(0,'rgba(50,8,18,'+(ap*2.5)+')');
+    ag.addColorStop(0.4,'rgba(25,0,8,'+(ap*1.2)+')');
+    ag.addColorStop(0.7,'rgba(8,0,3,'+(ap*0.4)+')');
+    ag.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=ag;
+    ctx.beginPath(); ctx.ellipse(wx,wy-imgH*0.2,imgW*0.55,imgH*0.4,0,0,Math.PI*2); ctx.fill();
+  }
 
   // Ground shadow — shrinks/grows with walk cycle stomp
   ctx.fillStyle='rgba(0,0,0,0.30)';
   ctx.beginPath(); ctx.ellipse(wx, wy+TILE*0.52, imgW*0.38*stomp, imgW*0.07/stomp, 0, 0, Math.PI*2); ctx.fill();
 
-  // Footstep dust particles when walking
-  if (isWalking) {
+  // Footstep dust particles when walking — skip on mobile
+  if (isWalking && !_isMobile) {
     const dustPhase = stride % 1;
     if (dustPhase < 0.15) {
       const dx = wx - imgW * 0.15;
@@ -4169,19 +5137,21 @@ function drawWolf() {
   ctx.drawImage(_wolfReady, drawX, drawY, imgW, imgH);
   ctx.restore();
 
-  // Red eye glow — estimated eye position (~30% from top, ~±15% from center)
-  const eyeY = drawY + imgH * 0.28;
-  const lEyeX = wx - imgW * 0.13;
-  const rEyeX = wx + imgW * 0.13;
-  const eg = 0.5 + Math.sin(t*3)*0.2;
-  [lEyeX, rEyeX].forEach(ex => {
-    const glow = ctx.createRadialGradient(ex, eyeY, 1, ex, eyeY, imgH*0.1);
-    glow.addColorStop(0,'rgba(255,8,8,'+(eg*0.85)+')');
-    glow.addColorStop(0.5,'rgba(255,0,0,'+(eg*0.3)+')');
-    glow.addColorStop(1,'rgba(255,0,0,0)');
-    ctx.fillStyle=glow;
-    ctx.beginPath(); ctx.arc(ex, eyeY, imgH*0.13, 0, Math.PI*2); ctx.fill();
-  });
+  // Red eye glow — skip on mobile to save GPU
+  if (!_isMobile) {
+    const eyeY = drawY + imgH * 0.28;
+    const lEyeX = wx - imgW * 0.13;
+    const rEyeX = wx + imgW * 0.13;
+    const eg = 0.5 + Math.sin(t*3)*0.2;
+    [lEyeX, rEyeX].forEach(ex => {
+      const glow = ctx.createRadialGradient(ex, eyeY, 1, ex, eyeY, imgH*0.1);
+      glow.addColorStop(0,'rgba(255,8,8,'+(eg*0.85)+')');
+      glow.addColorStop(0.5,'rgba(255,0,0,'+(eg*0.3)+')');
+      glow.addColorStop(1,'rgba(255,0,0,0)');
+      ctx.fillStyle=glow;
+      ctx.beginPath(); ctx.arc(ex, eyeY, imgH*0.13, 0, Math.PI*2); ctx.fill();
+    });
+  }
 
   // Name tag
   const dist=Math.hypot(player.x-wolf.x,player.y-wolf.y);
@@ -4194,9 +5164,9 @@ function drawWolf() {
     ctx.fillStyle='rgba(0,0,0,0.75)';
     ctx.beginPath(); ctx.roundRect(wx-tw/2,tagY-th/2,tw,th,6); ctx.fill();
     ctx.fillStyle='#ff4444';
-    ctx.shadowColor='rgba(255,0,0,0.5)'; ctx.shadowBlur=5;
+    if (!_isMobile) { ctx.shadowColor='rgba(255,0,0,0.5)'; ctx.shadowBlur=5; }
     ctx.fillText(tag,wx,tagY+th*0.18);
-    ctx.shadowBlur=0;
+    if (!_isMobile) { ctx.shadowBlur=0; }
     if(dist<TILE*2.5){
       const da=(1-dist/(TILE*2.5))*0.35;
       ctx.fillStyle='rgba(255,0,0,'+da+')';
@@ -4213,7 +5183,7 @@ function drawWolf() {
 function drawChibiCreature(cx, cy, creature) {
   const style = getCreatureStyle(creature.en);
   const S = TILE * 0.5 * style.size; // base scale
-  const bobY = Math.sin(Date.now()/1000 * 1.5 + creature.floatOff) * 2;
+  const bobY = Math.sin(_renderTime/1000 * 1.5 + creature.floatOff) * 2;
 
   // --- Shadow ---
   ctx.fillStyle = 'rgba(0,0,0,0.18)';
@@ -4554,11 +5524,11 @@ function drawChibiEars(hx, hy, style, S) {
 function drawCreature(creature) {
   const cx = creature.x - camera.x;
   const cy = creature.y - camera.y;
-  const emojiSize = Math.floor(TILE * 1.45);
+  const emojiSize = Math.floor(TILE * 1.65);
 
   if (cx < -emojiSize || cx > canvas.width + emojiSize || cy < -emojiSize || cy > canvas.height + emojiSize) return;
 
-  const floatY = Math.sin(Date.now()/1000 * 1.5 + creature.floatOff) * 6;
+  const floatY = Math.sin(_renderTime/1000 * 1.5 + creature.floatOff) * 6;
   const ddx = creature.wanderDir.x * 4;
   const ddy = creature.wanderDir.y * 4;
   const drawX = cx + ddx;
@@ -4574,7 +5544,7 @@ function drawCreature(creature) {
 
   // Cute "?" floating above uncollected word creatures
   if (!creature.collected) {
-    const qY = drawY - TILE*0.5 + Math.sin(Date.now()/600 + creature.floatOff) * 3;
+    const qY = drawY - TILE*0.5 + Math.sin(_renderTime/600 + creature.floatOff) * 3;
     // Circular background for the "?"
     ctx.fillStyle = '#ff6b9d';
     ctx.beginPath();
@@ -4615,7 +5585,7 @@ function drawCreature(creature) {
       ctx.strokeStyle = 'rgba(255,255,255,0.7)';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(cx, cy - TILE*0.15, TILE*0.9 + Math.sin(Date.now()/300)*4, 0, Math.PI*2);
+      ctx.arc(cx, cy - TILE*0.15, TILE*0.9 + Math.sin(_renderTime/300)*4, 0, Math.PI*2);
       ctx.stroke();
       ctx.fillStyle = '#fff';
       ctx.font = 'bold ' + Math.floor(TILE*0.28) + 'px "Microsoft YaHei",sans-serif';
@@ -4646,43 +5616,59 @@ function drawCreature(creature) {
 }
 
 function drawParticles() {
-  particles.forEach(p => {
+  for (var i = 0; i < particles.length; i++) {
+    var p = particles[i];
     ctx.globalAlpha = p.life / p.maxLife;
-    if (p.emoji) {
+    // Mobile: skip emoji particles (expensive fillText)
+    if (p.emoji && !_isMobile) {
       ctx.font = Math.floor(p.size * 3) + 'px serif';
       ctx.textAlign = 'center';
       ctx.fillText(p.emoji, p.x, p.y);
     } else {
-      ctx.fillStyle = p.color;
+      ctx.fillStyle = p.emoji ? '#ffd54f' : p.color;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
       ctx.fill();
     }
-  });
+  }
   ctx.globalAlpha = 1;
 }
 
+var _minimapCache = null;
+var _minimapCacheValid = false;
+function _invalidateMinimap() { _minimapCacheValid = false; }
+
 function drawMinimap() {
-  const mmW = 120, mmH = 120;
-  const mmX = canvas.width - mmW - 12;
-  const mmY = canvas.height - mmH - 60;
-  const scale = mmW / (WORLD_W * TILE);
+  var mmW = 120, mmH = 120;
+  var mmX = canvas.width - mmW - 12;
+  var mmY = canvas.height - mmH - 60;
+  var scale = mmW / (WORLD_W * TILE);
 
-  // Background
-  ctx.fillStyle = 'rgba(0,0,0,0.6)';
-  ctx.fillRect(mmX - 2, mmY - 2, mmW + 4, mmH + 4);
-  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(mmX - 2, mmY - 2, mmW + 4, mmH + 4);
-
-  // Biome colors
-  for (let ty = 0; ty < WORLD_H; ty += 2) {
-    for (let tx = 0; tx < WORLD_W; tx += 2) {
-      const tile = worldMap[ty][tx];
-      ctx.fillStyle = tile.color;
-      ctx.fillRect(mmX + tx * TILE * scale, mmY + ty * TILE * scale, TILE * scale * 2, TILE * scale * 2);
+  // Rebuild cached static layer (biomes) only when needed
+  if (!_minimapCache || !_minimapCacheValid) {
+    _minimapCache = document.createElement('canvas');
+    _minimapCache.width = mmW + 4;
+    _minimapCache.height = mmH + 4;
+    var mc = _minimapCache.getContext('2d');
+    // Background
+    mc.fillStyle = 'rgba(0,0,0,0.6)';
+    mc.fillRect(0, 0, mmW + 4, mmH + 4);
+    mc.strokeStyle = 'rgba(255,255,255,0.3)';
+    mc.lineWidth = 2;
+    mc.strokeRect(0, 0, mmW + 4, mmH + 4);
+    // Biome colors
+    for (var ty = 0; ty < WORLD_H; ty += 2) {
+      for (var tx = 0; tx < WORLD_W; tx += 2) {
+        var tile = worldMap[ty][tx];
+        mc.fillStyle = tile.color;
+        mc.fillRect(tx * TILE * scale + 2, ty * TILE * scale + 2, TILE * scale * 2, TILE * scale * 2);
+      }
     }
+    _minimapCacheValid = true;
   }
+
+  // Draw cached static layer
+  ctx.drawImage(_minimapCache, mmX - 2, mmY - 2);
 
   // Player dot
   ctx.fillStyle = '#ff4444';
@@ -4694,9 +5680,9 @@ function drawMinimap() {
   ctx.stroke();
 
   // Wolf dot with red warning glow
-  const wolfMX = mmX + wolf.x * scale;
-  const wolfMY = mmY + wolf.y * scale;
-  const pulse = 1 + Math.sin(_waveTime * 4) * 0.2; // pulsing glow
+  var wolfMX = mmX + wolf.x * scale;
+  var wolfMY = mmY + wolf.y * scale;
+  var pulse = 1 + Math.sin(_waveTime * 4) * 0.2;
   ctx.fillStyle = 'rgba(255,20,20,0.3)';
   ctx.beginPath();
   ctx.arc(wolfMX, wolfMY, 5 * pulse + 3, 0, Math.PI*2);
@@ -4713,12 +5699,26 @@ function drawMinimap() {
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  // Creature dots
-  creatures.forEach(c => {
-    if (c.collected) return;
-    ctx.fillStyle = '#ffd54f';
-    ctx.fillRect(mmX + c.x * scale - 1, mmY + c.y * scale - 1, 2, 2);
-  });
+  // Creature dots — bright cyan glow
+  var creaturePulse = 1 + Math.sin(_waveTime * 3.5) * 0.35;
+  for (var ci = 0; ci < creatures.length; ci++) {
+    var c = creatures[ci];
+    if (c.collected) continue;
+    var cx = mmX + c.x * scale;
+    var cy = mmY + c.y * scale;
+    ctx.fillStyle = 'rgba(0,255,220,' + (0.4 * creaturePulse) + ')';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5 * creaturePulse + 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(100,255,240,' + (0.75 * creaturePulse) + ')';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 3.5 * creaturePulse, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }
 
 // ==================== COLLISION DETECTION ====================
@@ -4751,6 +5751,7 @@ let lastStepSound = 0;
 // ==================== WOLF AI ====================
 let _wolfPath = null;
 let _wolfPathTarget = ''; // track player tile to know when to recalc
+let _wolfBfsCooldown = 0; // throttle BFS to once per 0.5s
 
 function findWolfPath() {
   const stx = Math.floor(wolf.x / TILE);
@@ -4787,9 +5788,9 @@ function updateWolf(dt) {
   if (gameOver || gameWin) return;
   if (_graceTimer > 0) return; // grace period — wolf frozen
 
-  const dx = player.x - wolf.x;
-  const dy = player.y - wolf.y;
-  const dist = Math.hypot(dx, dy);
+  var dx = player.x - wolf.x;
+  var dy = player.y - wolf.y;
+  var dist = Math.hypot(dx, dy);
   if (dist < 1) return;
 
   wolf.walking = true;
@@ -4801,11 +5802,14 @@ function updateWolf(dt) {
     wolf.dir = dy > 0 ? 'down' : 'up';
   }
 
-  // Recalculate path when player changes tile, or every 2 seconds
-  const playerTile = Math.floor(player.x / TILE) + ',' + Math.floor(player.y / TILE);
-  if (!_wolfPath || _wolfPath.length === 0 || _wolfPathTarget !== playerTile) {
+  // ── Throttle BFS: recalc at most every 0.5s ──
+  if (!_wolfBfsCooldown) _wolfBfsCooldown = 0;
+  _wolfBfsCooldown -= dt;
+  var playerTile = Math.floor(player.x / TILE) + ',' + Math.floor(player.y / TILE);
+  if ((!_wolfPath || _wolfPath.length === 0 || _wolfPathTarget !== playerTile) && _wolfBfsCooldown <= 0) {
     _wolfPathTarget = playerTile;
     _wolfPath = findWolfPath();
+    _wolfBfsCooldown = 0.5;
   }
 
   let targetX, targetY;
@@ -4873,14 +5877,17 @@ function update(dt) {
   // Handle overlay-close keys
   if (keys['escape']) {
     keys['escape'] = false;
-    closeQuiz();
-    if (document.getElementById('book-overlay').classList.contains('show')) toggleBook();
+    var statsOverlay = document.getElementById('stats-overlay');
+    if (statsOverlay.classList.contains('show')) {
+      toggleStats();
+    } else {
+      closeQuiz();
+    }
   }
 
   // Check for game over / win overlays
   const quizOverlay = document.getElementById('quiz-overlay');
   const quizOverlayShown = quizOverlay.classList.contains('show');
-  const bookOpen = document.getElementById('book-overlay').classList.contains('show');
   const speakOpen = document.getElementById('speak-overlay').classList.contains('show');
 
   if (gameOver || gameWin) {
@@ -4890,20 +5897,22 @@ function update(dt) {
     return;
   }
 
-  // Grace period countdown
-  if (_graceTimer > 0) {
-    _graceTimer -= dt;
-    if (_graceTimer < 0) _graceTimer = 0;
-  }
-
   // Update music intensity based on wolf distance
   updateMusicIntensity();
 
-  if (quizActive || bookOpen || speakOpen || foodQuizActive || reviewActive) {
+  if (quizActive || speakOpen || foodQuizActive || reviewActive || introActive || wolfQuizActive
+      || document.getElementById('name-overlay').classList.contains('show')
+      || document.getElementById('word-review-overlay').classList.contains('show')) {
     player.walking = false;
     player.animTimer = 0;
     wolf.walking = false; // wolf freezes during quiz
     return;
+  }
+
+  // Grace period countdown
+  if (_graceTimer > 0) {
+    _graceTimer -= dt;
+    if (_graceTimer < 0) _graceTimer = 0;
   }
 
   // Player movement
@@ -4969,6 +5978,36 @@ function update(dt) {
   camera.x += (camera.tx - camera.x) * 12 * dt;
   camera.y += (camera.ty - camera.y) * 12 * dt;
 
+  // Update pet companion (follows player with slight delay)
+  {
+    var trailDist = TILE * 1.2;
+    var px = player.x, py = player.y;
+    if (player.dir === 'up') py += trailDist;
+    else if (player.dir === 'down') py -= trailDist;
+    else if (player.dir === 'left') px += trailDist;
+    else if (player.dir === 'right') px -= trailDist;
+    // Add current target to trail
+    pet.trail.push({ x: px, y: py, t: 0 });
+    if (pet.trail.length > pet.maxTrail) pet.trail.shift();
+    // Age trail and find pet's target (lag behind by a few frames)
+    for (var ti = 0; ti < pet.trail.length; ti++) pet.trail[ti].t += dt;
+    var targetIdx = 0;
+    for (var ti = 0; ti < pet.trail.length; ti++) {
+      if (pet.trail[ti].t > 0.18) { targetIdx = ti; break; }
+    }
+    var target = pet.trail[targetIdx] || pet.trail[pet.trail.length - 1] || { x: px, y: py };
+    // Clean old trail entries
+    while (pet.trail.length > 0 && pet.trail[0].t > 0.6) pet.trail.shift();
+    // Smooth move toward target
+    pet.x += (target.x - pet.x) * 8 * dt;
+    pet.y += (target.y - pet.y) * 8 * dt;
+    // Update celebrate timer
+    if (pet.celebrateTimer > 0) {
+      pet.celebrateTimer -= dt;
+      if (pet.celebrateTimer < 0) pet.celebrateTimer = 0;
+    }
+  }
+
   // Update wolf
   updateWolf(dt);
 
@@ -4977,6 +6016,7 @@ function update(dt) {
   if (wolfDist < TILE * 1.5) {
     // Wolf caught player!
     gameOver = true;
+    playScreamSound();
     showDeathScreen();
     return;
   }
@@ -5043,12 +6083,6 @@ function update(dt) {
     foodSpawnTimer = 2 + Math.random() * 3;
   }
 
-  // B key for book
-  if (keys['b']) {
-    keys['b'] = false;
-    toggleBook();
-  }
-
   // Test hotkey: press T to spawn a "star" creature beside the player for testing
   if (keys['t']) {
     keys['t'] = false;
@@ -5088,10 +6122,12 @@ function update(dt) {
   if (foodAvailable && !foodQuizActive) {
     const sx = player.x - camera.x;
     const sy = player.y - camera.y;
-    foodBtn.style.left = (sx * _mobileZoom - 26) + 'px';
-    foodBtn.style.top = (sy * _mobileZoom - TILE * _mobileZoom - 52) + 'px';
+    const btnW = playerStamina <= 0 ? 70 : 28; // bigger offset when hint shown
+    foodBtn.style.left = (sx * _mobileZoom - btnW) + 'px';
+    foodBtn.style.top = (sy * _mobileZoom - TILE * _mobileZoom - 60) + 'px';
     foodBtn.style.display = 'flex';
-    foodBtn.textContent = currentFood.emoji;
+    foodBtn.innerHTML = '<span class="hint-text">点击食物补充体力</span>' + currentFood.emoji;
+    foodBtn.classList.toggle('no-stamina', playerStamina <= 0);
   } else if (foodQuizActive) {
     foodBtn.style.display = 'none';
   }
@@ -5128,12 +6164,16 @@ function drawJoystick() {
   ctx.arc(thumbX + 2, thumbY + 2, thumbR, 0, Math.PI * 2);
   ctx.fill();
 
-  // Thumb body
-  var thumbGrad = ctx.createRadialGradient(thumbX - thumbR*0.2, thumbY - thumbR*0.3, thumbR*0.05, thumbX, thumbY, thumbR);
-  thumbGrad.addColorStop(0, 'rgba(255,255,255,0.65)');
-  thumbGrad.addColorStop(0.6, 'rgba(255,255,255,0.35)');
-  thumbGrad.addColorStop(1, 'rgba(255,255,255,0.1)');
-  ctx.fillStyle = thumbGrad;
+  // Thumb body — flat fill on mobile, gradient on desktop
+  if (_isMobile) {
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  } else {
+    var thumbGrad = ctx.createRadialGradient(thumbX - thumbR*0.2, thumbY - thumbR*0.3, thumbR*0.05, thumbX, thumbY, thumbR);
+    thumbGrad.addColorStop(0, 'rgba(255,255,255,0.65)');
+    thumbGrad.addColorStop(0.6, 'rgba(255,255,255,0.35)');
+    thumbGrad.addColorStop(1, 'rgba(255,255,255,0.1)');
+    ctx.fillStyle = thumbGrad;
+  }
   ctx.beginPath();
   ctx.arc(thumbX, thumbY, thumbR, 0, Math.PI * 2);
   ctx.fill();
@@ -5152,47 +6192,62 @@ function drawJoystick() {
   }
 }
 
+var _renderTime = 0;
 function render() {
+  _renderTime = Date.now();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Cartoon sky gradient
-  const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  skyGrad.addColorStop(0, '#87CEEB');
-  skyGrad.addColorStop(0.5, '#b8e4f0');
-  skyGrad.addColorStop(1, '#e8f4e8');
-  ctx.fillStyle = skyGrad;
+  // Sky + clouds: draw at full resolution (fills entire screen)
+  if (!_skyGrad || _skyGradW !== canvas.width || _skyGradH !== canvas.height) {
+    _skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    _skyGrad.addColorStop(0, currentTheme.skyTop);
+    _skyGrad.addColorStop(0.5, currentTheme.skyMid);
+    _skyGrad.addColorStop(1, currentTheme.skyBot);
+    _skyGradW = canvas.width;
+    _skyGradH = canvas.height;
+  }
+  ctx.fillStyle = _skyGrad;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Fluffy clouds
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  const cloudPositions = [[0.15,0.08],[0.45,0.05],[0.75,0.1],[0.3,0.15],[0.6,0.12]];
+  ctx.fillStyle = currentTheme.cloudColor;
+  const cloudPositions = [[0.15,0.08],[0.45,0.05],[0.75,0.1]];
   cloudPositions.forEach(([cx,cy]) => {
     const bx = canvas.width*cx + Math.sin(_waveTime*0.3 + cx*10)*20;
     const by = canvas.height*cy;
-    for (let i = 0; i < 4; i++) {
-      ctx.beginPath();
-      ctx.arc(bx + i*25, by + (i%2)*10, 22+(i*3), 0, Math.PI*2);
-      ctx.fill();
-    }
+    ctx.beginPath();
+    ctx.arc(bx, by, 28, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(bx + 30, by + 6, 24, 0, Math.PI*2);
+    ctx.fill();
   });
 
   try { drawWorld(); } catch(e) { console.error('drawWorld:', e); }
-  try { drawChristmasTree(); } catch(e) { console.error('drawChristmasTree:', e); }
+  try { drawChristmasTree(); } catch(e) {}
   try { drawWolf(); } catch(e) { console.error('drawWolf:', e); }
   try { drawPlayer(); } catch(e) { console.error('drawPlayer:', e); }
+  try { drawPet(); } catch(e) { console.error('drawPet:', e); }
   try { creatures.forEach(c => drawCreature(c)); } catch(e) { console.error('drawCreature:', e); }
   try { drawParticles(); } catch(e) { console.error('drawParticles:', e); }
+
   try { drawMinimap(); } catch(e) { console.error('drawMinimap:', e); }
   try { drawJoystick(); } catch(e) { console.error('drawJoystick:', e); }
 
-  // Low stamina red vignette
-  if (playerStamina < 20 && !gameOver && !gameWin) {
-    const alpha = 0.25 + 0.15 * Math.sin(Date.now() / 300);
-    const grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, canvas.width*0.35, canvas.width/2, canvas.height/2, canvas.width*0.75);
-    grad.addColorStop(0, 'rgba(255,0,0,0)');
-    grad.addColorStop(1, 'rgba(200,0,0,' + alpha + ')');
-    ctx.fillStyle = grad;
+  // Low stamina red vignette — skip on mobile to save GPU fill rate
+  if (!_isMobile && playerStamina < 20 && !gameOver && !gameWin) {
+    const alpha = 0.25 + 0.15 * Math.sin(_renderTime / 300);
+    if (!_vigGrad || _vigW !== canvas.width || _vigH !== canvas.height) {
+      _vigGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, canvas.width*0.35, canvas.width/2, canvas.height/2, canvas.width*0.75);
+      _vigGrad.addColorStop(0, 'rgba(255,0,0,0)');
+      _vigGrad.addColorStop(1, 'rgba(200,0,0,1)');
+      _vigW = canvas.width;
+      _vigH = canvas.height;
+    }
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = _vigGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
   }
 
   // Grace period countdown overlay
@@ -5210,7 +6265,117 @@ function render() {
   }
 }
 
+var _frameParity = 0;
+
+function togglePause() {
+  if (gameOver || gameWin) return;
+  gamePaused = !gamePaused;
+  var overlay = document.getElementById('pause-overlay');
+  var btn = document.getElementById('pause-btn');
+  if (gamePaused) {
+    overlay.classList.add('show');
+    btn.textContent = '▶️';
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+  } else {
+    overlay.classList.remove('show');
+    btn.textContent = '⏸️';
+    lastTime = 0; // reset dt accumulator
+  }
+}
+
+// Preload scream sound
+// Pre-create scream audio at page load
+var _screamAudio = null;
+var _screamRestoreTimer = null;
+(function() {
+  try {
+    _screamAudio = new Audio('666.m4a');
+    _screamAudio.volume = 1.0;
+    _screamAudio.preload = 'auto';
+    _screamAudio.load();
+  } catch(e) {}
+})();
+
+var _screamBuffer = null;
+
+function playScreamSound() {
+  // Pause BGM so scream is clearly heard
+  var _bgmWasPlaying = false;
+  if (bgMusic.audio && bgMusic.playing && !bgMusic.audio.paused) {
+    bgMusic.audio.pause();
+    _bgmWasPlaying = true;
+  }
+  // Helper: resume BGM
+  var _resume = function() {
+    if (_bgmWasPlaying && bgMusic.audio && bgMusic.playing && bgMusic.audio.paused) {
+      bgMusic.audio.play().catch(function(){});
+    }
+  };
+  // Try AudioContext playback first (most reliable on mobile)
+  var ac = getAC();
+  if (ac) {
+    if (_screamBuffer) {
+      // Already decoded — play from 1/3 point to skip the quiet intro
+      var offset = _screamBuffer.duration / 3;
+      var src = ac.createBufferSource();
+      var g = ac.createGain();
+      src.buffer = _screamBuffer;
+      g.gain.value = 2.0;
+      src.connect(g); g.connect(ac.destination);
+      src.start(0, offset);
+      src.onended = _resume;
+    } else {
+      // Decode now and play
+      fetch('666.m4a').then(function(r) { return r.arrayBuffer(); }).then(function(buf) {
+        return ac.decodeAudioData(buf);
+      }).then(function(decoded) {
+        _screamBuffer = decoded;
+        var offset = _screamBuffer.duration / 3;
+        var src = ac.createBufferSource();
+        var g = ac.createGain();
+        src.buffer = _screamBuffer;
+        g.gain.value = 2.0;
+        src.connect(g); g.connect(ac.destination);
+        src.start(0, offset);
+        src.onended = _resume;
+      }).catch(function() {
+        // Fallback to HTML Audio
+        _playHtmlAudio();
+      });
+    }
+  } else {
+    _playHtmlAudio();
+  }
+  function _playHtmlAudio() {
+    try {
+      if (_screamAudio) {
+        _screamAudio.volume = 1.0;
+        // Skip first 1/3 of the audio (quiet intro)
+        var dur = _screamAudio.duration;
+        _screamAudio.currentTime = (dur && dur > 0) ? dur / 3 : 0;
+        _screamAudio.play().catch(function(){});
+        _screamAudio.onended = _resume;
+      }
+    } catch(e) {}
+  }
+  // Resume BGM after 4s timeout fallback
+  clearTimeout(_screamRestoreTimer);
+  _screamRestoreTimer = setTimeout(_resume, 4000);
+}
+
 function gameLoop(timestamp) {
+  // ── Mobile: skip every other frame → 30fps to save GPU/CPU ──
+  if (_isMobile) {
+    _frameParity = (_frameParity + 1) & 1;
+    if (_frameParity === 0) {
+      requestAnimationFrame(gameLoop);
+      return;
+    }
+  }
+  if (gamePaused) {
+    requestAnimationFrame(gameLoop);
+    return;
+  }
   try {
     if (lastTime === 0) lastTime = timestamp;
     let dt = (timestamp - lastTime) / 1000;
@@ -5333,11 +6498,155 @@ _princessImg.onload = function() {
 };
 _princessImg.src = '111.jpg';
 
+// Christmas tree image (center landmark)
+const _treeImg = new Image();
+_treeImg.src = '77.webp';
+
+
+// ==================== MAP THEME SYSTEM ====================
+let currentThemeIdx = 0;
+const MAP_THEMES = [
+  { // 0: 默认原野
+    name: 'default',
+    skyTop: '#87CEEB', skyMid: '#b8e4f0', skyBot: '#e8f4e8',
+    cloudColor: 'rgba(255,255,255,0.7)',
+    wallTint: '', // no tint
+  },
+  { // 1: 糖果王国
+    name: 'candy',
+    skyTop: '#ff9a9e', skyMid: '#fad0c4', skyBot: '#fbc2eb',
+    cloudColor: 'rgba(255,220,240,0.8)',
+    wallTint: 'rgba(255,182,193,0.12)',
+  },
+  { // 2: 星际太空
+    name: 'space',
+    skyTop: '#0a0a2e', skyMid: '#1a1a4e', skyBot: '#2a1a4e',
+    cloudColor: 'rgba(180,180,255,0.35)',
+    wallTint: 'rgba(100,100,255,0.15)',
+  },
+  { // 3: 魔法森林
+    name: 'forest',
+    skyTop: '#1a3a2a', skyMid: '#2a4a3a', skyBot: '#3a5a4a',
+    cloudColor: 'rgba(200,255,200,0.5)',
+    wallTint: 'rgba(100,200,100,0.1)',
+  },
+];
+let currentTheme = MAP_THEMES[0];
+
+function applyTheme(idx) {
+  idx = idx % MAP_THEMES.length;
+  currentThemeIdx = idx;
+  currentTheme = MAP_THEMES[idx];
+  _skyGrad = null; // force sky gradient rebuild
+  _vigGrad = null;
+  try { localStorage.setItem('wordcraft_theme_idx', idx.toString()); } catch(e) {}
+}
+
+function cycleTheme() {
+  applyTheme((currentThemeIdx + 1) % MAP_THEMES.length);
+}
+
+// ==================== INTRO DIALOG ====================
+let introActive = false;
+let introTimer = 0;
+let introCountdown = 10;
+
+// ── Player account ──
+let playerName = '';
+
+function loadPlayerName() {
+  try {
+    var saved = localStorage.getItem('wordcraft_player_name');
+    if (saved) { playerName = saved; return true; }
+  } catch(e) {}
+  return false;
+}
+
+function savePlayerName(name) {
+  playerName = name;
+  try { localStorage.setItem('wordcraft_player_name', name); } catch(e) {}
+  try { localStorage.setItem('wordcraft_player_pass', name); } catch(e) {} // password = name
+}
+
+function showNameOverlay() {
+  document.getElementById('name-overlay').classList.add('show');
+  setTimeout(function() {
+    document.getElementById('name-input').focus();
+  }, 500);
+}
+
+function confirmName() {
+  var input = document.getElementById('name-input');
+  var name = input.value.trim();
+  if (!name) {
+    input.style.borderColor = '#f44336';
+    input.style.animation = 'shake 0.5s';
+    setTimeout(function() { input.style.animation = ''; }, 500);
+    return;
+  }
+  if (name.length < 2) {
+    input.style.borderColor = '#f44336';
+    showToast('角色名至少2个字符哦~');
+    return;
+  }
+  savePlayerName(name);
+  document.getElementById('name-overlay').classList.remove('show');
+  // Auto-enter wolf intro dialog
+  setTimeout(function() { showIntro(); }, 400);
+}
+
+// Enter key submits name
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('name-overlay').classList.contains('show')) {
+    e.preventDefault();
+    confirmName();
+  }
+});
+
+function showIntro() {
+  introActive = true;
+  introCountdown = 10;
+  // Personalize welcome message
+  if (playerName) {
+    document.getElementById('intro-msg').innerHTML =
+      '<b style="color:#ffd54f">' + playerName + '</b>，欢迎来到狼人英语时间，小朋友！<br>找到地图上的 <b style="color:#ffd54f">20个英语单词</b> 并成功学习，<br>否则我将吃掉你，啊哈哈哈！~';
+  }
+  document.getElementById('intro-overlay').classList.add('show');
+  document.getElementById('intro-countdown').textContent = introCountdown;
+  // Countdown tick
+  window._introInterval = setInterval(function() {
+    introCountdown--;
+    document.getElementById('intro-countdown').textContent = introCountdown;
+    if (introCountdown <= 0) {
+      clearInterval(window._introInterval);
+      closeIntro();
+    }
+  }, 1000);
+}
+
+function skipIntro() {
+  clearInterval(window._introInterval);
+  closeIntro();
+}
+
+function closeIntro() {
+  clearInterval(window._introInterval);
+  introActive = false;
+  document.getElementById('intro-overlay').classList.remove('show');
+  resumeBgMusic();
+  showToast('🐺 5秒后狼人开始追你！快跑！');
+}
 
 function init() {
   // Pre-acquire mic stream at startup so the first SpeechRecognition call
   // won't trigger an additional permission prompt
   _ensureMicStream();
+
+  // Restore map theme
+  try {
+    var savedTheme = parseInt(localStorage.getItem('wordcraft_theme_idx') || '0');
+    applyTheme(savedTheme);
+  } catch(e) { applyTheme(0); }
 
   // Warn if opened via file:// — mic permissions work reliably only on http(s)
   if (location.protocol === 'file:' && !sessionStorage.getItem('_fileWarned')) {
@@ -5348,9 +6657,9 @@ function init() {
   }
 
   // Load saved layout or default to zones
-  let savedLayout = 'zones';
+  var savedLayout = 'zones';
   try {
-    const idx = parseInt(localStorage.getItem('wordcraft_layout_idx') || '0');
+    var idx = parseInt(localStorage.getItem('wordcraft_layout_idx') || '0');
     if (idx >= 0 && idx < MAP_LAYOUTS.length) savedLayout = MAP_LAYOUTS[idx];
   } catch(e) {}
   currentLayout = savedLayout;
@@ -5362,29 +6671,39 @@ function init() {
   }
   spawnCreatures();
   // Restore daily progress from saved creatures
-  for (const c of creatures) {
+  for (var ci = 0; ci < creatures.length; ci++) {
+    var c = creatures[ci];
     if (gameState.collected[c.en]) {
       c.collected = true;
       if (dailyWords.includes(c.en)) c.dailyDone = true;
     }
   }
-  dailyProgress = dailyWords.filter(w => {
-    const c = creatures.find(c => c.en === w);
+  dailyProgress = dailyWords.filter(function(w) {
+    var c = creatures.find(function(cc) { return cc.en === w; });
     return c && c.dailyDone;
   }).length;
   // Spawn player right of Christmas tree
   player.x = WORLD_W * TILE / 2 + 5 * TILE;
   player.y = WORLD_H * TILE / 2;
+  pet.x = player.x - TILE;
+  pet.y = player.y;
+  pet.trail = [];
+  pet.celebrateTimer = 0;
 
   // Spawn wolf near center
   spawnWolf();
-  _graceTimer = 5; // 5-second grace period before wolf starts chasing
+  _graceTimer = 5; // Will be extended by intro countdown
   camera.x = player.x - canvas.width / 2;
   camera.y = player.y - canvas.height / 2;
   updateHUD();
-  foodSpawnTimer = 8; // first food spawns after ~8 seconds
-  showToast('🐺 5秒后狼人开始追你！快跑！');
-  // Background music starts on first user click/keypress
+  foodSpawnTimer = 8;
+
+  // Show name creation for first-time players, otherwise intro
+  if (!loadPlayerName()) {
+    showNameOverlay();
+  } else {
+    showIntro();
+  }
   requestAnimationFrame(gameLoop);
 }
 
@@ -5395,7 +6714,7 @@ setInterval(() => { saveGame(); }, 10000);
 init();
 
 console.log('🎮 WordCraft · 单词我的世界');
-console.log('WASD/方向键 移动 | 空格 互动 | B 图鉴');
+console.log('WASD/方向键 移动 | 空格 互动');
 console.log('7个生态区域等你探索！');
 </script>
 </body>
