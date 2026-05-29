@@ -4112,7 +4112,7 @@ async function _recordAndRecognize(statusElId, durationMs) {
     }
   }
 
-  if (statusEl) statusEl.textContent = '⏳ 识别中...';
+  if (statusEl) statusEl.textContent = '⏳ 识别中...(' + Math.round(speechBase64.length/1024) + 'KB)';
   var resp = await fetch('https://vop.baidu.com/server_api', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -4128,7 +4128,10 @@ async function _recordAndRecognize(statusElId, durationMs) {
     if (statusEl) statusEl.textContent = '✅ 识别成功';
     return [data.result[0].toLowerCase().trim()];
   }
-  if (statusEl) statusEl.textContent = data.err_msg ? '识别失败: ' + data.err_msg : '识别失败，请再试一次';
+  // Show detailed Baidu error — KEEP visible
+  var errDetail = 'Baidu err=' + data.err_no;
+  if (data.err_msg) errDetail += ': ' + data.err_msg;
+  if (statusEl) statusEl.textContent = errDetail;
   return [];
 }
 
