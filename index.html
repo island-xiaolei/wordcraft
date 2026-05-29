@@ -3797,59 +3797,24 @@ async function _baiduTTS(text) {
   }
 }
 
-// Unified English speech: speechSynthesis first, Baidu TTS as fallback
+// Unified English speech
+// Android: speechSynthesis is unreliable — always use Baidu TTS via AudioContext
+// Desktop/iOS: use browser speechSynthesis
 function _speakEnglish(text, onend) {
-  if ('speechSynthesis' in window) {
-    var voices = speechSynthesis.getVoices();
-    var hasEnglish = voices.some(function(v) { return v.lang.indexOf('en') === 0; });
-
-    if (hasEnglish) {
-      // English voice available — use it directly
-      speechSynthesis.cancel();
-      var u = new SpeechSynthesisUtterance(text);
-      u.lang = 'en-US'; u.rate = 0.75; u.pitch = 1;
-      if (onend) u.onend = onend;
-      speechSynthesis.speak(u);
-      return;
-    }
-
-    if (_isAndroid) {
-      // Android: voices may load asynchronously — wait briefly then try
-      var fired = false;
-      var onVoices = function() {
-        if (fired) return;
-        fired = true;
-        speechSynthesis.cancel();
-        var u2 = new SpeechSynthesisUtterance(text);
-        u2.lang = 'en-US'; u2.rate = 0.75; u2.pitch = 1;
-        if (onend) u2.onend = onend;
-        speechSynthesis.speak(u2);
-      };
-      speechSynthesis.addEventListener('voiceschanged', onVoices, { once: true });
-      var fallbackTimer = setTimeout(function() {
-        if (fired) return;
-        fired = true;
-        speechSynthesis.removeEventListener('voiceschanged', onVoices);
-        _tryBaiduTTSFallback(text, onend);
-      }, 1500);
-      // Also attempt immediately — many browsers work fine without knowing voices
-      speechSynthesis.cancel();
-      var u3 = new SpeechSynthesisUtterance(text);
-      u3.lang = 'en-US'; u3.rate = 0.75; u3.pitch = 1;
-      if (onend) { u3.onend = function() { if (!fired) { fired = true; clearTimeout(fallbackTimer); } if (onend) onend(); }; }
-      speechSynthesis.speak(u3);
-      return;
-    }
-
-    // Desktop/iOS without detected voices — speak anyway (always works)
-    speechSynthesis.cancel();
-    var u4 = new SpeechSynthesisUtterance(text);
-    u4.lang = 'en-US'; u4.rate = 0.75; u4.pitch = 1;
-    if (onend) u4.onend = onend;
-    speechSynthesis.speak(u4);
+  if (_isAndroid) {
+    _baiduTTS(text).then(function(ok) {
+      if (onend) onend();
+      if (!ok) console.warn('[TTS] Baidu TTS failed, text:', text);
+    });
     return;
   }
-  _tryBaiduTTSFallback(text, onend);
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = 0.75; u.pitch = 1;
+    if (onend) u.onend = onend;
+    speechSynthesis.speak(u);
+  }
 }
 
 function _tryBaiduTTSFallback(text, onend) {
