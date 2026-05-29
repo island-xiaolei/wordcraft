@@ -3547,7 +3547,10 @@ let _lastRecording = null;
 let _lastAudioBlob = null;
 
 function _startAudioRecording() {
-  if (!_micStream || !_micStream.active) return;
+  if (!_micStream || !_micStream.active || !_micStream.getAudioTracks().length) {
+    console.warn('[Recording] mic stream not ready');
+    return false;
+  }
   try {
     _audioChunks = [];
     _mediaRecorder = new MediaRecorder(_micStream, { mimeType: 'audio/webm' });
@@ -3555,6 +3558,7 @@ function _startAudioRecording() {
       if (e.data.size > 0) _audioChunks.push(e.data);
     };
     _mediaRecorder.start();
+    return true;
   } catch(e) {
     try {
       _mediaRecorder = new MediaRecorder(_micStream);
@@ -3562,9 +3566,23 @@ function _startAudioRecording() {
         if (e.data.size > 0) _audioChunks.push(e.data);
       };
       _mediaRecorder.start();
+      return true;
     } catch(e2) {
       console.warn('MediaRecorder not supported:', e2.message);
+      return false;
     }
+  }
+}
+
+// Ensure mic is ready, then run callback
+function _withMic(callback) {
+  if (_micStream && _micStream.active && _micStream.getAudioTracks().length) {
+    callback();
+  } else {
+    _ensureMicStream().then(function(ok) {
+      if (ok) callback();
+      else console.warn('[Mic] failed to acquire');
+    }).catch(function() { console.warn('[Mic] permission denied'); });
   }
 }
 
@@ -3722,6 +3740,26 @@ async function _recordAndRecognize(statusElId, durationMs) {
 
 // ── Baidu TTS: speak English text via Baidu on Android (no en-US voices) ──
 var _isAndroid = /android/i.test(navigator.userAgent);
+var _sharedAudioCtx = null;
+
+function _getAudioCtx() {
+  if (!_sharedAudioCtx) {
+    try {
+      _sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) {
+      console.warn('[AudioCtx] failed:', e.message);
+    }
+  }
+  // Resume if suspended (browsers suspend until user gesture)
+  if (_sharedAudioCtx && _sharedAudioCtx.state === 'suspended') {
+    _sharedAudioCtx.resume().catch(function(){});
+  }
+  return _sharedAudioCtx;
+}
+
+// Pre-warm AudioContext on first user interaction across the page
+document.addEventListener('click', function() { _getAudioCtx(); }, { once: true });
+document.addEventListener('touchstart', function() { _getAudioCtx(); }, { once: true });
 
 async function _baiduTTS(text) {
   var token = await _getBaiduToken();
@@ -3738,10 +3776,21 @@ async function _baiduTTS(text) {
       return false;
     }
     var blob = await resp.blob();
-    var audioUrl = URL.createObjectURL(blob);
-    var audio = new Audio(audioUrl);
-    audio.onended = function() { URL.revokeObjectURL(audioUrl); };
-    await audio.play();
+    var ctx = _getAudioCtx();
+    if (!ctx) {
+      // Last resort: try Audio element
+      var audioUrl2 = URL.createObjectURL(blob);
+      var audio2 = new Audio(audioUrl2);
+      audio2.onended = function() { URL.revokeObjectURL(audioUrl2); };
+      try { await audio2.play(); return true; }
+      catch(e3) { console.warn('[BaiduTTS] audio.play blocked:', e3.message); return false; }
+    }
+    var arrayBuf = await blob.arrayBuffer();
+    var audioBuf = await ctx.decodeAudioData(arrayBuf);
+    var source = ctx.createBufferSource();
+    source.buffer = audioBuf;
+    source.connect(ctx.destination);
+    source.start(0);
     return true;
   } catch(e) {
     console.warn('[BaiduTTS] failed:', e.message);
@@ -4194,37 +4243,45 @@ function startRecognition() {
     recognitionActive = true;
     document.getElementById('quiz-mic').classList.add('listening');
     document.getElementById('quiz-mic-status').textContent = '🎤 正在听你说...';
-    _startAudioRecording();
-    setTimeout(function() {
-      _stopAudioRecording().then(function(blob) {
-        if (!blob) {
-          recognitionActive = false;
-          document.getElementById('quiz-mic').classList.remove('listening');
-          document.getElementById('quiz-mic-status').textContent = '录音失败，请重试';
-          document.getElementById('quiz-retry-btn').style.display = 'inline-block';
-          return;
-        }
-        document.getElementById('quiz-mic-status').textContent = '⏳ 识别中...';
-        _callBaiduASR(blob).then(function(heard) {
-          recognitionActive = false;
-          document.getElementById('quiz-mic').classList.remove('listening');
-          if (heard.length > 0) {
-            handleSpeechResult(heard);
-          } else {
-            // Baidu ASR failed → text input fallback
-            quizPhase = 'dictation';
-            document.getElementById('quiz-mic').style.display = 'none';
-            document.getElementById('quiz-mic-status').textContent = '语音服务不可用，请用打字模式 👇';
-            document.getElementById('dictation-area').style.display = 'block';
-            document.getElementById('dictation-input').value = '';
-            document.getElementById('dictation-input').focus();
-            document.getElementById('speak-actions').style.display = 'none';
-            document.getElementById('quiz-retry-btn').style.display = 'none';
-            document.getElementById('quiz-skip-btn').style.display = 'inline-block';
+    _withMic(function() {
+      if (!_startAudioRecording()) {
+        recognitionActive = false;
+        document.getElementById('quiz-mic').classList.remove('listening');
+        document.getElementById('quiz-mic-status').textContent = '麦克风未就绪，请重试';
+        document.getElementById('quiz-retry-btn').style.display = 'inline-block';
+        return;
+      }
+      setTimeout(function() {
+        _stopAudioRecording().then(function(blob) {
+          if (!blob) {
+            recognitionActive = false;
+            document.getElementById('quiz-mic').classList.remove('listening');
+            document.getElementById('quiz-mic-status').textContent = '录音失败，请重试';
+            document.getElementById('quiz-retry-btn').style.display = 'inline-block';
+            return;
           }
+          document.getElementById('quiz-mic-status').textContent = '⏳ 识别中...';
+          _callBaiduASR(blob).then(function(heard) {
+            recognitionActive = false;
+            document.getElementById('quiz-mic').classList.remove('listening');
+            if (heard.length > 0) {
+              handleSpeechResult(heard);
+            } else {
+              // Baidu ASR failed → text input fallback
+              quizPhase = 'dictation';
+              document.getElementById('quiz-mic').style.display = 'none';
+              document.getElementById('quiz-mic-status').textContent = '语音服务不可用，请用打字模式 👇';
+              document.getElementById('dictation-area').style.display = 'block';
+              document.getElementById('dictation-input').value = '';
+              document.getElementById('dictation-input').focus();
+              document.getElementById('speak-actions').style.display = 'none';
+              document.getElementById('quiz-retry-btn').style.display = 'none';
+              document.getElementById('quiz-skip-btn').style.display = 'inline-block';
+            }
         });
       });
     }, 2500);
+    });
     return;
   }
 
