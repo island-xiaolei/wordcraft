@@ -3798,13 +3798,23 @@ async function _baiduTTS(text) {
 }
 
 // Unified English speech
-// Android: speechSynthesis is unreliable — always use Baidu TTS via AudioContext
+// Android: prefer Baidu TTS (AudioContext), fall back to speechSynthesis
 // Desktop/iOS: use browser speechSynthesis
 function _speakEnglish(text, onend) {
   if (_isAndroid) {
     _baiduTTS(text).then(function(ok) {
-      if (onend) onend();
-      if (!ok) console.warn('[TTS] Baidu TTS failed, text:', text);
+      if (ok) { if (onend) onend(); return; }
+      // Baidu TTS failed — try speechSynthesis as last resort
+      console.warn('[TTS] Baidu TTS failed, trying speechSynthesis...');
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US'; u.rate = 0.75; u.pitch = 1;
+        if (onend) u.onend = onend;
+        speechSynthesis.speak(u);
+      } else if (onend) {
+        onend();
+      }
     });
     return;
   }
