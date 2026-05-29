@@ -494,7 +494,6 @@ canvas{display:block;position:absolute;top:0;left:0}
     <div class="quiz-label">📖 听发音</div>
     <div class="quiz-emoji" id="quiz-emoji">🐱</div>
     <div class="quiz-word-en" id="quiz-word-en">cat</div>
-    <div class="quiz-seg-letters" id="quiz-phonetic-seg"></div>
     <div class="quiz-phonetic" id="quiz-phonetic">/kæt/</div>
     <div class="quiz-word-cn" id="quiz-word-cn">猫</div>
     <button class="quiz-speak" onclick="playQuizWord()">🔊 点击听正确发音 👈</button>
@@ -4138,7 +4137,6 @@ function openQuiz(creature) {
   var rawPh = getPhonetic(creature.en);
   var ph = getSegmentedPhonetic(creature.en) || rawPh;
   document.getElementById('quiz-phonetic').textContent = ph || '⏳ 加载音标中...';
-  document.getElementById('quiz-phonetic-seg').textContent = creature.en.split('').join('  ');
   document.getElementById('quiz-word-cn').textContent = creature.cn;
   document.getElementById('quiz-overlay').classList.add('show');
   // Fetch missing phonetic from API in background
