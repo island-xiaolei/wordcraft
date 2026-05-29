@@ -3911,7 +3911,6 @@ function _startPCMRecording(ctx, durationMs, resolve, reject) {
       for (var i = 0; i < bytes.byteLength; i++) b64 += String.fromCharCode(bytes[i]);
       resolve(btoa(b64));
     }, durationMs);
-  });
 }
 
 function _stopAudioRecording() {
