@@ -4044,22 +4044,38 @@ async function _baiduTTS(text) {
   }
 })();
 
+// Android audio unlock: play silent buffer to activate audio channel
+// On many Android devices, speechSynthesis is silent until audio context is "unlocked"
+function _unlockAndroidAudio() {
+  var ctx = _getAudioCtx();
+  if (!ctx) return;
+  try {
+    var buf = ctx.createBuffer(1, 1, 22050);
+    var src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    src.start(0);
+  } catch(e) {}
+}
+
 function _speakEnglish(text, onend) {
   if (!('speechSynthesis' in window)) {
     if (onend) onend();
     return;
   }
-  // Android fix: resume if paused (Chrome bug)
-  if (speechSynthesis.paused) {
-    speechSynthesis.resume();
-  }
+  // Unlock Android audio channel
+  _unlockAndroidAudio();
+  // Fix paused state (Chrome Android bug)
+  if (speechSynthesis.paused) speechSynthesis.resume();
   speechSynthesis.cancel();
+
   var u = new SpeechSynthesisUtterance(text);
   u.lang = 'en-US';
   u.rate = 0.75;
   u.pitch = 1.0;
   u.volume = 1.0;
-  // Pick an English voice if available
+
+  // Pick English voice
   var voices = speechSynthesis.getVoices();
   for (var i = 0; i < voices.length; i++) {
     if (voices[i].lang.indexOf('en') === 0) {
@@ -4067,7 +4083,26 @@ function _speakEnglish(text, onend) {
       break;
     }
   }
+
   if (onend) u.onend = onend;
+
+  // Android: detect if speech fails and retry once
+  var _ssStarted = false;
+  u.onstart = function() { _ssStarted = true; };
+  if (_isAndroid) {
+    setTimeout(function() {
+      if (!_ssStarted) {
+        speechSynthesis.cancel();
+        speechSynthesis.resume();
+        _unlockAndroidAudio();
+        var u2 = new SpeechSynthesisUtterance(text);
+        u2.lang = 'en-US'; u2.rate = 0.7; u2.pitch = 1.0; u2.volume = 1.0;
+        if (onend) u2.onend = onend;
+        speechSynthesis.speak(u2);
+      }
+    }, 800);
+  }
+
   speechSynthesis.speak(u);
 }
 
