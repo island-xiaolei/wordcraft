@@ -64,7 +64,9 @@ canvas{display:block;position:absolute;top:0;left:0}
 .quiz-speak:hover{background:linear-gradient(135deg,#ffb040,#ff7043);transform:scale(1.08);box-shadow:0 0 32px rgba(255,152,0,0.7),0 6px 20px rgba(255,87,34,0.4)}
 .quiz-speak:active{transform:scale(0.95)}
 @keyframes speakGlow{0%,100%{box-shadow:0 0 20px rgba(255,152,0,0.5),0 4px 12px rgba(255,87,34,0.3)}50%{box-shadow:0 0 36px rgba(255,152,0,0.8),0 6px 24px rgba(255,87,34,0.5)}}
-.quiz-phonetic{font-size:18px;color:#ffb74d;margin:4px 0;font-style:italic;letter-spacing:1px}
+.quiz-phonetic{font-size:22px;color:#ffb74d;margin:4px 0;letter-spacing:2px;font-weight:bold}
+.quiz-seg-letters{font-size:18px;color:#fff;letter-spacing:6px;margin:6px 0 2px;font-weight:bold}
+.quiz-seg-sounds{font-size:16px;color:#ffb74d;letter-spacing:3px;margin-bottom:6px}
 .quiz-word-en{font-size:32px;font-weight:bold;color:var(--gold);margin:8px 0;letter-spacing:2px}
 .quiz-word-cn{font-size:18px;color:var(--sub);margin-bottom:6px}
 .quiz-word-hidden{font-size:36px;font-weight:bold;color:rgba(255,255,255,0.2);margin:8px 0;letter-spacing:6px}
@@ -493,6 +495,8 @@ canvas{display:block;position:absolute;top:0;left:0}
     <div class="quiz-label">📖 听发音</div>
     <div class="quiz-emoji" id="quiz-emoji">🐱</div>
     <div class="quiz-word-en" id="quiz-word-en">cat</div>
+    <div class="quiz-seg-letters" id="quiz-phonetic-seg"></div>
+    <div class="quiz-seg-sounds" id="quiz-phonetic-seg-ipa"></div>
     <div class="quiz-phonetic" id="quiz-phonetic">/kæt/</div>
     <div class="quiz-word-cn" id="quiz-word-cn">猫</div>
     <button class="quiz-speak" onclick="playQuizWord()">🔊 点击听正确发音 👈</button>
@@ -512,6 +516,7 @@ canvas{display:block;position:absolute;top:0;left:0}
     <div class="quiz-emoji" id="speak-emoji">🐱</div>
     <div class="quiz-word-hidden">???</div>
     <div class="quiz-word-cn" id="speak-word-cn">猫</div>
+    <div class="quiz-phonetic" id="speak-phonetic" style="font-size:26px;color:#ffb74d;margin:4px 0;letter-spacing:2px"></div>
     <div class="quiz-mic" id="quiz-mic">🎤</div>
     <div class="quiz-mic-status" id="quiz-mic-status">请对着麦克风说出英文单词</div>
     <div class="quiz-speech-result" id="quiz-speech-result"></div>
@@ -3993,6 +3998,24 @@ function getPhonetic(word) {
   return _PHONETIC[w] || _PHONETIC[w.replace(/_/g,' ')] || '';
 }
 
+// Split IPA phonetic into readable syllable groups with · separators
+function getSegmentedPhonetic(word) {
+  var raw = getPhonetic(word);
+  if (!raw) return '';
+  var p = raw.replace(/^\//, '').replace(/\/$/,'');
+  // Split at stress marks + following consonant cluster + vowel
+  var parts = p.split(/(?=[ˈˌ])/);
+  // For each stress group, further split into syllables
+  var result = [];
+  for (var i = 0; i < parts.length; i++) {
+    var chunk = parts[i];
+    // Simple syllabification: split CVC-CV or CV-CVC patterns
+    var syls = chunk.replace(/([aeiouɑɔɛɪʊʌæɒəɜɝ][^aeiouɑɔɛɪʊʌæɒəɜɝˌˈ]*)(?=[^aeiouɑɔɛɪʊʌæɒəɜɝˌˈ]+[aeiouɑɔɛɪʊʌæɒəɜɝ])/g, '$1·');
+    result.push(syls);
+  }
+  return '/' + result.join('') + '/';
+}
+
 function openQuiz(creature) {
   if (quizActive) return;
   quizActive = true;
@@ -4002,7 +4025,10 @@ function openQuiz(creature) {
 
   document.getElementById('quiz-emoji').textContent = creature.emoji;
   document.getElementById('quiz-word-en').textContent = creature.en;
-  document.getElementById('quiz-phonetic').textContent = getPhonetic(creature.en);
+  var ph = getSegmentedPhonetic(creature.en) || getPhonetic(creature.en);
+  document.getElementById('quiz-phonetic').textContent = ph;
+  document.getElementById('quiz-phonetic-seg').textContent = creature.en.split('').join('  ');
+  document.getElementById('quiz-phonetic-seg-ipa').textContent = ph;
   document.getElementById('quiz-word-cn').textContent = creature.cn;
   document.getElementById('quiz-overlay').classList.add('show');
 
@@ -4080,6 +4106,8 @@ function startSpeakingTest() {
   document.getElementById('quiz-overlay').classList.remove('show');
   document.getElementById('speak-emoji').textContent = quizCreature.emoji;
   document.getElementById('speak-word-cn').textContent = quizCreature.cn;
+  var ph = getSegmentedPhonetic(quizCreature.en) || getPhonetic(quizCreature.en);
+  document.getElementById('speak-phonetic').textContent = ph;
   document.getElementById('quiz-speech-result').textContent = ''; document.getElementById('quiz-sentence').classList.remove('show');
   document.getElementById('quiz-speech-result').className = 'quiz-speech-result';
   document.getElementById('quiz-mic').className = 'quiz-mic';
@@ -4651,7 +4679,8 @@ function reviewWord(wordEn) {
   _reviewWord = entry;
   document.getElementById('wr-emoji').textContent = entry.emoji;
   document.getElementById('wr-en').textContent = entry.en;
-  document.getElementById('wr-phonetic').textContent = getPhonetic(entry.en);
+  var ph = getSegmentedPhonetic(entry.en) || getPhonetic(entry.en);
+  document.getElementById('wr-phonetic').textContent = ph;
   document.getElementById('wr-cn').textContent = entry.cn;
   document.getElementById('word-review-overlay').classList.add('show');
   // Auto-play pronunciation
