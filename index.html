@@ -3781,14 +3781,17 @@ let _audioChunks = [];
 let _lastRecording = null;
 let _lastAudioBlob = null;
 
+var _recordingFormat = '';
 function _startAudioRecording() {
   if (!_micStream || !_micStream.active || !_micStream.getAudioTracks().length) {
     console.warn('[Recording] mic stream not ready');
     return false;
   }
   _audioChunks = [];
-  // Try multiple MIME types for Android compatibility
-  var mimeTypes = ['audio/webm', 'audio/webm;codecs=opus', 'audio/mp4', ''];
+  _recordingFormat = '';
+  var mimeTypes = _isAndroid
+    ? ['audio/amr', 'audio/3gpp', 'audio/webm;codecs=opus', 'audio/webm', '']
+    : ['audio/webm', 'audio/webm;codecs=opus', ''];
   for (var mt = 0; mt < mimeTypes.length; mt++) {
     try {
       var opts = mimeTypes[mt] ? { mimeType: mimeTypes[mt] } : {};
@@ -3797,6 +3800,8 @@ function _startAudioRecording() {
         if (e.data.size > 0) _audioChunks.push(e.data);
       };
       _mediaRecorder.start();
+      _recordingFormat = mimeTypes[mt] || 'default';
+      console.log('[Recording] using format:', _recordingFormat);
       return true;
     } catch(e) {
       if (mt === mimeTypes.length - 1) {
@@ -3925,17 +3930,35 @@ async function _callBaiduASR(audioBlob) {
   try {
     var token = await _getBaiduToken();
     if (!token) { console.warn('[BaiduASR] no token'); return []; }
-    var speechBase64 = await _webmToWavBase64(audioBlob);
-    if (!speechBase64) {
-      // WAV conversion failed — skip, will show error in caller
-      console.warn('[BaiduASR] WAV conversion failed');
+
+    var asrFormat = 'wav';
+    var rate = 16000;
+    var speechBase64 = '';
+
+    // AMR/3GPP: Baidu accepts natively, no conversion needed
+    if (_recordingFormat.indexOf('amr') >= 0 || _recordingFormat.indexOf('3gpp') >= 0) {
+      asrFormat = 'amr';
+      rate = 8000;
+      var buf = await audioBlob.arrayBuffer();
+      var bytes = new Uint8Array(buf);
+      var raw = '';
+      for (var i = 0; i < bytes.byteLength; i++) raw += String.fromCharCode(bytes[i]);
+      speechBase64 = btoa(raw);
+    } else {
+      // WebM/mp4: convert to WAV
+      speechBase64 = await _webmToWavBase64(audioBlob);
+      if (!speechBase64) {
+        console.warn('[BaiduASR] WAV conversion failed');
+        return [];
+      }
     }
+
     var resp = await fetch('https://vop.baidu.com/server_api', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        format: 'wav',
-        rate: 16000,
+        format: asrFormat,
+        rate: rate,
         channel: 1,
         cuid: _getBaiduCuid(),
         token: token,
