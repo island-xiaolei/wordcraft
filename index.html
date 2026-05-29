@@ -3870,10 +3870,12 @@ async function _getBaiduToken() {
 
 async function _webmToWavBase64(blob) {
   try {
-    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    var audioCtx = _getAudioCtx(); // reuse shared context, more reliable on mobile
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     var arrayBuffer = await blob.arrayBuffer();
     var audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-    audioCtx.close();
+    // Don't close if it's the shared context
+    if (audioCtx !== _sharedAudioCtx) { try { audioCtx.close(); } catch(e) {} }
 
     var sampleRate = 16000;
     var offlineCtx = new OfflineAudioContext(1, Math.ceil(audioBuffer.duration * sampleRate), sampleRate);
