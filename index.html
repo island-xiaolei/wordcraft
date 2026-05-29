@@ -3825,6 +3825,85 @@ function _withMic(callback) {
   }
 }
 
+// ── PCM direct recording: captures raw audio via ScriptProcessor ──
+// More reliable than MediaRecorder on Android
+function _recordPCM(durationMs) {
+  return new Promise(function(resolve, reject) {
+    if (!_micStream || !_micStream.active) {
+      reject(new Error('no mic stream'));
+      return;
+    }
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var source = ctx.createMediaStreamSource(_micStream);
+    var sampleRate = 16000;
+    // Use offline context for proper resampling
+    var pcmChunks = [];
+    var scriptNode;
+    try {
+      scriptNode = ctx.createScriptProcessor(4096, 1, 1);
+    } catch(e) {
+      try { ctx.close(); } catch(ex) {}
+      reject(new Error('ScriptProcessor not supported'));
+      return;
+    }
+    scriptNode.onaudioprocess = function(e) {
+      pcmChunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+    };
+    source.connect(scriptNode);
+    scriptNode.connect(ctx.destination);
+
+    setTimeout(function() {
+      scriptNode.disconnect();
+      source.disconnect();
+      try { ctx.close(); } catch(e) {}
+
+      // Combine all chunks into single Float32Array
+      var totalLen = 0;
+      for (var i = 0; i < pcmChunks.length; i++) totalLen += pcmChunks[i].length;
+      if (totalLen === 0) { reject(new Error('no audio data')); return; }
+      var combined = new Float32Array(totalLen);
+      var offset = 0;
+      for (var i = 0; i < pcmChunks.length; i++) {
+        combined.set(pcmChunks[i], offset);
+        offset += pcmChunks[i].length;
+      }
+
+      // Simple resample to target rate if needed
+      var actualRate = ctx.sampleRate;
+      if (Math.abs(actualRate - sampleRate) > 100) {
+        var ratio = actualRate / sampleRate;
+        var resampledLen = Math.floor(combined.length / ratio);
+        var resampled = new Float32Array(resampledLen);
+        for (var r = 0; r < resampledLen; r++) {
+          var srcIdx = Math.floor(r * ratio);
+          resampled[r] = combined[Math.min(srcIdx, combined.length - 1)];
+        }
+        combined = resampled;
+      }
+
+      // Encode to WAV
+      var wavBuf = new ArrayBuffer(44 + combined.length * 2);
+      var view = new DataView(wavBuf);
+      function ws(s, o) { for (var i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); }
+      ws('RIFF', 0); view.setUint32(4, 36 + combined.length * 2, true); ws('WAVE', 8);
+      ws('fmt ', 12); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true); view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+      ws('data', 36); view.setUint32(40, combined.length * 2, true);
+      for (var i = 0; i < combined.length; i++) {
+        var s = Math.max(-1, Math.min(1, combined[i]));
+        view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      }
+
+      // Base64 encode
+      var bytes = new Uint8Array(wavBuf);
+      var b64 = '';
+      for (var i = 0; i < bytes.byteLength; i++) b64 += String.fromCharCode(bytes[i]);
+      resolve(btoa(b64));
+    }, durationMs);
+  });
+}
+
 function _stopAudioRecording() {
   if (!_mediaRecorder || _mediaRecorder.state === 'inactive') return Promise.resolve(_lastAudioBlob);
   return new Promise(function(resolve) {
@@ -3873,13 +3952,12 @@ async function _getBaiduToken() {
 }
 
 async function _webmToWavBase64(blob) {
+  var audioCtx = null;
   try {
-    var audioCtx = _getAudioCtx(); // reuse shared context, more reliable on mobile
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Always create fresh AudioContext — shared context may be locked on Android
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     var arrayBuffer = await blob.arrayBuffer();
     var audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-    // Don't close if it's the shared context
-    if (audioCtx !== _sharedAudioCtx) { try { audioCtx.close(); } catch(e) {} }
 
     var sampleRate = 16000;
     var offlineCtx = new OfflineAudioContext(1, Math.ceil(audioBuffer.duration * sampleRate), sampleRate);
@@ -3987,24 +4065,62 @@ async function _recordAndRecognize(statusElId, durationMs) {
     if (statusEl) statusEl.textContent = '麦克风未就绪，请重试';
     return [];
   }
-  if (!_startAudioRecording()) {
-    if (statusEl) statusEl.textContent = '录音启动失败，请重试';
+
+  var token = await _getBaiduToken();
+  if (!token) {
+    if (statusEl) statusEl.textContent = '语音服务连接失败';
     return [];
   }
-  await new Promise(function(r) { setTimeout(r, durationMs || 3000); });
-  var blob = await _stopAudioRecording();
-  if (!blob) {
-    if (statusEl) statusEl.textContent = '录音失败，请重试';
-    return [];
-  }
-  if (statusEl) statusEl.textContent = '⏳ 识别中...';
-  var result = await _callBaiduASR(blob);
-  if (result.length === 0) {
-    if (statusEl) statusEl.textContent = '识别失败，请再试一次';
+
+  var speechBase64 = '';
+  if (statusEl) statusEl.textContent = '⏺ 录音中...';
+
+  if (_isAndroid) {
+    // Android: use PCM direct recording (bypasses MediaRecorder+WAV conversion)
+    try {
+      speechBase64 = await _recordPCM(durationMs || 2500);
+    } catch(e) {
+      console.warn('[PCM] recording failed:', e.message);
+      if (statusEl) statusEl.textContent = '录音失败，请重试';
+      return [];
+    }
   } else {
-    if (statusEl) statusEl.textContent = '✅ 识别成功';
+    // Desktop/iOS: use MediaRecorder
+    if (!_startAudioRecording()) {
+      if (statusEl) statusEl.textContent = '录音启动失败，请重试';
+      return [];
+    }
+    await new Promise(function(r) { setTimeout(r, durationMs || 3000); });
+    var blob = await _stopAudioRecording();
+    if (!blob) {
+      if (statusEl) statusEl.textContent = '录音失败，请重试';
+      return [];
+    }
+    speechBase64 = await _webmToWavBase64(blob);
+    if (!speechBase64) {
+      if (statusEl) statusEl.textContent = '音频转换失败';
+      return [];
+    }
   }
-  return result;
+
+  if (statusEl) statusEl.textContent = '⏳ 识别中...';
+  var resp = await fetch('https://vop.baidu.com/server_api', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      format: 'wav', rate: 16000, channel: 1,
+      cuid: _getBaiduCuid(), token: token,
+      speech: speechBase64, len: speechBase64.length
+    })
+  });
+  var data = await resp.json();
+  console.log('[BaiduASR]', data);
+  if (data.err_no === 0 && data.result && data.result.length > 0) {
+    if (statusEl) statusEl.textContent = '✅ 识别成功';
+    return [data.result[0].toLowerCase().trim()];
+  }
+  if (statusEl) statusEl.textContent = data.err_msg ? '识别失败: ' + data.err_msg : '识别失败，请再试一次';
+  return [];
 }
 
 // ── Baidu TTS: speak English text via Baidu on Android (no en-US voices) ──
@@ -4096,22 +4212,25 @@ function _speakEnglish(text, onend) {
     return;
   }
 
-  // Android: Youdao TTS — create new Audio each time for user-gesture safety
-  // Browser HTTP cache handles re-downloads (304 Not Modified, instant)
-  var word = text.replace(/[^a-zA-Z ]/g,'').trim().toLowerCase();
-  var a = new Audio();
-  a.src = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) + '&type=0';
-  a.onended = function() { if (onend) onend(); };
-  a.onerror = function() {
-    if ('speechSynthesis' in window) {
-      speechSynthesis.cancel();
-      var u2 = new SpeechSynthesisUtterance(text);
-      u2.lang = 'en-US'; u2.rate = 0.75;
-      if (onend) u2.onend = onend;
-      speechSynthesis.speak(u2);
-    } else if (onend) onend();
-  };
-  a.play().catch(function() { if (onend) onend(); });
+  // Android: Youdao TTS supports single words only
+  // Split multi-word text and play words sequentially
+  var words = text.replace(/[^a-zA-Z ]/g,'').trim().toLowerCase().split(/\s+/).filter(function(w){return w.length>0;});
+  if (words.length === 0) { if (onend) onend(); return; }
+  var idx = 0;
+  function _playNext() {
+    if (idx >= words.length) { if (onend) onend(); return; }
+    var w = words[idx++];
+    var a = new Audio();
+    a.src = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(w) + '&type=0';
+    a.onended = _playNext;
+    a.onerror = function() {
+      // Word failed, try speechSynthesis for this word
+      if ('speechSynthesis' in window) { speechSynthesis.cancel(); var uu = new SpeechSynthesisUtterance(w); uu.lang = 'en-US'; uu.rate = 0.75; uu.onend = _playNext; speechSynthesis.speak(uu); }
+      else _playNext();
+    };
+    a.play().catch(function() { _playNext(); });
+  }
+  _playNext();
 }
 
 function _tryBaiduTTSFallback(text, onend) {
