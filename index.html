@@ -66,7 +66,6 @@ canvas{display:block;position:absolute;top:0;left:0}
 @keyframes speakGlow{0%,100%{box-shadow:0 0 20px rgba(255,152,0,0.5),0 4px 12px rgba(255,87,34,0.3)}50%{box-shadow:0 0 36px rgba(255,152,0,0.8),0 6px 24px rgba(255,87,34,0.5)}}
 .quiz-phonetic{font-size:22px;color:#ffb74d;margin:4px 0;letter-spacing:2px;font-weight:bold}
 .quiz-seg-letters{font-size:18px;color:#fff;letter-spacing:6px;margin:6px 0 2px;font-weight:bold}
-.quiz-seg-sounds{font-size:16px;color:#ffb74d;letter-spacing:3px;margin-bottom:6px}
 .quiz-word-en{font-size:32px;font-weight:bold;color:var(--gold);margin:8px 0;letter-spacing:2px}
 .quiz-word-cn{font-size:18px;color:var(--sub);margin-bottom:6px}
 .quiz-word-hidden{font-size:36px;font-weight:bold;color:rgba(255,255,255,0.2);margin:8px 0;letter-spacing:6px}
@@ -496,7 +495,6 @@ canvas{display:block;position:absolute;top:0;left:0}
     <div class="quiz-emoji" id="quiz-emoji">🐱</div>
     <div class="quiz-word-en" id="quiz-word-en">cat</div>
     <div class="quiz-seg-letters" id="quiz-phonetic-seg"></div>
-    <div class="quiz-seg-sounds" id="quiz-phonetic-seg-ipa"></div>
     <div class="quiz-phonetic" id="quiz-phonetic">/kæt/</div>
     <div class="quiz-word-cn" id="quiz-word-cn">猫</div>
     <button class="quiz-speak" onclick="playQuizWord()">🔊 点击听正确发音 👈</button>
@@ -4052,9 +4050,7 @@ function _refreshPhoneticDisplay(word, phonetic) {
   // Update quiz overlay if showing this word
   if (quizCreature && quizCreature.en.toLowerCase().replace(/[^a-z]/g,'') === word) {
     var el1 = document.getElementById('quiz-phonetic');
-    var el2 = document.getElementById('quiz-phonetic-seg-ipa');
     if (el1) el1.textContent = seg;
-    if (el2) el2.textContent = seg;
   }
   // Update speak overlay
   var el3 = document.getElementById('speak-phonetic');
@@ -4094,7 +4090,6 @@ function openQuiz(creature) {
   var ph = getSegmentedPhonetic(creature.en) || rawPh;
   document.getElementById('quiz-phonetic').textContent = ph || '⏳ 加载音标中...';
   document.getElementById('quiz-phonetic-seg').textContent = creature.en.split('').join('  ');
-  document.getElementById('quiz-phonetic-seg-ipa').textContent = ph || '';
   document.getElementById('quiz-word-cn').textContent = creature.cn;
   document.getElementById('quiz-overlay').classList.add('show');
   // Fetch missing phonetic from API in background
