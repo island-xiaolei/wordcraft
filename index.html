@@ -3924,9 +3924,12 @@ async function _webmToWavBase64(blob) {
 async function _callBaiduASR(audioBlob) {
   try {
     var token = await _getBaiduToken();
-    if (!token) return [];
+    if (!token) { console.warn('[BaiduASR] no token'); return []; }
     var speechBase64 = await _webmToWavBase64(audioBlob);
-    if (!speechBase64) return [];
+    if (!speechBase64) {
+      // WAV conversion failed — skip, will show error in caller
+      console.warn('[BaiduASR] WAV conversion failed');
+    }
     var resp = await fetch('https://vop.baidu.com/server_api', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -3973,7 +3976,11 @@ async function _recordAndRecognize(statusElId, durationMs) {
   }
   if (statusEl) statusEl.textContent = '⏳ 识别中...';
   var result = await _callBaiduASR(blob);
-  if (statusEl) statusEl.textContent = '';
+  if (result.length === 0) {
+    if (statusEl) statusEl.textContent = '识别失败，请再试一次';
+  } else {
+    if (statusEl) statusEl.textContent = '✅ 识别成功';
+  }
   return result;
 }
 
