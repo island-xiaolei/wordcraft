@@ -2847,7 +2847,7 @@ function speakReviewSentence() {
 }
 
 function startReviewSpeaking() {
-  if (!SpeechRecognition) { showToast('⚠️ 浏览器不支持语音识别'); return; }
+  if (!_isAndroid && !SpeechRecognition) { showToast('⚠️ 浏览器不支持语音识别'); return; }
   if (reviewRecognition) { try { reviewRecognition.abort(); } catch(e) {} }
 
   if ('speechSynthesis' in window) speechSynthesis.cancel();
@@ -3145,7 +3145,7 @@ function startWolfQuizRecognition() {
     return;
   }
 
-  if (!SpeechRecognition) { showToast('⚠️ 浏览器不支持语音识别'); return; }
+  if (!_isAndroid && !SpeechRecognition) { showToast('⚠️ 浏览器不支持语音识别'); return; }
 
   wolfQuizRecognition = _createFreshSR();
   if (!wolfQuizRecognition) return;
@@ -4439,7 +4439,8 @@ function playQuizWord() {
 }
 
 function startSpeakingTest() {
-  if (!quizCreature || !SpeechRecognition) {
+  if (!quizCreature) return;
+  if (!_isAndroid && !SpeechRecognition) {
     showToast('⚠️ 浏览器不支持语音识别，请使用 Chrome 浏览器');
     return;
   }
