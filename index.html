@@ -3797,34 +3797,42 @@ async function _baiduTTS(text) {
   }
 }
 
-// Unified English speech
-// Android: prefer Baidu TTS (AudioContext), fall back to speechSynthesis
-// Desktop/iOS: use browser speechSynthesis
+// Unified English speech — uses browser speechSynthesis (free, unlimited)
+// Android Chrome fix: speechSynthesis gets stuck in "paused" state,
+// calling resume() before speak() restores audio output.
+// Pre-load voices at page load.
+(function() {
+  if ('speechSynthesis' in window) {
+    speechSynthesis.getVoices(); // trigger voices load
+    speechSynthesis.onvoiceschanged = function() { speechSynthesis.getVoices(); };
+  }
+})();
+
 function _speakEnglish(text, onend) {
-  if (_isAndroid) {
-    _baiduTTS(text).then(function(ok) {
-      if (ok) { if (onend) onend(); return; }
-      // Baidu TTS failed — try speechSynthesis as last resort
-      console.warn('[TTS] Baidu TTS failed, trying speechSynthesis...');
-      if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-        var u = new SpeechSynthesisUtterance(text);
-        u.lang = 'en-US'; u.rate = 0.75; u.pitch = 1;
-        if (onend) u.onend = onend;
-        speechSynthesis.speak(u);
-      } else if (onend) {
-        onend();
-      }
-    });
+  if (!('speechSynthesis' in window)) {
+    if (onend) onend();
     return;
   }
-  if ('speechSynthesis' in window) {
-    speechSynthesis.cancel();
-    var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US'; u.rate = 0.75; u.pitch = 1;
-    if (onend) u.onend = onend;
-    speechSynthesis.speak(u);
+  // Android fix: resume if paused (Chrome bug)
+  if (speechSynthesis.paused) {
+    speechSynthesis.resume();
   }
+  speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = 0.75;
+  u.pitch = 1.0;
+  u.volume = 1.0;
+  // Pick an English voice if available
+  var voices = speechSynthesis.getVoices();
+  for (var i = 0; i < voices.length; i++) {
+    if (voices[i].lang.indexOf('en') === 0) {
+      u.voice = voices[i];
+      break;
+    }
+  }
+  if (onend) u.onend = onend;
+  speechSynthesis.speak(u);
 }
 
 function _tryBaiduTTSFallback(text, onend) {
@@ -4211,49 +4219,27 @@ function startSpeakingTest() {
 function startRecognition() {
   if (recognitionActive) return;
 
-  // On Android in China, Google SR is blocked — skip straight to Baidu ASR
+  // On Android, Google SR is blocked — use Baidu ASR directly
   if (_isAndroid) {
     recognitionActive = true;
     document.getElementById('quiz-mic').classList.add('listening');
     document.getElementById('quiz-mic-status').textContent = '🎤 正在听你说...';
-    _withMic(function() {
-      if (!_startAudioRecording()) {
-        recognitionActive = false;
-        document.getElementById('quiz-mic').classList.remove('listening');
-        document.getElementById('quiz-mic-status').textContent = '麦克风未就绪，请重试';
-        document.getElementById('quiz-retry-btn').style.display = 'inline-block';
-        return;
+    _recordAndRecognize('quiz-mic-status', 2500).then(function(heard) {
+      recognitionActive = false;
+      document.getElementById('quiz-mic').classList.remove('listening');
+      if (heard.length > 0) {
+        handleSpeechResult(heard);
+      } else {
+        quizPhase = 'dictation';
+        document.getElementById('quiz-mic').style.display = 'none';
+        document.getElementById('quiz-mic-status').textContent = '语音服务不可用，请用打字模式 👇';
+        document.getElementById('dictation-area').style.display = 'block';
+        document.getElementById('dictation-input').value = '';
+        document.getElementById('dictation-input').focus();
+        document.getElementById('speak-actions').style.display = 'none';
+        document.getElementById('quiz-retry-btn').style.display = 'none';
+        document.getElementById('quiz-skip-btn').style.display = 'inline-block';
       }
-      setTimeout(function() {
-        _stopAudioRecording().then(function(blob) {
-          if (!blob) {
-            recognitionActive = false;
-            document.getElementById('quiz-mic').classList.remove('listening');
-            document.getElementById('quiz-mic-status').textContent = '录音失败，请重试';
-            document.getElementById('quiz-retry-btn').style.display = 'inline-block';
-            return;
-          }
-          document.getElementById('quiz-mic-status').textContent = '⏳ 识别中...';
-          _callBaiduASR(blob).then(function(heard) {
-            recognitionActive = false;
-            document.getElementById('quiz-mic').classList.remove('listening');
-            if (heard.length > 0) {
-              handleSpeechResult(heard);
-            } else {
-              // Baidu ASR failed → text input fallback
-              quizPhase = 'dictation';
-              document.getElementById('quiz-mic').style.display = 'none';
-              document.getElementById('quiz-mic-status').textContent = '语音服务不可用，请用打字模式 👇';
-              document.getElementById('dictation-area').style.display = 'block';
-              document.getElementById('dictation-input').value = '';
-              document.getElementById('dictation-input').focus();
-              document.getElementById('speak-actions').style.display = 'none';
-              document.getElementById('quiz-retry-btn').style.display = 'none';
-              document.getElementById('quiz-skip-btn').style.display = 'inline-block';
-            }
-        });
-      });
-    }, 2500);
     });
     return;
   }
