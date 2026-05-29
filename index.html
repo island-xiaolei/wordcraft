@@ -3992,10 +3992,75 @@ corner:'/ˈkɔːrnər/',edge:'/edʒ/',dot:'/dɑːt/',line:'/laɪn/',curve:'/kɜ�
 cross:'/krɔːs/',arrow:'/ˈæroʊ/',check:'/tʃek/',x_mark:'/eks/',
 question:'/ˈkwestʃən/',exclamation:'/ˌekskləˈmeɪʃən/',
 };
+var _phoneticCache = {};
+try { _phoneticCache = JSON.parse(localStorage.getItem('_wc_phonetic') || '{}'); } catch(e) {}
+
+function _savePhoneticCache() {
+  try { localStorage.setItem('_wc_phonetic', JSON.stringify(_phoneticCache)); } catch(e) {}
+}
+
 function getPhonetic(word) {
   if (!word) return '';
-  const w = word.toLowerCase().replace(/[^a-z_]/g,'');
-  return _PHONETIC[w] || _PHONETIC[w.replace(/_/g,' ')] || '';
+  var w = word.toLowerCase().replace(/[^a-z_]/g,'');
+  // Check static dictionary first
+  var result = _PHONETIC[w] || _PHONETIC[w.replace(/_/g,' ')] || '';
+  if (result) return result;
+  // Check runtime cache
+  w = w.replace(/_/g,' ');
+  if (_phoneticCache[w]) return _phoneticCache[w];
+  return '';
+}
+
+// Fetch phonetic from free dictionary API asynchronously
+function _fetchPhoneticAsync(word) {
+  var w = word.toLowerCase().replace(/[^a-z]/g,'');
+  if (!w || _phoneticCache[w] || _PHONETIC[w]) return;
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(w), true);
+    xhr.timeout = 5000;
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          if (data && data[0]) {
+            var phonetic = '';
+            if (data[0].phonetic) {
+              phonetic = data[0].phonetic;
+            } else if (data[0].phonetics && data[0].phonetics.length > 0) {
+              for (var i = 0; i < data[0].phonetics.length; i++) {
+                if (data[0].phonetics[i].text) { phonetic = data[0].phonetics[i].text; break; }
+              }
+            }
+            if (phonetic) {
+              if (phonetic[0] !== '/') phonetic = '/' + phonetic + '/';
+              _phoneticCache[w] = phonetic;
+              _savePhoneticCache();
+              // Update any currently displayed phonetic for this word
+              _refreshPhoneticDisplay(w, phonetic);
+            }
+          }
+        } catch(e2) {}
+      }
+    };
+    xhr.send();
+  } catch(e) {}
+}
+
+function _refreshPhoneticDisplay(word, phonetic) {
+  var seg = getSegmentedPhonetic(word) || phonetic;
+  // Update quiz overlay if showing this word
+  if (quizCreature && quizCreature.en.toLowerCase().replace(/[^a-z]/g,'') === word) {
+    var el1 = document.getElementById('quiz-phonetic');
+    var el2 = document.getElementById('quiz-phonetic-seg-ipa');
+    if (el1) el1.textContent = seg;
+    if (el2) el2.textContent = seg;
+  }
+  // Update speak overlay
+  var el3 = document.getElementById('speak-phonetic');
+  if (el3 && quizCreature && quizCreature.en.toLowerCase().replace(/[^a-z]/g,'') === word) {
+    el3.textContent = seg;
+  }
 }
 
 // Split IPA phonetic into readable syllable groups with · separators
@@ -4025,12 +4090,15 @@ function openQuiz(creature) {
 
   document.getElementById('quiz-emoji').textContent = creature.emoji;
   document.getElementById('quiz-word-en').textContent = creature.en;
-  var ph = getSegmentedPhonetic(creature.en) || getPhonetic(creature.en);
-  document.getElementById('quiz-phonetic').textContent = ph;
+  var rawPh = getPhonetic(creature.en);
+  var ph = getSegmentedPhonetic(creature.en) || rawPh;
+  document.getElementById('quiz-phonetic').textContent = ph || '⏳ 加载音标中...';
   document.getElementById('quiz-phonetic-seg').textContent = creature.en.split('').join('  ');
-  document.getElementById('quiz-phonetic-seg-ipa').textContent = ph;
+  document.getElementById('quiz-phonetic-seg-ipa').textContent = ph || '';
   document.getElementById('quiz-word-cn').textContent = creature.cn;
   document.getElementById('quiz-overlay').classList.add('show');
+  // Fetch missing phonetic from API in background
+  if (!rawPh) _fetchPhoneticAsync(creature.en);
 
   // Pre-warm microphone stream so it's ready when user clicks speak
   _ensureMicStream();
