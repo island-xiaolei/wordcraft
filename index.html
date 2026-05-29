@@ -401,14 +401,14 @@ canvas{display:block;position:absolute;top:0;left:0}
     <div class="hud-item" style="border-color:rgba(255,215,0,0.4)"><span id="cat-label" style="font-size:11px;color:#aaa;margin-right:4px"></span>📝 <span class="val" id="daily-val">0/20</span></div>
     <div class="hud-item">⭐ <span class="val" id="score-val">0</span></div>
     <div class="hud-item">🔥 <span class="val" id="combo-val">0</span></div>
-    <div class="hud-item">📦 <span class="val" id="coll-val">0</span></div>
+    <div class="hud-item" style="font-size:11px;padding:5px 9px">📦 <span class="val" style="font-size:13px" id="coll-val">0</span></div>
 
   </div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="hud-item" id="wolf-proximity" style="border-color:rgba(255,50,50,0.3)">🐺 <span class="val" style="color:#ff6666;font-size:13px" id="wolf-dist">--</span></div>
     <div class="hud-item hud-pet" id="pet-icon" title="宠物伙伴"><span id="pet-emoji">🥚</span> <span id="pet-label" style="font-size:11px;color:var(--sub)">宠物</span></div>
     <div class="hud-item stats-btn" style="pointer-events:auto;cursor:pointer" onclick="toggleStats()">📝 已学单词表</div>
-    <div class="hud-item stats-btn" style="pointer-events:auto;cursor:pointer;background:rgba(76,175,80,0.18);border-color:rgba(100,200,100,0.4)" onclick="toggleFriends()">👥 <span id="friends-count">0</span></div>
+    <div class="hud-item stats-btn" style="pointer-events:auto;cursor:pointer;background:rgba(76,175,80,0.28);border-color:rgba(100,220,100,0.7);animation:statsGlow 1.5s ease-in-out infinite" onclick="toggleFriends()">📨 邀请好友玩一起增加词汇量 <span style="background:rgba(255,255,255,0.2);border-radius:10px;padding:1px 7px;margin-left:4px;font-size:12px" id="friends-count">0</span></div>
   </div>
 </div>
 
