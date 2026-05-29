@@ -145,6 +145,28 @@ canvas{display:block;position:absolute;top:0;left:0}
   color:#ffe8c0;text-shadow:0 1px 2px rgba(0,0,0,0.5);animation:bookGlow 2s ease-in-out infinite}
 @keyframes bookGlow{0%,100%{border-color:rgba(200,160,60,0.5);box-shadow:0 3px 10px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.06)}50%{border-color:rgba(240,200,80,0.7);box-shadow:0 3px 18px rgba(200,150,40,0.3),inset 0 1px 0 rgba(255,255,255,0.1)}}
 
+/* Pet detail overlay */
+#pet-detail-overlay{position:fixed;inset:0;z-index:95;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.8);backdrop-filter:blur(6px)}
+#pet-detail-overlay.show{display:flex}
+.pet-detail-card{background:linear-gradient(160deg,#1a1a2e,#2e1a1a);border:3px solid rgba(255,180,50,0.4);
+  border-radius:24px;padding:28px 24px 20px;text-align:center;max-width:360px;width:90%;position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 40px rgba(255,180,40,0.1);animation:quizIn 0.3s ease-out}
+.pet-detail-emoji{font-size:80px;line-height:1;margin:10px 0;animation:quizFloat 2s ease-in-out infinite}
+.pet-detail-name{color:#fff;font-size:18px;font-weight:bold;margin-bottom:2px}
+.pet-detail-level{color:var(--gold);font-size:22px;font-weight:bold;margin-bottom:10px}
+.pet-detail-xp-bar{width:100%;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;margin-bottom:4px}
+.pet-detail-xp-fill{height:100%;background:linear-gradient(90deg,#ff9800,#ffd54f);border-radius:4px;transition:width 0.5s}
+.pet-detail-xp-text{color:var(--sub);font-size:11px;margin-bottom:14px}
+.pet-detail-stats{display:flex;gap:16px;justify-content:center;margin-bottom:16px}
+.pet-stat-row{color:var(--sub);font-size:13px}
+.pet-stat-row span{color:var(--gold);font-weight:bold;font-size:16px}
+.pet-evolution{background:rgba(255,255,255,0.04);border-radius:14px;padding:14px}
+.pet-evo-title{color:var(--sub);font-size:12px;margin-bottom:10px}
+.pet-evo-row{display:flex;justify-content:space-between;padding:0 6px}
+.pet-evo-row span{font-size:26px;width:40px;text-align:center}
+.pet-evo-label span{font-size:10px;color:var(--sub)}
+
 /* Friends panel */
 #friends-overlay{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;
   background:rgba(0,0,0,0.8);backdrop-filter:blur(6px)}
@@ -429,7 +451,7 @@ canvas{display:block;position:absolute;top:0;left:0}
   </div>
 </div>
 
-<div id="pet-icon" title="宠物伙伴" style="position:fixed;top:14px;right:14px;z-index:12;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:3px 8px;display:flex;align-items:center;gap:4px;pointer-events:none"><span id="pet-emoji" style="font-size:18px">🥚</span><span id="pet-label" style="font-size:10px;color:#ddd">宠物</span></div>
+<div id="pet-icon" title="点击查看宠物详情" onclick="togglePetDetail()" style="position:fixed;top:14px;right:14px;z-index:12;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.25);border-radius:10px;padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:0.2s" onmouseover="this.style.borderColor='rgba(255,200,50,0.6)';this.style.background='rgba(20,10,0,0.75)';this.style.transform='scale(1.06)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.25)';this.style.background='rgba(0,0,0,0.6)';this.style.transform='scale(1)'"><span id="pet-emoji" style="font-size:20px">🥚</span><span id="pet-label" style="font-size:10px;color:#ddd">宠物</span></div>
 
 <div id="hint">
   <span class="key">WASD</span> 探索迷宫 &nbsp;<span class="key">空格</span> 发现单词学习 &nbsp;<span class="key">C</span> 吃食物恢复体力
@@ -552,6 +574,26 @@ canvas{display:block;position:absolute;top:0;left:0}
     </div>
     <button class="friends-share-btn" onclick="shareInviteLink()">📤 复制邀请链接</button>
     <div id="friends-list"></div>
+  </div>
+</div>
+
+<div id="pet-detail-overlay" onclick="if(event.target===this)togglePetDetail()">
+  <div class="pet-detail-card">
+    <button class="sticky-close-btn" onclick="togglePetDetail()">✕</button>
+    <div class="pet-detail-emoji" id="pdet-emoji">🥚</div>
+    <div class="pet-detail-name" id="pdet-name">小公主的宠物</div>
+    <div class="pet-detail-level" id="pdet-level">Lv.1</div>
+    <div class="pet-detail-xp-bar"><div class="pet-detail-xp-fill" id="pdet-xp-fill"></div></div>
+    <div class="pet-detail-xp-text" id="pdet-xp-text">0 / 100 XP</div>
+    <div class="pet-detail-stats">
+      <div class="pet-stat-row">📝 累计单词 <span id="pdet-words">0</span></div>
+      <div class="pet-stat-row">⭐ 最高连击 <span id="pdet-maxcombo">0</span></div>
+    </div>
+    <div class="pet-evolution">
+      <div class="pet-evo-title">进化路线</div>
+      <div class="pet-evo-row"><span>🥚</span><span>🐣</span><span>🐥</span><span>🦉</span><span>🦉✨</span><span>🦉👑</span></div>
+      <div class="pet-evo-row pet-evo-label"><span>Lv.1</span><span>Lv.2</span><span>Lv.5</span><span>Lv.15</span><span>Lv.30</span><span>Lv.50</span></div>
+    </div>
   </div>
 </div>
 
@@ -4796,6 +4838,33 @@ function _checkFriendInvite() {
 }
 
 // Toggle friends panel overlay
+function togglePetDetail() {
+  var overlay = document.getElementById('pet-detail-overlay');
+  if (!overlay) return;
+  if (overlay.classList.contains('show')) {
+    overlay.classList.remove('show');
+  } else {
+    updatePetDetail();
+    overlay.classList.add('show');
+  }
+}
+
+function updatePetDetail() {
+  document.getElementById('pdet-emoji').textContent = getPetEmoji();
+  var pname = loadPlayerName() || '小公主';
+  document.getElementById('pdet-name').textContent = pname + '的宠物';
+  var level = gameState.petLevel || 1;
+  document.getElementById('pdet-level').textContent = 'Lv.' + level;
+  var xp = gameState.petXp || 0;
+  var nextXp = level * 100;
+  var curLvlXp = (level - 1) * 100;
+  var pct = Math.min(100, Math.floor(((xp - curLvlXp) / (nextXp - curLvlXp)) * 100));
+  document.getElementById('pdet-xp-fill').style.width = pct + '%';
+  document.getElementById('pdet-xp-text').textContent = xp + ' / ' + nextXp + ' XP';
+  document.getElementById('pdet-words').textContent = Object.keys(gameState.collected || {}).length;
+  document.getElementById('pdet-maxcombo').textContent = gameState.maxCombo || 0;
+}
+
 function toggleFriends() {
   var overlay = document.getElementById('friends-overlay');
   if (!overlay) return;
