@@ -4048,11 +4048,11 @@ async function _baiduTTS(text) {
   }
 })();
 
-// ── Pronunciation: Youdao TTS on Android (free, no key, works in China) ──
-// AudioContext used for playback to avoid mobile autoplay restrictions
-var _ttsBlobCache = {};
+// ── Pronunciation ──
+// Android: Youdao dictionary free TTS, played via <audio> (bypasses CORS)
+// Desktop/iOS: browser speechSynthesis (more natural voices)
 function _speakEnglish(text, onend) {
-  // Desktop/iOS: browser speechSynthesis works fine
+  // Desktop/iOS: use browser speechSynthesis
   if (!_isAndroid && 'speechSynthesis' in window) {
     var u = new SpeechSynthesisUtterance(text);
     u.lang = 'en-US'; u.rate = 0.75; u.pitch = 1.0; u.volume = 1.0;
@@ -4066,44 +4066,22 @@ function _speakEnglish(text, onend) {
     return;
   }
 
-  // Android: use Youdao free TTS via AudioContext (no autoplay restriction)
+  // Android: Youdao TTS — create new Audio each time for user-gesture safety
+  // Browser HTTP cache handles re-downloads (304 Not Modified, instant)
   var word = text.replace(/[^a-zA-Z ]/g,'').trim().toLowerCase();
-  function _playBuf(buf) {
-    var ctx = _getAudioCtx();
-    if (!ctx) { if (onend) onend(); return; }
-    var src = ctx.createBufferSource();
-    src.buffer = buf;
-    src.connect(ctx.destination);
-    src.onended = function() { if (onend) onend(); };
-    src.start(0);
-  }
-
-  if (_ttsBlobCache[word]) {
-    _playBuf(_ttsBlobCache[word]);
-    return;
-  }
-
-  // Fetch from Youdao, decode, cache, play
-  fetch('https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) + '&type=0')
-    .then(function(r) { return r.arrayBuffer(); })
-    .then(function(buf) {
-      var ctx = _getAudioCtx();
-      if (!ctx) { if (onend) onend(); return; }
-      return ctx.decodeAudioData(buf).then(function(audioBuf) {
-        _ttsBlobCache[word] = audioBuf;
-        _playBuf(audioBuf);
-      });
-    })
-    .catch(function() {
-      // Youdao failed, try speechSynthesis as fallback
-      if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-        var u2 = new SpeechSynthesisUtterance(text);
-        u2.lang = 'en-US'; u2.rate = 0.75;
-        if (onend) u2.onend = onend;
-        speechSynthesis.speak(u2);
-      } else if (onend) { onend(); }
-    });
+  var a = new Audio();
+  a.src = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) + '&type=0';
+  a.onended = function() { if (onend) onend(); };
+  a.onerror = function() {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      var u2 = new SpeechSynthesisUtterance(text);
+      u2.lang = 'en-US'; u2.rate = 0.75;
+      if (onend) u2.onend = onend;
+      speechSynthesis.speak(u2);
+    } else if (onend) onend();
+  };
+  a.play().catch(function() { if (onend) onend(); });
 }
 
 function _tryBaiduTTSFallback(text, onend) {
