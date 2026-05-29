@@ -6749,16 +6749,15 @@ var _frameParity = 0;
 function togglePause() {
   if (gameOver || gameWin) return;
   gamePaused = !gamePaused;
-  var overlay = document.getElementById('pause-overlay');
   var btn = document.getElementById('pause-btn');
   if (gamePaused) {
-    overlay.classList.add('show');
     btn.textContent = '▶️';
     if ('speechSynthesis' in window) speechSynthesis.cancel();
+    pauseBgMusic();
   } else {
-    overlay.classList.remove('show');
     btn.textContent = '⏸️';
-    lastTime = 0; // reset dt accumulator
+    lastTime = 0;
+    resumeBgMusic();
   }
 }
 
