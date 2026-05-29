@@ -12,6 +12,7 @@ var _hmt = _hmt || [];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <title>WordCraft · 单词我的世界</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -129,6 +130,35 @@ canvas{display:block;position:absolute;top:0;left:0}
 .stats-word-chip:active{transform:scale(0.95)}
 .stats-encourage{text-align:center;color:var(--gold);font-size:16px;font-weight:bold;padding:10px;
   background:rgba(255,215,0,0.08);border-radius:14px;margin-top:8px}
+
+/* Friends panel */
+#friends-overlay{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.8);backdrop-filter:blur(6px)}
+#friends-overlay.show{display:flex}
+.friends-panel{background:linear-gradient(160deg,#1a2e1a,#2e1a1a);border:3px solid rgba(100,200,100,0.3);
+  border-radius:24px;padding:24px;max-width:480px;width:92%;max-height:85vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:quizIn 0.3s ease-out}
+.friends-title{font-size:20px;color:var(--green);font-weight:bold;margin-bottom:4px}
+.friends-subtitle{color:var(--sub);font-size:13px;margin-bottom:16px}
+.friend-row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:12px 16px;margin-bottom:10px}
+.friend-emoji{font-size:36px;flex-shrink:0}
+.friend-info{flex:1;min-width:0}
+.friend-name{color:var(--white);font-weight:bold;font-size:16px;margin-bottom:2px}
+.friend-stats{color:var(--sub);font-size:12px;display:flex;gap:12px;flex-wrap:wrap}
+.friend-stats span{color:var(--gold);font-weight:bold}
+.friend-active{color:#888;font-size:11px;flex-shrink:0;text-align:right}
+.friends-empty{text-align:center;color:var(--sub);padding:30px 0;font-size:14px;line-height:2}
+.friends-share-btn{display:inline-block;margin-bottom:14px;padding:10px 22px;border-radius:20px;
+  border:none;background:linear-gradient(135deg,#4caf50,#2e7d32);color:#fff;font-size:14px;
+  cursor:pointer;font-family:inherit;transition:0.2s;font-weight:bold}
+.friends-share-btn:hover{transform:scale(1.05)}
+.friends-share-btn:active{transform:scale(0.95)}
+.friends-activity-banner{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,0.75);border:1px solid rgba(100,200,100,0.3);border-radius:20px;
+  padding:8px 18px;color:#fff;font-size:12px;z-index:25;pointer-events:none;
+  backdrop-filter:blur(4px);opacity:0;transition:opacity 0.5s}
+.friends-activity-banner.show{opacity:1}
 
 /* Word review overlay */
 #word-review-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
@@ -378,6 +408,7 @@ canvas{display:block;position:absolute;top:0;left:0}
     <div class="hud-item" id="wolf-proximity" style="border-color:rgba(255,50,50,0.3)">🐺 <span class="val" style="color:#ff6666;font-size:13px" id="wolf-dist">--</span></div>
     <div class="hud-item hud-pet" id="pet-icon" title="宠物伙伴"><span id="pet-emoji">🥚</span> <span id="pet-label" style="font-size:11px;color:var(--sub)">宠物</span></div>
     <div class="hud-item stats-btn" style="pointer-events:auto;cursor:pointer" onclick="toggleStats()">📝 已学单词表</div>
+    <div class="hud-item stats-btn" style="pointer-events:auto;cursor:pointer;background:rgba(76,175,80,0.18);border-color:rgba(100,200,100,0.4)" onclick="toggleFriends()">👥 <span id="friends-count">0</span></div>
   </div>
 </div>
 
@@ -491,6 +522,17 @@ canvas{display:block;position:absolute;top:0;left:0}
     <div class="quiz-phonetic" id="wr-phonetic">/wɜːrd/</div>
     <div class="quiz-word-cn" id="wr-cn">单词</div>
     <button class="quiz-speak" onclick="reviewPlayWord()">🔊 点击听正确发音 👈</button>
+  </div>
+</div>
+
+<div id="friends-overlay" onclick="if(event.target===this)toggleFriends()">
+  <div class="friends-panel">
+    <div class="book-header">
+      <h2 class="friends-title">👥 好友列表</h2>
+      <button class="book-close" onclick="toggleFriends()">✕</button>
+    </div>
+    <button class="friends-share-btn" onclick="shareInviteLink()">📤 复制邀请链接</button>
+    <div id="friends-list"></div>
   </div>
 </div>
 
@@ -4602,6 +4644,7 @@ function updateHUD() {
     wolfEl.textContent = '远 ' + dTiles + '步';
     wolfProx.style.borderColor = 'rgba(255,50,50,0.3)';
   }
+  updateFriendsHUD(); // refresh friend count in HUD
 }
 
 // ==================== SAVE/LOAD ====================
@@ -4619,6 +4662,7 @@ function saveGame() {
       timestamp: Date.now(),
     };
     localStorage.setItem('wordcraft_save', JSON.stringify(data));
+    syncProfile(); // friend system: sync to cloud (throttled)
   } catch(e) {}
 }
 
@@ -4643,6 +4687,203 @@ function loadGame() {
     }
   } catch(e) {}
 }
+
+// ═══════════════════════════════════════════
+// Friend system — Supabase backend
+// ═══════════════════════════════════════════
+var _supabase = (function() {
+  try {
+    var supabase = window.supabase;
+    if (!supabase || !supabase.createClient) return null;
+    return supabase.createClient(
+      'https://bkveecgbvtuizuqjvjtr.supabase.co',
+      'sb_publishable_jlsspp5zY6CHoPSs69DZ9g_nrFHXbsH'
+    );
+  } catch(e) { return null; }
+})();
+
+function _getPlayerId() {
+  var id = localStorage.getItem('wordcraft_pid');
+  if (!id) {
+    id = 'wc_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+    localStorage.setItem('wordcraft_pid', id);
+  }
+  return id;
+}
+
+function _getMyFriends() {
+  try {
+    return JSON.parse(localStorage.getItem('wordcraft_friends') || '[]');
+  } catch(e) { return []; }
+}
+
+function _saveMyFriends(list) {
+  localStorage.setItem('wordcraft_friends', JSON.stringify(list));
+}
+
+// Sync current player profile to cloud (fire-and-forget, never blocks game)
+var _lastSync = 0;
+function syncProfile() {
+  if (!_supabase) return;
+  var now = Date.now();
+  if (now - _lastSync < 15000) return; // throttle to once per 15s
+  _lastSync = now;
+  var pid = _getPlayerId();
+  var name = loadPlayerName() || '无名';
+  var wordCount = Object.keys(gameState.collected || {}).length;
+  _supabase.from('players').upsert({
+    player_id: pid,
+    name: name,
+    pet_level: gameState.petLevel || 1,
+    pet_xp: gameState.petXp || 0,
+    word_count: wordCount,
+    last_active: now,
+    updated_at: new Date().toISOString()
+  }).then(function() { /* silent */ }).catch(function() { /* silent */ });
+}
+
+// Fetch friends' current profiles from cloud
+function _fetchFriendProfiles() {
+  if (!_supabase) return Promise.resolve([]);
+  var fids = _getMyFriends();
+  if (!fids.length) return Promise.resolve([]);
+  return _supabase.from('players').select('*').in('player_id', fids).then(function(r) {
+    return (r.data || []).sort(function(a, b) { return (b.last_active || 0) - (a.last_active || 0); });
+  }).catch(function() { return []; });
+}
+
+// Check URL for invite code on startup
+function _checkFriendInvite() {
+  try {
+    var params = new URLSearchParams(location.search);
+    var ref = params.get('ref');
+    if (ref && ref !== _getPlayerId()) {
+      var friends = _getMyFriends();
+      if (friends.indexOf(ref) === -1) {
+        friends.push(ref);
+        _saveMyFriends(friends);
+        // Clean URL
+        if (history.replaceState) {
+          history.replaceState({}, '', location.pathname);
+        }
+        // Show welcome toast
+        setTimeout(function() {
+          showToast('🎉 有新好友加入啦！你的好友列表已更新~');
+          updateFriendsHUD();
+        }, 2000);
+      }
+    }
+  } catch(e) { /* silent */ }
+}
+
+// Toggle friends panel overlay
+function toggleFriends() {
+  var overlay = document.getElementById('friends-overlay');
+  if (!overlay) return;
+  var isOpen = overlay.classList.contains('show');
+  if (isOpen) {
+    overlay.classList.remove('show');
+  } else {
+    overlay.classList.add('show');
+    refreshFriendsPanel();
+  }
+}
+
+// Refresh the friends panel content
+var _friendsRefreshing = false;
+function refreshFriendsPanel() {
+  if (_friendsRefreshing) return;
+  _friendsRefreshing = true;
+  var listEl = document.getElementById('friends-list');
+  if (!listEl) { _friendsRefreshing = false; return; }
+  listEl.innerHTML = '<div style="text-align:center;color:var(--sub);padding:20px">⏳ 加载好友数据...</div>';
+  _fetchFriendProfiles().then(function(friends) {
+    if (!friends.length) {
+      listEl.innerHTML = '<div class="friends-empty">还没有好友 👋<br>点击上方 📤 按钮复制邀请链接<br>发给朋友一起玩吧！</div>';
+    } else {
+      var html = '';
+      for (var i = 0; i < friends.length; i++) {
+        var f = friends[i];
+        var emoji = _getPetEmojiByLevel(f.pet_level || 1);
+        var timeAgo = _formatTimeAgo(f.last_active || 0);
+        html += '<div class="friend-row">' +
+          '<div class="friend-emoji">' + emoji + '</div>' +
+          '<div class="friend-info">' +
+            '<div class="friend-name">' + _escHtml(f.name) + '</div>' +
+            '<div class="friend-stats">Lv.<span>' + (f.pet_level || 1) + '</span> · 📝<span>' + (f.word_count || 0) + '</span> 单词</div>' +
+          '</div>' +
+          '<div class="friend-active">' + timeAgo + '</div>' +
+        '</div>';
+      }
+      listEl.innerHTML = html;
+    }
+    _friendsRefreshing = false;
+  }).catch(function() {
+    listEl.innerHTML = '<div class="friends-empty">加载失败，请重试</div>';
+    _friendsRefreshing = false;
+  });
+}
+
+function _getPetEmojiByLevel(level) {
+  if (level >= 50) return '🦉👑';
+  if (level >= 30) return '🦉✨';
+  if (level >= 15) return '🦉';
+  if (level >= 5) return '🐥';
+  if (level >= 1) return '🐣';
+  return '🥚';
+}
+
+function _formatTimeAgo(ts) {
+  var sec = Math.floor((Date.now() - ts) / 1000);
+  if (sec < 0 || !ts) return '刚刚';
+  if (sec < 60) return sec + '秒前';
+  if (sec < 3600) return Math.floor(sec / 60) + '分钟前';
+  if (sec < 86400) return Math.floor(sec / 3600) + '小时前';
+  if (sec < 604800) return Math.floor(sec / 86400) + '天前';
+  return '很久以前';
+}
+
+function _escHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// Share invite link
+function shareInviteLink() {
+  var pid = _getPlayerId();
+  var link = 'https://island-xiaolei.github.io/wordcraft/?ref=' + pid;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(function() {
+      showToast('📋 邀请链接已复制！发给好友吧~');
+    }).catch(function() {
+      _fallbackShare(link);
+    });
+  } else {
+    _fallbackShare(link);
+  }
+}
+
+function _fallbackShare(link) {
+  // Create a temporary input to copy
+  var ta = document.createElement('textarea');
+  ta.value = link;
+  ta.style.position = 'fixed'; ta.style.left = '-9999px'; ta.style.top = '-9999px';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy'); showToast('📋 邀请链接已复制！发给好友吧~'); }
+  catch(e) { prompt('复制此链接发给好友：', link); showToast('📋 请手动复制链接发给好友~'); }
+  document.body.removeChild(ta);
+}
+
+// Update the HUD friends count badge
+function updateFriendsHUD() {
+  var countEl = document.getElementById('friends-count');
+  var friends = _getMyFriends();
+  if (countEl) countEl.textContent = friends.length;
+}
+
+// ═══════════════════════════════════════════
 
 // ==================== RENDER ====================
 function lightenColor(hex, amt) {
@@ -6861,6 +7102,10 @@ function init() {
   // Pre-acquire mic stream at startup so the first SpeechRecognition call
   // won't trigger an additional permission prompt
   _ensureMicStream();
+
+  // Friend system: check if opened from invite link
+  _checkFriendInvite();
+  updateFriendsHUD();
 
   // Restore map theme
   try {
