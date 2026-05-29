@@ -3786,27 +3786,26 @@ function _startAudioRecording() {
     console.warn('[Recording] mic stream not ready');
     return false;
   }
-  try {
-    _audioChunks = [];
-    _mediaRecorder = new MediaRecorder(_micStream, { mimeType: 'audio/webm' });
-    _mediaRecorder.ondataavailable = function(e) {
-      if (e.data.size > 0) _audioChunks.push(e.data);
-    };
-    _mediaRecorder.start();
-    return true;
-  } catch(e) {
+  _audioChunks = [];
+  // Try multiple MIME types for Android compatibility
+  var mimeTypes = ['audio/webm', 'audio/webm;codecs=opus', 'audio/mp4', ''];
+  for (var mt = 0; mt < mimeTypes.length; mt++) {
     try {
-      _mediaRecorder = new MediaRecorder(_micStream);
+      var opts = mimeTypes[mt] ? { mimeType: mimeTypes[mt] } : {};
+      _mediaRecorder = new MediaRecorder(_micStream, opts);
       _mediaRecorder.ondataavailable = function(e) {
         if (e.data.size > 0) _audioChunks.push(e.data);
       };
       _mediaRecorder.start();
       return true;
-    } catch(e2) {
-      console.warn('MediaRecorder not supported:', e2.message);
-      return false;
+    } catch(e) {
+      if (mt === mimeTypes.length - 1) {
+        console.warn('[Recording] all MIME types failed');
+        return false;
+      }
     }
   }
+  return false;
 }
 
 // Ensure mic is ready, then run callback
@@ -3962,7 +3961,10 @@ async function _recordAndRecognize(statusElId, durationMs) {
     if (statusEl) statusEl.textContent = '麦克风未就绪，请重试';
     return [];
   }
-  _startAudioRecording();
+  if (!_startAudioRecording()) {
+    if (statusEl) statusEl.textContent = '录音启动失败，请重试';
+    return [];
+  }
   await new Promise(function(r) { setTimeout(r, durationMs || 3000); });
   var blob = await _stopAudioRecording();
   if (!blob) {
@@ -4046,12 +4048,11 @@ async function _baiduTTS(text) {
   }
 })();
 
-// ── Pronunciation: Use Youdao Dictionary TTS (FREE, no API key, works in China) ──
-// Android speechSynthesis is unreliable on Chinese-market phones
-// Youdao dictvoice provides free English pronunciation MP3s
-var _ttsCache = {};
+// ── Pronunciation: Youdao TTS on Android (free, no key, works in China) ──
+// AudioContext used for playback to avoid mobile autoplay restrictions
+var _ttsBlobCache = {};
 function _speakEnglish(text, onend) {
-  // Try browser speechSynthesis first (works on desktop/iOS)
+  // Desktop/iOS: browser speechSynthesis works fine
   if (!_isAndroid && 'speechSynthesis' in window) {
     var u = new SpeechSynthesisUtterance(text);
     u.lang = 'en-US'; u.rate = 0.75; u.pitch = 1.0; u.volume = 1.0;
@@ -4065,50 +4066,44 @@ function _speakEnglish(text, onend) {
     return;
   }
 
-  // Android or no speechSynthesis: use Youdao free TTS
-  // type=0 American, type=1 British
+  // Android: use Youdao free TTS via AudioContext (no autoplay restriction)
   var word = text.replace(/[^a-zA-Z ]/g,'').trim().toLowerCase();
-  if (_ttsCache[word]) {
-    _ttsCache[word].currentTime = 0;
-    _ttsCache[word].play().then(function() {
-      if (onend) onend();
-    }).catch(function() {
-      if (onend) onend();
-    });
-    return;
+  function _playBuf(buf) {
+    var ctx = _getAudioCtx();
+    if (!ctx) { if (onend) onend(); return; }
+    var src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    src.onended = function() { if (onend) onend(); };
+    src.start(0);
   }
-  var audio = new Audio();
-  audio.src = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) + '&type=0';
-  audio.onended = function() { if (onend) onend(); };
-  audio.onerror = function() {
-    // Youdao failed, try speechSynthesis as last resort
-    if ('speechSynthesis' in window) {
-      speechSynthesis.cancel();
-      var u2 = new SpeechSynthesisUtterance(text);
-      u2.lang = 'en-US'; u2.rate = 0.75;
-      if (onend) u2.onend = onend;
-      speechSynthesis.speak(u2);
-    } else if (onend) onend();
-  };
-  _ttsCache[word] = audio;
-  audio.play().catch(function() {
-    // Autoplay blocked — store for next click
-    if (onend) onend();
-  });
-}
 
-// ── Mic helper: ensure microphone is ready ──
-function _ensureMicReady(callback) {
-  if (_micStream && _micStream.active && _micStream.getAudioTracks().length > 0) {
-    callback();
+  if (_ttsBlobCache[word]) {
+    _playBuf(_ttsBlobCache[word]);
     return;
   }
-  _ensureMicStream().then(function(ok) {
-    if (ok) callback();
-    else {
-      showToast('请允许麦克风权限后重试');
-    }
-  });
+
+  // Fetch from Youdao, decode, cache, play
+  fetch('https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) + '&type=0')
+    .then(function(r) { return r.arrayBuffer(); })
+    .then(function(buf) {
+      var ctx = _getAudioCtx();
+      if (!ctx) { if (onend) onend(); return; }
+      return ctx.decodeAudioData(buf).then(function(audioBuf) {
+        _ttsBlobCache[word] = audioBuf;
+        _playBuf(audioBuf);
+      });
+    })
+    .catch(function() {
+      // Youdao failed, try speechSynthesis as fallback
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+        var u2 = new SpeechSynthesisUtterance(text);
+        u2.lang = 'en-US'; u2.rate = 0.75;
+        if (onend) u2.onend = onend;
+        speechSynthesis.speak(u2);
+      } else if (onend) { onend(); }
+    });
 }
 
 function _tryBaiduTTSFallback(text, onend) {
