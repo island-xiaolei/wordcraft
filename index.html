@@ -386,6 +386,13 @@ canvas{display:block;position:absolute;top:0;left:0}
 #food-btn .hint-text{display:none;font-size:14px;font-weight:700;color:#fff;text-shadow:0 0 6px rgba(255,0,0,0.6)}
 #food-btn.no-stamina .hint-text{display:inline}
 #food-btn:hover{transform:scale(1.15)}
+#home-btn{position:fixed;z-index:16;display:none;align-items:center;justify-content:center;gap:4px;
+  width:auto;height:auto;border-radius:28px;background:rgba(255,180,0,0.9);border:3px solid #ffd700;
+  color:#fff;font-size:20px;font-weight:700;cursor:pointer;pointer-events:auto;
+  animation:homePulse 0.8s ease-in-out infinite alternate;
+  box-shadow:0 4px 20px rgba(255,215,0,0.6);padding:10px 20px;white-space:nowrap}
+@keyframes homePulse{0%{box-shadow:0 4px 20px rgba(255,215,0,0.6)}100%{box-shadow:0 4px 32px rgba(255,215,0,0.9),0 0 44px rgba(255,200,0,0.4)}}
+#home-btn:active{transform:scale(0.9)}
 #food-btn:active{transform:scale(0.9)}
 @keyframes foodBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
@@ -614,6 +621,7 @@ canvas{display:block;position:absolute;top:0;left:0}
 
 <!-- Food button - floating near player -->
 <button id="food-btn" onclick="collectFood()" title="点击收集食物恢复体力"><span class="hint-text">点击食物补充体力</span>🍎</button>
+<button id="home-btn" onclick="enterHouse()">🏠 回家躲起来！</button>
 
 <!-- Food quiz overlay -->
 <div id="food-overlay">
@@ -7158,19 +7166,22 @@ function drawMinimap() {
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  // 🏠 HOME marker on minimap
+  // 🏠 HOME marker on minimap — bright and visible
   var homeMX = mmX + HOUSE_PX * scale;
   var homeMY = mmY + HOUSE_PY * scale;
-  ctx.fillStyle = 'rgba(255,215,0,0.35)';
+  // Glow
+  var homePulse = 1 + Math.sin(_waveTime * 3) * 0.2;
+  ctx.fillStyle = 'rgba(255,215,0,' + (0.4 * homePulse) + ')';
   ctx.beginPath();
-  ctx.arc(homeMX, homeMY, 6, 0, Math.PI*2);
+  ctx.arc(homeMX, homeMY, 7 * homePulse + 2, 0, Math.PI*2);
   ctx.fill();
+  // House icon
   ctx.fillStyle = '#ffd700';
-  ctx.fillRect(homeMX - 3, homeMY - 3, 6, 6);
+  ctx.fillRect(homeMX - 3.5, homeMY - 3.5, 7, 7);
   ctx.fillStyle = '#fff';
-  ctx.font = '8px sans-serif';
+  ctx.font = 'bold 7px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('HOME', homeMX, homeMY - 5);
+  ctx.fillText('H', homeMX, homeMY - 6);
   ctx.textAlign = 'start';
 
   // Creature dots — bright cyan glow
@@ -7610,6 +7621,17 @@ function update(dt) {
     foodBtn.classList.toggle('no-stamina', playerStamina <= 0);
   } else if (foodQuizActive) {
     foodBtn.style.display = 'none';
+  }
+
+  // 🏠 Home button — show when near completed house
+  var homeBtn = document.getElementById('home-btn');
+  if (_houseStage >= 5 && _playerNearHouseDoor() && !_inHouse && !quizActive) {
+    homeBtn.style.display = 'flex';
+    homeBtn.style.left = '50%';
+    homeBtn.style.bottom = '100px';
+    homeBtn.style.transform = 'translateX(-50%)';
+  } else {
+    homeBtn.style.display = 'none';
   }
 }
 
