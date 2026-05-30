@@ -2479,7 +2479,7 @@ function completeWord(en) {
     _saveHouseStage();
     _markHouseTiles(); // update door walkability
     if (_houseStage >= 5) {
-      showToast('🏠 房子建好了！快去地图中央躲进去吧！');
+      showToast('🏠 房子建好了！快去右上角(HOME)躲进去！按空格进入', 4000);
     } else {
       var stageNames = ['地基', '框架', '砌墙', '盖顶', '装门', '完成'];
       showToast('🏠 房子进度: ' + stageNames[_houseStage] + ' (' + (_houseStage * 4) + '/20)');
@@ -6239,7 +6239,7 @@ function drawPet() {
 let _houseStage = 0; // 0=foundation, 1=frame, 2=walls, 3=roof, 4=door+windows, 5=complete
 let _inHouse = false; // true when player is inside house for review
 let _houseFailCount = 0; // wrong answers during house review (5 strikes = wolf breaks in)
-const HOUSE_CX = 18, HOUSE_CY = 24; // house left of tree, tree stays at center (24,24)
+const HOUSE_CX = 40, HOUSE_CY = 10; // top-right corner, away from tree/player/wolf
 const HOUSE_TILES = 5; // house is 5x5 tiles
 const HOUSE_PX = HOUSE_CX * TILE + TILE / 2; // pixel center X of house
 const HOUSE_PY = HOUSE_CY * TILE + TILE / 2; // pixel center Y of house
@@ -6297,212 +6297,195 @@ function drawHouse() {
   var hx = HOUSE_CX * TILE + TILE / 2 - camera.x;
   var hy = HOUSE_CY * TILE + TILE / 2 - camera.y;
   var hw = HOUSE_TILES * TILE; // 280px
-  var hh = HOUSE_TILES * TILE; // 280px
+  var hh = HOUSE_TILES * TILE;
   var left = hx - hw / 2;
   var top = hy - hh / 2;
-
-  // Skip if offscreen
   if (left > canvas.width + 80 || left + hw < -80 || top > canvas.height + 80 || top + hh < -80) return;
 
-  var s = _houseStage; // 0-5
+  var s = _houseStage;
+  var t = _waveTime;
 
-  // ── Stage 0: Foundation outline ──
-  if (s >= 0) {
-    // Ground shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.15)';
-    ctx.fillRect(left + 6, top + 6, hw - 12, hh - 12);
-    // Foundation base
-    ctx.fillStyle = '#b0a090';
-    ctx.strokeStyle = '#8a7a6a';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.roundRect(left + 4, top + 4, hw - 8, hh - 8, 6);
-    ctx.fill();
-    ctx.stroke();
-    // Dashed construction outline
-    ctx.strokeStyle = '#ffe066';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([8, 6]);
-    ctx.stroke();
+  // ── Ground shadow (all stages) ──
+  ctx.fillStyle = 'rgba(0,0,0,0.12)';
+  ctx.beginPath();
+  ctx.ellipse(hx, hy + hh/2 - 4, hw * 0.42, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ═══════ Stage 0: Construction site ═══════
+  if (s === 0) {
+    // Soft dirt ground patch
+    ctx.fillStyle = '#c8b898';
+    ctx.beginPath(); ctx.roundRect(left + 8, top + 8, hw - 16, hh - 16, 8); ctx.fill();
+    // Corner stakes
+    var stakes = [[left+14,top+14],[left+hw-14,top+14],[left+14,top+hh-14],[left+hw-14,top+hh-14]];
+    stakes.forEach(function(p){
+      ctx.fillStyle = '#8B6914'; ctx.fillRect(p[0]-2.5, p[1]-16, 5, 18);
+      ctx.fillStyle = '#f39c12'; ctx.beginPath(); ctx.arc(p[0], p[1]-16, 3, 0, Math.PI*2); ctx.fill();
+    });
+    // String/tape between stakes
+    ctx.strokeStyle = '#f39c12'; ctx.lineWidth = 1.5; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(left+14,top+14); ctx.lineTo(left+hw-14,top+14);
+    ctx.lineTo(left+hw-14,top+hh-14); ctx.lineTo(left+14,top+hh-14); ctx.closePath(); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.lineWidth = 1;
+    // Blueprint sign in middle
+    ctx.fillStyle = '#e8f0f8'; ctx.strokeStyle = '#2980b9'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(hx-22, hy-28, 44, 36, 4); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#2980b9'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('📋', hx, hy-12); ctx.fillText('蓝图', hx, hy+3); ctx.textAlign = 'start';
+    // Small material pile
+    ctx.fillStyle = '#a0522d'; ctx.beginPath(); ctx.arc(hx+35, hy+40, 12, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#8B4513'; ctx.beginPath(); ctx.arc(hx+42, hy+38, 9, 0, Math.PI*2); ctx.fill();
   }
 
-  // ── Stage 1: Wooden frame posts ──
+  // ═══════ Stage 1-2: Foundation + Frame ═══════
   if (s >= 1) {
-    ctx.fillStyle = '#8B5E3C';
-    var postR = 6;
-    var posts = [
-      [left + 10, top + 10], [left + hw - 10, top + 10],
-      [left + 10, top + hh - 10], [left + hw - 10, top + hh - 10]
-    ];
-    posts.forEach(function(p) {
-      ctx.beginPath();
-      ctx.roundRect(p[0] - postR, p[1] - postR, postR * 2, postR * 2, 3);
-      ctx.fill();
-    });
-    // Cross beams
-    ctx.strokeStyle = '#6B4226';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(left + 10, top + 10); ctx.lineTo(left + hw - 10, top + 10);
-    ctx.moveTo(left + 10, top + hh - 10); ctx.lineTo(left + hw - 10, top + hh - 10);
-    ctx.moveTo(left + 10, top + 10); ctx.lineTo(left + 10, top + hh - 10);
-    ctx.moveTo(left + hw - 10, top + 10); ctx.lineTo(left + hw - 10, top + hh - 10);
-    ctx.stroke();
-    ctx.lineWidth = 1;
-  }
-
-  // ── Stage 2: Brick walls ──
-  if (s >= 2) {
-    // Wall body — inset slightly from foundation
-    var wallL = left + 12, wallT = top + 12, wallW = hw - 24, wallH = hh - 24;
-    // Fill
-    ctx.fillStyle = '#d4a574';
-    ctx.strokeStyle = '#a0724a';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(wallL, wallT, wallW, wallH, 4);
-    ctx.fill();
-    ctx.stroke();
-    // Brick lines (horizontal)
-    ctx.strokeStyle = '#c0986e';
-    ctx.lineWidth = 1;
-    for (var row = 0; row < 4; row++) {
-      var by = wallT + (row + 1) * wallH / 5;
-      ctx.beginPath();
-      ctx.moveTo(wallL + 2, by); ctx.lineTo(wallL + wallW - 2, by);
-      ctx.stroke();
+    // Concrete foundation pad
+    ctx.fillStyle = '#d5cfc0'; ctx.strokeStyle = '#b0a898'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(left+6, top+6, hw-12, hh-12, 5); ctx.fill(); ctx.stroke();
+    // Wooden floor planks
+    var plankH = 14;
+    for (var py = top + 10; py < top + hh - 10; py += plankH) {
+      ctx.fillStyle = (Math.floor(py / plankH) % 2 === 0) ? '#c4956a' : '#b8875e';
+      ctx.fillRect(left + 12, py, hw - 24, plankH);
     }
-    ctx.lineWidth = 1;
+
+    if (s >= 2) {
+      // Timber frame walls (open stud frame, no siding yet)
+      var studW = 6, studSpacing = 18;
+      // Front wall (bottom edge)
+      for (var sx = left + 20; sx <= left + hw - 20; sx += studSpacing) {
+        ctx.fillStyle = '#a0724a';
+        ctx.fillRect(sx - studW/2, top + 16, studW, hh - 32);
+      }
+      // Back wall
+      for (var sx2 = left + 20; sx2 <= left + hw - 20; sx2 += studSpacing) {
+        ctx.fillStyle = '#c09068';
+        ctx.fillRect(sx2 - studW/2, top + 16, studW, hh - 32);
+      }
+      // Top plate beam
+      ctx.fillStyle = '#8B5E3C'; ctx.fillRect(left + 14, top + 12, hw - 28, 8);
+      // Bottom plate
+      ctx.fillStyle = '#8B5E3C'; ctx.fillRect(left + 14, top + hh - 20, hw - 28, 8);
+      // Cross brace (X pattern)
+      ctx.strokeStyle = '#a0724a'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(left+20, top+16); ctx.lineTo(left+hw-20, top+hh-16);
+      ctx.moveTo(left+hw-20, top+16); ctx.lineTo(left+20, top+hh-16); ctx.stroke();
+    }
   }
 
-  // ── Stage 3: Roof ──
+  // ═══════ Stage 3: Walls going up ═══════
   if (s >= 3) {
-    var roofL = left, roofT = top - 8;
-    var roofW = hw, roofH = hh * 0.45;
-    // Roof triangle
-    ctx.fillStyle = '#c0392b';
-    ctx.strokeStyle = '#922b21';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(roofL, roofT + roofH); // bottom-left
-    ctx.lineTo(roofL + roofW / 2, roofT - 10); // peak
-    ctx.lineTo(roofL + roofW, roofT + roofH); // bottom-right
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.lineWidth = 1;
-    // Roof shingle lines
-    ctx.strokeStyle = '#a93226';
-    ctx.lineWidth = 1;
-    for (var r = 1; r < 4; r++) {
-      var ry = roofT + roofH - (r * roofH / 4);
-      var halfW = (roofW / 2) * (1 - r / 4);
-      ctx.beginPath();
-      ctx.moveTo(roofL + roofW / 2 - halfW, ry);
-      ctx.lineTo(roofL + roofW / 2 + halfW, ry);
-      ctx.stroke();
+    // Wood siding (horizontal lap planks)
+    var wallL = left + 16, wallT = top + 16, wallW = hw - 32, wallH = hh - 32;
+    ctx.fillStyle = '#d4a76a'; ctx.strokeStyle = '#b8894e'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(wallL, wallT, wallW, wallH, 3); ctx.fill(); ctx.stroke();
+    // Plank lines
+    var rowH = 14;
+    for (var r = wallT + rowH; r < wallT + wallH - 4; r += rowH) {
+      ctx.strokeStyle = '#c49658'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(wallL+3, r); ctx.lineTo(wallL+wallW-3, r); ctx.stroke();
     }
-  }
-
-  // ── Stage 4: Door + Windows + Chimney ──
-  if (s >= 4) {
-    // Chimney (top-right of roof)
-    var chX = hx + hw * 0.25, chY = top - 15;
-    ctx.fillStyle = '#7f8c8d';
-    ctx.fillRect(chX - 8, chY - 25, 16, 30);
-    // Door (center-bottom)
-    var doorW = 20, doorH = 28;
-    var doorX = hx - doorW / 2, doorY = hy + hh / 2 - doorH - 4;
-    ctx.fillStyle = '#5D3A1A';
-    ctx.strokeStyle = '#3E2010';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(doorX, doorY, doorW, doorH, 3);
-    ctx.fill();
-    ctx.stroke();
-    ctx.lineWidth = 1;
-    // Door knob
-    ctx.fillStyle = '#f1c40f';
-    ctx.beginPath();
-    ctx.arc(doorX + doorW - 5, doorY + doorH / 2, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-    // Windows (left and right of door)
-    var winW = 18, winH = 18;
-    var winPositions = [[hx - hw * 0.22, hy + 8], [hx + hw * 0.22, hy + 8]];
-    winPositions.forEach(function(wp) {
-      ctx.fillStyle = '#AED6F1';
-      ctx.strokeStyle = '#5D3A1A';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(wp[0] - winW / 2, wp[1] - winH / 2, winW, winH, 2);
-      ctx.fill();
-      ctx.stroke();
-      // Window cross
-      ctx.strokeStyle = '#5D3A1A';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(wp[0], wp[1] - winH / 2); ctx.lineTo(wp[0], wp[1] + winH / 2);
-      ctx.moveTo(wp[0] - winW / 2, wp[1]); ctx.lineTo(wp[0] + winW / 2, wp[1]);
-      ctx.stroke();
+    // Window cutouts (dark holes)
+    var wins = [[hx+40, hy-10], [hx-40, hy-10]];
+    wins.forEach(function(wp) {
+      ctx.fillStyle = '#3a2a1a';
+      ctx.beginPath(); ctx.roundRect(wp[0]-16, wp[1]-18, 32, 30, 3); ctx.fill();
+      // Cross mullions
+      ctx.strokeStyle = '#d4a76a'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(wp[0], wp[1]-18); ctx.lineTo(wp[0], wp[1]+12);
+      ctx.moveTo(wp[0]-16, wp[1]-3); ctx.lineTo(wp[0]+16, wp[1]-3); ctx.stroke();
     });
-    ctx.lineWidth = 1;
+    // Door cutout
+    ctx.fillStyle = '#3a2a1a';
+    ctx.beginPath(); ctx.roundRect(hx-14, hy+hh/2-34, 28, 36, 3); ctx.fill();
   }
 
-  // ── Stage 5: Complete — glowing door + chimney smoke ✨ ──
-  if (s >= 5) {
-    // Door glow (pulsing)
-    var pulse = 0.5 + 0.5 * Math.sin(_waveTime * 3);
-    var doorW2 = 20, doorH2 = 28;
-    var doorX2 = hx - doorW2 / 2, doorY2 = hy + hh / 2 - doorH2 - 4;
-    ctx.shadowColor = '#ffd700';
-    ctx.shadowBlur = 10 + pulse * 8;
-    ctx.fillStyle = '#ffd700';
+  // ═══════ Stage 4: Roof + Trim ═══════
+  if (s >= 4) {
+    // Roof — reddish shingle triangle
+    var roofL = left - 4, roofT = top + 14, roofW2 = hw + 8, roofH2 = hh * 0.42;
+    ctx.fillStyle = '#b8402c'; ctx.strokeStyle = '#8b2518'; ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.roundRect(doorX2 - 1, doorY2 - 1, doorW2 + 2, doorH2 + 2, 3);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    // Redraw door on top
-    ctx.fillStyle = '#5D3A1A';
-    ctx.beginPath();
-    ctx.roundRect(doorX2, doorY2, doorW2, doorH2, 3);
-    ctx.fill();
-    ctx.fillStyle = '#f1c40f';
-    ctx.beginPath();
-    ctx.arc(doorX2 + doorW2 - 5, doorY2 + doorH2 / 2, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-    // Chimney smoke
-    for (var sm = 0; sm < 2; sm++) {
-      var smokeX = hx + hw * 0.25 + sm * 10;
-      var smokeY = top - 35 - sm * 8 - Math.sin(_waveTime * 2 + sm) * 8;
-      var smokeR = 6 + sm * 3 + Math.sin(_waveTime + sm) * 2;
-      ctx.fillStyle = 'rgba(200,200,200,' + (0.25 + sm * 0.1) + ')';
-      ctx.beginPath();
-      ctx.arc(smokeX, smokeY, smokeR, 0, Math.PI * 2);
-      ctx.fill();
+    ctx.moveTo(roofL, roofT); ctx.lineTo(roofL + roofW2/2, roofT - roofH2); ctx.lineTo(roofL + roofW2, roofT);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Shingle texture lines
+    ctx.strokeStyle = '#9e3020'; ctx.lineWidth = 1;
+    for (var r2 = 0; r2 < 5; r2++) {
+      var ry2 = roofT - roofH2 + (r2+1) * roofH2 / 6;
+      var hw2 = roofW2 * (r2+1) / 12;
+      ctx.beginPath(); ctx.moveTo(roofL+roofW2/2-hw2, ry2); ctx.lineTo(roofL+roofW2/2+hw2, ry2); ctx.stroke();
     }
-    // "ENTER" indicator above door
-    ctx.fillStyle = '#ffd700';
-    ctx.font = (_isMobile ? '11px' : '14px') + ' sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('🚪ENTER', hx, doorY2 - 12);
-    ctx.textAlign = 'start';
+    // Chimney
+    var chX = hx + hw * 0.28;
+    ctx.fillStyle = '#c0392b'; ctx.fillRect(chX - 8, roofT - roofH2 - 22, 16, 26);
+    ctx.fillStyle = '#e74c3c'; ctx.fillRect(chX - 6, roofT - roofH2 - 20, 6, 8);
+
+    // Windows with glass
+    var wins2 = [[hx+40, hy-10], [hx-40, hy-10]];
+    wins2.forEach(function(wp) {
+      // Frame
+      ctx.fillStyle = '#fdebd0'; ctx.strokeStyle = '#8B5E3C'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.roundRect(wp[0]-17, wp[1]-19, 34, 32, 3); ctx.fill(); ctx.stroke();
+      // Inner glow
+      ctx.fillStyle = 'rgba(255,250,200,0.4)';
+      ctx.beginPath(); ctx.roundRect(wp[0]-13, wp[1]-15, 26, 24, 2); ctx.fill();
+      // Cross
+      ctx.strokeStyle = '#8B5E3C'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(wp[0], wp[1]-19); ctx.lineTo(wp[0], wp[1]+13);
+      ctx.moveTo(wp[0]-17, wp[1]-3); ctx.lineTo(wp[0]+17, wp[1]-3); ctx.stroke();
+    });
+    // Door
+    var doorX = hx - 14, doorY = hy + hh/2 - 36;
+    ctx.fillStyle = '#6B3A2A'; ctx.strokeStyle = '#3E1A0A'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(doorX, doorY, 28, 38, 4); ctx.fill(); ctx.stroke();
+    // Door panels
+    ctx.strokeStyle = '#5a2a1a'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(doorX+4, doorY+4, 20, 14, 2); ctx.stroke();
+    ctx.beginPath(); ctx.roundRect(doorX+4, doorY+20, 20, 14, 2); ctx.stroke();
+    // Knob
+    ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(doorX+22, doorY+20, 3, 0, Math.PI*2); ctx.fill();
   }
 
-  // Always draw a small label showing build progress
+  // ═══════ Stage 5: Complete ═══════
+  if (s >= 5) {
+    // Chimney smoke
+    for (var sm = 0; sm < 3; sm++) {
+      var smokeX = hx + hw * 0.28;
+      var smokeY = top - 30 - sm * 10 + Math.sin(t * 1.8 + sm * 1.5) * 8;
+      var smokeR = 5 + sm * 4 + Math.cos(t * 1.2 + sm) * 2;
+      ctx.fillStyle = 'rgba(210,210,210,' + (0.35 - sm * 0.08) + ')';
+      ctx.beginPath(); ctx.arc(smokeX + Math.sin(t + sm)*6, smokeY, smokeR, 0, Math.PI*2); ctx.fill();
+    }
+    // Window warm light
+    var wins3 = [[hx+40, hy-10], [hx-40, hy-10]];
+    wins3.forEach(function(wp) {
+      ctx.fillStyle = 'rgba(255,240,180,' + (0.5 + 0.2*Math.sin(t*2.5)) + ')';
+      ctx.beginPath(); ctx.roundRect(wp[0]-13, wp[1]-15, 26, 24, 2); ctx.fill();
+    });
+    // Door glow pulse
+    var pulse = 0.5 + 0.5 * Math.sin(t * 3);
+    ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 12 + pulse * 10;
+    ctx.fillStyle = 'rgba(255,215,0,' + (0.25 + pulse * 0.2) + ')';
+    ctx.beginPath(); ctx.roundRect(hx-16, hy+hh/2-38, 32, 42, 5); ctx.fill();
+    ctx.shadowBlur = 0;
+    // Re-draw door on top
+    var doorX5 = hx - 14, doorY5 = hy + hh/2 - 36;
+    ctx.fillStyle = '#6B3A2A'; ctx.beginPath(); ctx.roundRect(doorX5, doorY5, 28, 38, 4); ctx.fill();
+    ctx.strokeStyle = '#f1c40f'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(doorX5+22, doorY5+20, 3, 0, Math.PI*2); ctx.fill();
+    // "ENTER" label
+    ctx.fillStyle = '#ffd700'; ctx.font = (_isMobile ? 'bold 11px' : 'bold 14px') + ' sans-serif';
+    ctx.textAlign = 'center'; ctx.fillText('🚪 ENTER', hx, doorY5 - 10); ctx.textAlign = 'start';
+  }
+
+  // ── Build progress label ──
   if (s < 5) {
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    var lblW = _isMobile ? 80 : 100;
-    ctx.beginPath();
-    ctx.roundRect(hx - lblW / 2, hy - 8, lblW, 20, 4);
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.font = (_isMobile ? '10px' : '12px') + ' sans-serif';
-    ctx.textAlign = 'center';
-    var stageNames = ['地基', '框架', '砌墙', '盖顶', '装门', '完成'];
-    ctx.fillText('🏠 ' + stageNames[s] + ' ' + (s * 4) + '/20', hx, hy + 7);
-    ctx.textAlign = 'start';
+    var stageNames = ['🔨施工中', '🪵搭框架', '🧱砌木墙', '🪟封墙开窗', '🏠装门窗'];
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    var lblW = _isMobile ? 90 : 110;
+    ctx.beginPath(); ctx.roundRect(hx - lblW/2, hy - hh/2 - 6, lblW, 18, 5); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = (_isMobile ? '10px' : '12px') + ' sans-serif';
+    ctx.textAlign = 'center'; ctx.fillText(stageNames[s] + ' '+(s*4)+'/20', hx, hy - hh/2 + 8); ctx.textAlign = 'start';
   }
 }
 
@@ -7174,6 +7157,21 @@ function drawMinimap() {
   ctx.strokeStyle = '#ff8888';
   ctx.lineWidth = 1;
   ctx.stroke();
+
+  // 🏠 HOME marker on minimap
+  var homeMX = mmX + HOUSE_PX * scale;
+  var homeMY = mmY + HOUSE_PY * scale;
+  ctx.fillStyle = 'rgba(255,215,0,0.35)';
+  ctx.beginPath();
+  ctx.arc(homeMX, homeMY, 6, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#ffd700';
+  ctx.fillRect(homeMX - 3, homeMY - 3, 6, 6);
+  ctx.fillStyle = '#fff';
+  ctx.font = '8px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('HOME', homeMX, homeMY - 5);
+  ctx.textAlign = 'start';
 
   // Creature dots — bright cyan glow
   var creaturePulse = 1 + Math.sin(_waveTime * 3.5) * 0.35;
