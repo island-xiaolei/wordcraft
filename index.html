@@ -6236,7 +6236,7 @@ function drawPet() {
 let _houseStage = 0; // 0=foundation, 1=frame, 2=walls, 3=roof, 4=door+windows, 5=complete
 let _inHouse = false; // true when player is inside house for review
 let _houseFailCount = 0; // wrong answers during house review (5 strikes = wolf breaks in)
-const HOUSE_CX = 24, HOUSE_CY = 24; // center tile of house (same as world center)
+const HOUSE_CX = 18, HOUSE_CY = 24; // house left of tree, tree stays at center (24,24)
 const HOUSE_TILES = 5; // house is 5x5 tiles
 const HOUSE_PX = HOUSE_CX * TILE + TILE / 2; // pixel center X of house
 const HOUSE_PY = HOUSE_CY * TILE + TILE / 2; // pixel center Y of house
@@ -6491,11 +6491,10 @@ function drawHouse() {
 function drawChristmasTree() {
   if (!_treeImg || !_treeImg.complete || _treeImg.naturalWidth === 0) return;
 
-  var treeOffsetX = TILE * 6; // tree well clear of house
-  var cx = (WORLD_W / 2) * TILE + TILE / 2 + treeOffsetX - camera.x;
+  var cx = (WORLD_W / 2) * TILE + TILE / 2 - camera.x;
   var cy = (WORLD_H / 2) * TILE + TILE / 2 - camera.y;
 
-  var treeH = TILE * 4; // smaller tree
+  var treeH = TILE * 6;
   var scale = treeH / _treeImg.naturalHeight;
   var treeW = _treeImg.naturalWidth * scale;
   var drawX = cx - treeW / 2;
@@ -7181,11 +7180,10 @@ function drawMinimap() {
 }
 
 // ==================== COLLISION DETECTION ====================
-function canMoveTo(px, py) {
+function canMoveTo(px, py, isWolf) {
   const tx = Math.floor(px / TILE);
   const ty = Math.floor(py / TILE);
 
-  // Check the 4 corners of the player's bounding box
   const checks = [
     [px - 12, py - 8],
     [px + 12, py - 8],
@@ -7198,8 +7196,8 @@ function canMoveTo(px, py) {
     const cty = Math.floor(cy / TILE);
     if (ctx < 0 || ctx >= WORLD_W || cty < 0 || cty >= WORLD_H) return false;
     if (!worldMap[cty][ctx].walkable) return false;
-    // 🏠 House collision: solid walls (except center door when complete)
-    if (_houseCollides(cx, cy)) return false;
+    // House collision: only blocks player, not wolf
+    if (!isWolf && _houseCollides(cx, cy)) return false;
   }
   return true;
 }
@@ -7295,7 +7293,7 @@ function updateWolf(dt) {
     for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
       const tx = wolf.x + Math.cos(a) * step;
       const ty = wolf.y + Math.sin(a) * step;
-      if (canMoveTo(tx, ty)) {
+      if (canMoveTo(tx, ty, true)) {
         const d = Math.hypot(player.x - tx, player.y - ty);
         if (d < bestDist) { bestDist = d; bestX = tx; bestY = ty; }
       }
@@ -7328,7 +7326,7 @@ function updateWolf(dt) {
     const nextTile = _wolfPath[0];
     const blocked = !canMoveTo(
       nextTile.x * TILE + TILE / 2,
-      nextTile.y * TILE + TILE / 2
+      nextTile.y * TILE + TILE / 2, true
     );
     if (blocked) _wolfPath = null; // force recalc next frame
   }
