@@ -2435,6 +2435,11 @@ function startNewDay() {
   wolf.tx = Math.floor(wolf.x / TILE);
   wolf.ty = Math.floor(wolf.y / TILE);
   _graceTimer = 5;
+  // Reset house for new day
+  _houseStage = 0;
+  _inHouse = false;
+  _houseFailCount = 0;
+  _saveHouseStage();
   // Respawn creatures for the new daily words
   spawnCreatures();
   // Close all overlays and restore quiz HTML (was destroyed by showWinScreen)
@@ -2466,6 +2471,19 @@ function completeWord(en) {
   // Check sentence completion
   _checkSentenceCompletion(en);
 
+  // Update house build stage (every 4 words = 1 stage)
+  var newStage = Math.min(5, Math.floor(dailyProgress / 4));
+  if (newStage !== _houseStage) {
+    _houseStage = newStage;
+    _saveHouseStage();
+    if (_houseStage >= 5) {
+      showToast('🏠 房子建好了！快去地图中央躲进去吧！');
+    } else {
+      var stageNames = ['地基', '框架', '砌墙', '盖顶', '装门', '完成'];
+      showToast('🏠 房子进度: ' + stageNames[_houseStage] + ' (' + (_houseStage * 4) + '/20)');
+    }
+  }
+
   if (dailyProgress >= dailyWords.length) {
     gameWin = true;
     // Increment days completed counter (only on first win trigger)
@@ -2475,13 +2493,13 @@ function completeWord(en) {
       try { daysDone = parseInt(localStorage.getItem('wordcraft_days') || '0'); } catch(e) {}
       daysDone++;
       try { localStorage.setItem('wordcraft_days', daysDone.toString()); } catch(e) {}
-      // Also track total sentences practiced
       let totalSents = 0;
       try { totalSents = parseInt(localStorage.getItem('wordcraft_sentences') || '0'); } catch(e) {}
       totalSents += (gameState.completedSentences ? gameState.completedSentences.length : 0);
       try { localStorage.setItem('wordcraft_sentences', totalSents.toString()); } catch(e) {}
     }
-    startWolfQuiz();
+    // ⚠ Don't auto-start wolf quiz — player must enter house first
+    // startWolfQuiz() is now called from enterHouse()
   }
 }
 
@@ -2900,6 +2918,7 @@ function startReviewSpeaking() {
       resultEl.textContent = '❌ 再试一次吧！你说了: "' + heard[0] + '"';
       resultEl.className = 'quiz-speech-result wrong';
       sfxWrong();
+      _houseWrongAnswer();
     }
   };
 
@@ -3005,7 +3024,95 @@ function finishSentenceReview() {
   reviewActive = false;
   reviewSentences = [];
   resumeBgMusic();
-  showWinScreen();
+
+  if (_inHouse) {
+    // Came from house → celebration!
+    _inHouse = false;
+    gamePaused = false;
+    document.getElementById('quiz-overlay').innerHTML =
+      '<div class="quiz-card" style="text-align:center;border-color:rgba(255,215,0,0.6)">' +
+        '<div style="font-size:80px">🏆</div>' +
+        '<div class="quiz-title">房子安全了！</div>' +
+        '<div class="quiz-subtitle">狼人灰溜溜地走了~</div>' +
+        '<div style="color:var(--gold);font-size:18px;margin:10px 0">全部单词和句子复习通过！</div>' +
+        '<button class="quiz-action-btn" onclick="document.getElementById(\'quiz-overlay\').classList.remove(\'show\'); _inHouse=false; gamePaused=false; showWinScreen();" style="margin-top:10px">🎉 太好了</button>' +
+      '</div>';
+    document.getElementById('quiz-overlay').classList.add('show');
+  } else {
+    showWinScreen();
+  }
+}
+
+// ═══════════════════════════════════════════
+// 🏠 House Entry / Review System
+// ═══════════════════════════════════════════
+function enterHouse() {
+  if (_inHouse) return;
+  _inHouse = true;
+  gamePaused = true;
+  pauseBgMusic();
+
+  // Brief flash effect before transitioning
+  document.getElementById('quiz-overlay').innerHTML =
+    '<div class="quiz-card" style="text-align:center;border-color:rgba(255,215,0,0.4)">' +
+      '<div style="font-size:80px">🏠</div>' +
+      '<div class="quiz-title" style="color:#ffd700">你躲进了房子！</div>' +
+      '<div class="quiz-subtitle">狼人在外面等着...</div>' +
+      '<div style="color:var(--red);margin:10px 0">🐺: 有本事别出来！</div>' +
+      '<button class="quiz-action-btn" onclick="document.getElementById(\'quiz-overlay\').classList.remove(\'show\'); startWolfQuizInHouse();" style="margin-top:10px;background:linear-gradient(135deg,#f44336,#ff5722)">🎤 开始复习挑战</button>' +
+    '</div>';
+  document.getElementById('quiz-overlay').classList.add('show');
+}
+
+function leaveHouse() {
+  _inHouse = false;
+  gamePaused = false;
+  document.getElementById('wolf-quiz-overlay').classList.remove('show');
+  document.getElementById('sentence-overlay').classList.remove('show');
+  document.getElementById('quiz-overlay').classList.remove('show');
+  resumeBgMusic();
+}
+
+// Track wrong answers during house review — 5 strikes = wolf breaks in
+function _houseWrongAnswer() {
+  if (!_inHouse) return;
+  _houseFailCount++;
+  var strikesLeft = 5 - _houseFailCount;
+  if (_houseFailCount >= 5) {
+    wolfBreaksIn();
+  } else if (strikesLeft <= 3) {
+    showToast('⚠️ 狼人在撞门！还剩 ' + strikesLeft + ' 次机会！', 2000);
+  }
+}
+
+// Called from house entry — same as startWolfQuiz but without the intro dialog
+function startWolfQuizInHouse() {
+  document.getElementById('quiz-overlay').classList.remove('show');
+  _houseFailCount = 0; // reset fail counter
+  startWolfQuiz();
+}
+
+// Wolf breaks into house — review failed
+function wolfBreaksIn() {
+  leaveHouse();
+  // Revert house door (stage 4 — door broken)
+  _houseStage = 4;
+  _saveHouseStage();
+  // Dramatic overlay
+  document.getElementById('quiz-overlay').innerHTML =
+    '<div class="quiz-card" style="text-align:center;border-color:rgba(244,67,54,0.6)">' +
+      '<div style="font-size:90px">🐺💥</div>' +
+      '<div class="quiz-title" style="color:var(--red)">狼人破门而入！</div>' +
+      '<div class="quiz-subtitle">你被抓住了...</div>' +
+      '<div style="color:var(--sub);font-size:14px;margin:8px 0">今日完成: ' + dailyProgress + '/20 个单词<br>门被破坏了，重新收集最后4个单词修门吧</div>' +
+      '<button class="quiz-action-btn" onclick="document.getElementById(\'quiz-overlay\').classList.remove(\'show\'); respawnPlayer();" style="margin-top:10px">🔄 重新挑战</button>' +
+    '</div>';
+  document.getElementById('quiz-overlay').classList.add('show');
+  playScreamSound();
+  // Reset last 4 words' daily progress so player must re-earn them
+  dailyProgress = Math.max(0, dailyProgress - 4);
+  _houseStage = 4;
+  saveDailyTask();
 }
 
 // ==================== WOLF QUIZ SYSTEM ====================
@@ -3129,6 +3236,7 @@ function startWolfQuizRecognition() {
               setTimeout(function() { showWolfQuizWord(wolfQuizIndex + 1); }, 1200);
             } else {
               sfxWrong();
+              _houseWrongAnswer();
               if (micEl2) micEl2.className = 'quiz-mic';
               if (statusEl2) statusEl2.textContent = '❌ 识别到: "' + heardClean + '"';
               if (resultEl2) { resultEl2.textContent = '❌ 再试一次！目标: ' + wolfQuizWords[wolfQuizIndex].en + ' (你说了: ' + heard[0] + ')'; resultEl2.className = 'quiz-speech-result wrong'; }
@@ -6122,6 +6230,264 @@ function drawPet() {
   ctx.textBaseline = 'alphabetic';
 }
 
+// ═══════════════════════════════════════════
+// 🏠 House System — map center building, built as words are learned
+// ═══════════════════════════════════════════
+let _houseStage = 0; // 0=foundation, 1=frame, 2=walls, 3=roof, 4=door+windows, 5=complete
+let _inHouse = false; // true when player is inside house for review
+let _houseFailCount = 0; // wrong answers during house review (5 strikes = wolf breaks in)
+const HOUSE_CX = 24, HOUSE_CY = 24; // center tile of house (same as world center)
+const HOUSE_TILES = 5; // house is 5x5 tiles
+const HOUSE_PX = HOUSE_CX * TILE + TILE / 2; // pixel center X of house
+const HOUSE_PY = HOUSE_CY * TILE + TILE / 2; // pixel center Y of house
+// House tile bounds (inclusive): tiles [22-26] x [22-26]
+const HOUSE_TX1 = HOUSE_CX - Math.floor(HOUSE_TILES / 2); // 22
+const HOUSE_TY1 = HOUSE_CY - Math.floor(HOUSE_TILES / 2); // 22
+
+// Load house stage from persistent storage
+(function() {
+  try {
+    var saved = localStorage.getItem('wordcraft_house');
+    if (saved) { var d = JSON.parse(saved); _houseStage = d.stage || 0; }
+  } catch(e) {}
+})();
+
+function _saveHouseStage() {
+  try { localStorage.setItem('wordcraft_house', JSON.stringify({ stage: _houseStage })); } catch(e) {}
+}
+
+// Check if a pixel position collides with the house walls
+// House is 5x5 tiles; at stage 5 the center door tile is walkable
+function _houseCollides(px, py) {
+  var tx = Math.floor(px / TILE);
+  var ty = Math.floor(py / TILE);
+  if (tx < HOUSE_TX1 || tx >= HOUSE_TX1 + HOUSE_TILES) return false;
+  if (ty < HOUSE_TY1 || ty >= HOUSE_TY1 + HOUSE_TILES) return false;
+  // Stage 5: center door tile is walkable (player can enter)
+  if (_houseStage >= 5 && tx === HOUSE_CX && ty === HOUSE_CY) return false;
+  return true; // all other house tiles are solid
+}
+
+// Check if player is near the house entrance (center door)
+function _playerNearHouseDoor() {
+  if (_houseStage < 5) return false; // house not complete
+  var dist = Math.hypot(player.x - HOUSE_PX, player.y - HOUSE_PY);
+  return dist < TILE * 1.8;
+}
+
+function drawHouse() {
+  var hx = HOUSE_CX * TILE + TILE / 2 - camera.x;
+  var hy = HOUSE_CY * TILE + TILE / 2 - camera.y;
+  var hw = HOUSE_TILES * TILE; // 280px
+  var hh = HOUSE_TILES * TILE; // 280px
+  var left = hx - hw / 2;
+  var top = hy - hh / 2;
+
+  // Skip if offscreen
+  if (left > canvas.width + 80 || left + hw < -80 || top > canvas.height + 80 || top + hh < -80) return;
+
+  var s = _houseStage; // 0-5
+
+  // ── Stage 0: Foundation outline ──
+  if (s >= 0) {
+    // Ground shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.fillRect(left + 6, top + 6, hw - 12, hh - 12);
+    // Foundation base
+    ctx.fillStyle = '#b0a090';
+    ctx.strokeStyle = '#8a7a6a';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(left + 4, top + 4, hw - 8, hh - 8, 6);
+    ctx.fill();
+    ctx.stroke();
+    // Dashed construction outline
+    ctx.strokeStyle = '#ffe066';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([8, 6]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.lineWidth = 1;
+  }
+
+  // ── Stage 1: Wooden frame posts ──
+  if (s >= 1) {
+    ctx.fillStyle = '#8B5E3C';
+    var postR = 6;
+    var posts = [
+      [left + 10, top + 10], [left + hw - 10, top + 10],
+      [left + 10, top + hh - 10], [left + hw - 10, top + hh - 10]
+    ];
+    posts.forEach(function(p) {
+      ctx.beginPath();
+      ctx.roundRect(p[0] - postR, p[1] - postR, postR * 2, postR * 2, 3);
+      ctx.fill();
+    });
+    // Cross beams
+    ctx.strokeStyle = '#6B4226';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(left + 10, top + 10); ctx.lineTo(left + hw - 10, top + 10);
+    ctx.moveTo(left + 10, top + hh - 10); ctx.lineTo(left + hw - 10, top + hh - 10);
+    ctx.moveTo(left + 10, top + 10); ctx.lineTo(left + 10, top + hh - 10);
+    ctx.moveTo(left + hw - 10, top + 10); ctx.lineTo(left + hw - 10, top + hh - 10);
+    ctx.stroke();
+    ctx.lineWidth = 1;
+  }
+
+  // ── Stage 2: Brick walls ──
+  if (s >= 2) {
+    // Wall body — inset slightly from foundation
+    var wallL = left + 12, wallT = top + 12, wallW = hw - 24, wallH = hh - 24;
+    // Fill
+    ctx.fillStyle = '#d4a574';
+    ctx.strokeStyle = '#a0724a';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(wallL, wallT, wallW, wallH, 4);
+    ctx.fill();
+    ctx.stroke();
+    // Brick lines (horizontal)
+    ctx.strokeStyle = '#c0986e';
+    ctx.lineWidth = 1;
+    for (var row = 0; row < 4; row++) {
+      var by = wallT + (row + 1) * wallH / 5;
+      ctx.beginPath();
+      ctx.moveTo(wallL + 2, by); ctx.lineTo(wallL + wallW - 2, by);
+      ctx.stroke();
+    }
+    ctx.lineWidth = 1;
+  }
+
+  // ── Stage 3: Roof ──
+  if (s >= 3) {
+    var roofL = left, roofT = top - 8;
+    var roofW = hw, roofH = hh * 0.45;
+    // Roof triangle
+    ctx.fillStyle = '#c0392b';
+    ctx.strokeStyle = '#922b21';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(roofL, roofT + roofH); // bottom-left
+    ctx.lineTo(roofL + roofW / 2, roofT - 10); // peak
+    ctx.lineTo(roofL + roofW, roofT + roofH); // bottom-right
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.lineWidth = 1;
+    // Roof shingle lines
+    ctx.strokeStyle = '#a93226';
+    ctx.lineWidth = 1;
+    for (var r = 1; r < 4; r++) {
+      var ry = roofT + roofH - (r * roofH / 4);
+      var halfW = (roofW / 2) * (1 - r / 4);
+      ctx.beginPath();
+      ctx.moveTo(roofL + roofW / 2 - halfW, ry);
+      ctx.lineTo(roofL + roofW / 2 + halfW, ry);
+      ctx.stroke();
+    }
+  }
+
+  // ── Stage 4: Door + Windows + Chimney ──
+  if (s >= 4) {
+    // Chimney (top-right of roof)
+    var chX = hx + hw * 0.25, chY = top - 15;
+    ctx.fillStyle = '#7f8c8d';
+    ctx.fillRect(chX - 8, chY - 25, 16, 30);
+    // Door (center-bottom)
+    var doorW = 20, doorH = 28;
+    var doorX = hx - doorW / 2, doorY = hy + hh / 2 - doorH - 4;
+    ctx.fillStyle = '#5D3A1A';
+    ctx.strokeStyle = '#3E2010';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(doorX, doorY, doorW, doorH, 3);
+    ctx.fill();
+    ctx.stroke();
+    ctx.lineWidth = 1;
+    // Door knob
+    ctx.fillStyle = '#f1c40f';
+    ctx.beginPath();
+    ctx.arc(doorX + doorW - 5, doorY + doorH / 2, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    // Windows (left and right of door)
+    var winW = 18, winH = 18;
+    var winPositions = [[hx - hw * 0.22, hy + 8], [hx + hw * 0.22, hy + 8]];
+    winPositions.forEach(function(wp) {
+      ctx.fillStyle = '#AED6F1';
+      ctx.strokeStyle = '#5D3A1A';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(wp[0] - winW / 2, wp[1] - winH / 2, winW, winH, 2);
+      ctx.fill();
+      ctx.stroke();
+      // Window cross
+      ctx.strokeStyle = '#5D3A1A';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(wp[0], wp[1] - winH / 2); ctx.lineTo(wp[0], wp[1] + winH / 2);
+      ctx.moveTo(wp[0] - winW / 2, wp[1]); ctx.lineTo(wp[0] + winW / 2, wp[1]);
+      ctx.stroke();
+    });
+    ctx.lineWidth = 1;
+  }
+
+  // ── Stage 5: Complete — glowing door + chimney smoke ✨ ──
+  if (s >= 5) {
+    // Door glow (pulsing)
+    var pulse = 0.5 + 0.5 * Math.sin(_waveTime * 3);
+    var doorW2 = 20, doorH2 = 28;
+    var doorX2 = hx - doorW2 / 2, doorY2 = hy + hh / 2 - doorH2 - 4;
+    ctx.shadowColor = '#ffd700';
+    ctx.shadowBlur = 10 + pulse * 8;
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath();
+    ctx.roundRect(doorX2 - 1, doorY2 - 1, doorW2 + 2, doorH2 + 2, 3);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    // Redraw door on top
+    ctx.fillStyle = '#5D3A1A';
+    ctx.beginPath();
+    ctx.roundRect(doorX2, doorY2, doorW2, doorH2, 3);
+    ctx.fill();
+    ctx.fillStyle = '#f1c40f';
+    ctx.beginPath();
+    ctx.arc(doorX2 + doorW2 - 5, doorY2 + doorH2 / 2, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    // Chimney smoke
+    for (var sm = 0; sm < 2; sm++) {
+      var smokeX = hx + hw * 0.25 + sm * 10;
+      var smokeY = top - 35 - sm * 8 - Math.sin(_waveTime * 2 + sm) * 8;
+      var smokeR = 6 + sm * 3 + Math.sin(_waveTime + sm) * 2;
+      ctx.fillStyle = 'rgba(200,200,200,' + (0.25 + sm * 0.1) + ')';
+      ctx.beginPath();
+      ctx.arc(smokeX, smokeY, smokeR, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // "ENTER" indicator above door
+    ctx.fillStyle = '#ffd700';
+    ctx.font = (_isMobile ? '11px' : '14px') + ' sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🚪ENTER', hx, doorY2 - 12);
+    ctx.textAlign = 'start';
+  }
+
+  // Always draw a small label showing build progress
+  if (s < 5) {
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    var lblW = _isMobile ? 80 : 100;
+    ctx.beginPath();
+    ctx.roundRect(hx - lblW / 2, hy - 8, lblW, 20, 4);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = (_isMobile ? '10px' : '12px') + ' sans-serif';
+    ctx.textAlign = 'center';
+    var stageNames = ['地基', '框架', '砌墙', '盖顶', '装门', '完成'];
+    ctx.fillText('🏠 ' + stageNames[s] + ' ' + (s * 4) + '/20', hx, hy + 7);
+    ctx.textAlign = 'start';
+  }
+}
+
 function drawChristmasTree() {
   if (!_treeImg || !_treeImg.complete || _treeImg.naturalWidth === 0) return;
 
@@ -6832,6 +7198,8 @@ function canMoveTo(px, py) {
     const cty = Math.floor(cy / TILE);
     if (ctx < 0 || ctx >= WORLD_W || cty < 0 || cty >= WORLD_H) return false;
     if (!worldMap[cty][ctx].walkable) return false;
+    // 🏠 House collision: solid walls (except center door when complete)
+    if (_houseCollides(cx, cy)) return false;
   }
   return true;
 }
@@ -6880,6 +7248,7 @@ function findWolfPath() {
 function updateWolf(dt) {
   if (gameOver || gameWin) return;
   if (_graceTimer > 0) return; // grace period — wolf frozen
+  if (_inHouse) return; // player is in house — wolf waits outside
 
   var dx = player.x - wolf.x;
   var dy = player.y - wolf.y;
@@ -7140,20 +7509,24 @@ function update(dt) {
   if ((keys[' '] || _joystick.wasTap) && !quizActive) {
     keys[' '] = false;
     _joystick.wasTap = false;
-    let nearest = null;
-    let nearestDist = TILE * 1.8; // interaction range scales with tile
-    for (const c of creatures) {
-      const dist = Math.hypot(player.x - c.x, player.y - c.y);
-      if (dist < nearestDist) {
-        nearestDist = dist;
-        nearest = c;
+    // 🏠 Check house entry first (complete house + near door)
+    if (_playerNearHouseDoor() && !_inHouse) {
+      enterHouse();
+    } else {
+      let nearest = null;
+      let nearestDist = TILE * 1.8;
+      for (const c of creatures) {
+        const dist = Math.hypot(player.x - c.x, player.y - c.y);
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearest = c;
+        }
       }
-    }
-    if (nearest) {
-      openQuiz(nearest);
-    } else if (_joystick.wasTap && foodAvailable) {
-      // Tap on empty space near the player → collect food
-      collectFood();
+      if (nearest) {
+        openQuiz(nearest);
+      } else if (_joystick.wasTap && foodAvailable) {
+        collectFood();
+      }
     }
     _joystick.wasTap = false;
   }
@@ -7317,6 +7690,7 @@ function render() {
   });
 
   try { drawWorld(); } catch(e) { console.error('drawWorld:', e); }
+  try { drawHouse(); } catch(e) { console.error('drawHouse:', e); }
   try { drawChristmasTree(); } catch(e) {}
   try { drawWolf(); } catch(e) { console.error('drawWolf:', e); }
   try { drawPlayer(); } catch(e) { console.error('drawPlayer:', e); }
