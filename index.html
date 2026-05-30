@@ -6462,9 +6462,9 @@ function drawHouse() {
       ctx.beginPath(); ctx.moveTo(wp[0], wp[1]-28); ctx.lineTo(wp[0], wp[1]+24);
       ctx.moveTo(wp[0]-30, wp[1]-2); ctx.lineTo(wp[0]+30, wp[1]-2); ctx.stroke();
     });
-    // Door cutout
+    // Door cutout — big
     ctx.fillStyle = '#3a2a1a';
-    ctx.beginPath(); ctx.roundRect(hx-14, hy+hh/2-34, 28, 36, 3); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(hx-25, hy+hh/2-58, 50, 62, 5); ctx.fill();
   }
 
   // ═══════ Stage 4: Roof + Trim ═══════
@@ -6498,16 +6498,17 @@ function drawHouse() {
       ctx.beginPath(); ctx.moveTo(wp[0], wp[1]-30); ctx.lineTo(wp[0], wp[1]+26);
       ctx.moveTo(wp[0]-32, wp[1]-2); ctx.lineTo(wp[0]+32, wp[1]-2); ctx.stroke();
     });
-    // Door
-    var doorX = hx - 14, doorY = hy + hh/2 - 36;
-    ctx.fillStyle = '#6B3A2A'; ctx.strokeStyle = '#3E1A0A'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.roundRect(doorX, doorY, 28, 38, 4); ctx.fill(); ctx.stroke();
+    // Big door
+    var doorX = hx - 25, doorY = hy + hh/2 - 60;
+    ctx.fillStyle = '#6B3A2A'; ctx.strokeStyle = '#3E1A0A'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.roundRect(doorX, doorY, 50, 64, 6); ctx.fill(); ctx.stroke();
     // Door panels
-    ctx.strokeStyle = '#5a2a1a'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.roundRect(doorX+4, doorY+4, 20, 14, 2); ctx.stroke();
-    ctx.beginPath(); ctx.roundRect(doorX+4, doorY+20, 20, 14, 2); ctx.stroke();
+    ctx.strokeStyle = '#5a2a1a'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.roundRect(doorX+6, doorY+6, 16, 22, 3); ctx.stroke();
+    ctx.beginPath(); ctx.roundRect(doorX+28, doorY+6, 16, 22, 3); ctx.stroke();
+    ctx.beginPath(); ctx.roundRect(doorX+6, doorY+34, 38, 24, 3); ctx.stroke();
     // Knob
-    ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(doorX+22, doorY+20, 3, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(doorX+42, doorY+34, 4, 0, Math.PI*2); ctx.fill();
   }
 
   // ═══════ Stage 5: Complete ═══════
@@ -6533,24 +6534,24 @@ function drawHouse() {
     ctx.beginPath(); ctx.roundRect(hx-16, hy+hh/2-38, 32, 42, 5); ctx.fill();
     ctx.shadowBlur = 0;
     // Re-draw door on top
-    var doorX5 = hx - 14, doorY5 = hy + hh/2 - 36;
-    ctx.fillStyle = '#6B3A2A'; ctx.beginPath(); ctx.roundRect(doorX5, doorY5, 28, 38, 4); ctx.fill();
-    ctx.strokeStyle = '#f1c40f'; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(doorX5+22, doorY5+20, 3, 0, Math.PI*2); ctx.fill();
-    // Big bouncing label at roof peak
-    var roofPeakY = top - hh * 0.42 - 22; // top of the roof triangle
+    var doorX5 = hx - 25, doorY5 = hy + hh/2 - 60;
+    ctx.fillStyle = '#6B3A2A'; ctx.beginPath(); ctx.roundRect(doorX5, doorY5, 50, 64, 6); ctx.fill();
+    ctx.strokeStyle = '#f1c40f'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(doorX5+42, doorY5+34, 4, 0, Math.PI*2); ctx.fill();
+    // HUGE bouncing label at roof peak
+    var roofPeakY = top - hh * 0.42 - 22;
     var bounce = Math.sin(_waveTime * 2.5) * 5;
     var labelY2 = roofPeakY - 8 + bounce;
-    var labelW2 = _isMobile ? 130 : 150;
-    var labelH2 = 30;
-    ctx.fillStyle = 'rgba(220,30,30,0.9)';
-    ctx.beginPath(); ctx.roundRect(hx - labelW2/2, labelY2 - labelH2/2, labelW2, labelH2, 14); ctx.fill();
-    ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.roundRect(hx - labelW2/2, labelY2 - labelH2/2, labelW2, labelH2, 14); ctx.stroke();
+    var labelW2 = _isMobile ? 180 : 220;
+    var labelH2 = 42;
+    ctx.fillStyle = 'rgba(220,20,20,0.92)';
+    ctx.beginPath(); ctx.roundRect(hx - labelW2/2, labelY2 - labelH2/2, labelW2, labelH2, 18); ctx.fill();
+    ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.roundRect(hx - labelW2/2, labelY2 - labelH2/2, labelW2, labelH2, 18); ctx.stroke();
     ctx.fillStyle = '#fff';
-    ctx.font = (_isMobile ? 'bold 16px' : 'bold 18px') + ' sans-serif';
+    ctx.font = (_isMobile ? 'bold 28px' : 'bold 36px') + ' sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('🏠 快回家！', hx, labelY2 + 5);
+    ctx.fillText('🏠 快回家！', hx, labelY2 + 8);
     ctx.textAlign = 'start';
   }
 
@@ -7234,22 +7235,30 @@ function drawMinimap() {
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  // 🏠 HOME marker on minimap — bright and visible
+  // 🏠 HOME marker on minimap — big colorful glow
   var homeMX = mmX + HOUSE_PX * scale;
   var homeMY = mmY + HOUSE_PY * scale;
-  // Glow
-  var homePulse = 1 + Math.sin(_waveTime * 3) * 0.2;
-  ctx.fillStyle = 'rgba(255,215,0,' + (0.4 * homePulse) + ')';
+  var homePulse = 1 + Math.sin(_waveTime * 3) * 0.3;
+  // Outer glow
+  ctx.fillStyle = 'rgba(255,60,60,' + (0.5 * homePulse) + ')';
   ctx.beginPath();
-  ctx.arc(homeMX, homeMY, 7 * homePulse + 2, 0, Math.PI*2);
+  ctx.arc(homeMX, homeMY, 9 * homePulse, 0, Math.PI*2);
+  ctx.fill();
+  // Mid glow
+  ctx.fillStyle = 'rgba(255,200,0,' + (0.7 * homePulse) + ')';
+  ctx.beginPath();
+  ctx.arc(homeMX, homeMY, 6 * homePulse, 0, Math.PI*2);
   ctx.fill();
   // House icon
-  ctx.fillStyle = '#ffd700';
-  ctx.fillRect(homeMX - 3.5, homeMY - 3.5, 7, 7);
+  ctx.fillStyle = '#ff3333';
+  ctx.fillRect(homeMX - 4, homeMY - 4, 8, 8);
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+  ctx.strokeRect(homeMX - 4, homeMY - 4, 8, 8);
+  // Label
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 7px sans-serif';
+  ctx.font = 'bold 8px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('H', homeMX, homeMY - 6);
+  ctx.fillText('HOME', homeMX, homeMY - 7);
   ctx.textAlign = 'start';
 
   // Creature dots — bright cyan glow
