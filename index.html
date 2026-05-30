@@ -2493,6 +2493,7 @@ function completeWord(en) {
     _markHouseTiles(); // update door walkability
     if (_houseStage >= 5) {
       showToast('🏠 房子建好了！快去右上角(HOME)躲进去！按空格进入', 4000);
+      _clearHouseDoorArea(); // move any creatures blocking the entrance
     } else {
       var stageNames = ['地基', '框架', '砌墙', '盖顶', '装门', '完成'];
       showToast('🏠 房子进度: ' + stageNames[_houseStage] + ' (' + (_houseStage * 4) + '/20)');
@@ -6342,9 +6343,30 @@ function _houseCollides(px, py) {
 
 // Check if player is near the house entrance (center door)
 function _playerNearHouseDoor() {
-  if (_houseStage < 5) return false; // house not complete
+  if (_houseStage < 5) return false;
   var dist = Math.hypot(player.x - HOUSE_PX, player.y - HOUSE_PY);
-  return dist < TILE * 1.8;
+  return dist < TILE * 3; // wider than creature range (1.8) so house always wins
+}
+
+// Clear creatures blocking the house door when house is complete
+function _clearHouseDoorArea() {
+  for (var i = 0; i < creatures.length; i++) {
+    var c = creatures[i];
+    var dist = Math.hypot(c.x - HOUSE_PX, c.y - HOUSE_PY);
+    if (dist < TILE * 2) {
+      // Relocate creature to random walkable tile
+      for (var tries = 0; tries < 50; tries++) {
+        var tx = Math.floor(Math.random() * WORLD_W);
+        var ty = Math.floor(Math.random() * WORLD_H);
+        if (worldMap[ty] && worldMap[ty][tx] && worldMap[ty][tx].walkable) {
+          c.x = tx * TILE + TILE / 2;
+          c.y = ty * TILE + TILE / 2;
+          c.tx = tx; c.ty = ty;
+          break;
+        }
+      }
+    }
+  }
 }
 
 function drawHouse() {
