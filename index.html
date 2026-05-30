@@ -1404,6 +1404,7 @@ function closeFoodQuiz() {
 function startFoodRecognition() {
   if (!currentFood) return;
   if (foodRecognitionActive) return;
+  pauseBgMusic();
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   if (!_micStream || !_micStream.active) {
     _ensureMicStream().then(function(ok) {
@@ -2861,15 +2862,14 @@ function showReviewSentence(idx) {
   document.getElementById('s-replay-btn').style.display = 'none';
   document.getElementById('s-next-btn').style.display = 'none';
   document.getElementById('s-finish-btn').style.display = 'none';
-  document.getElementById('s-typing-area').style.display = 'none';
-  _sFailCount = 0; // reset speech fail counter for new sentence
+  document.getElementById('s-typing-area').style.display = 'block';
+  document.getElementById('s-typing-input').value = '';
+  _sFailCount = 0;
 
   document.getElementById('sentence-overlay').classList.add('show');
 
   // Auto-play pronunciation
   setTimeout(() => speakReviewSentence(), 500);
-  // Mobile voice unreliable → always show typing input immediately
-  setTimeout(() => showSentenceTyping(), 800);
 }
 
 function speakReviewSentence() {
@@ -2921,6 +2921,7 @@ function startReviewSpeaking() {
   if (!_isAndroid && !SpeechRecognition) { showToast('⚠️ 浏览器不支持语音识别'); return; }
   if (reviewRecognition) { try { reviewRecognition.abort(); } catch(e) {} }
 
+  pauseBgMusic();
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   if (!_micStream || !_micStream.active) {
     _ensureMicStream().then(function(ok) {
@@ -3241,6 +3242,7 @@ function startWolfQuizRecognition() {
   if (!wolfQuizActive || wolfQuizIndex >= wolfQuizWords.length) return;
   if (wolfQuizRecognition) { try { wolfQuizRecognition.abort(); } catch(e) {} }
 
+  pauseBgMusic();
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   if (!_micStream || !_micStream.active) {
     _ensureMicStream().then(function(ok) {
@@ -4815,6 +4817,7 @@ function startSpeakingTest() {
 
 function startRecognition() {
   if (recognitionActive) return;
+  pauseBgMusic();
 
   // On Android, Google SR is blocked — use Baidu ASR directly
   if (_isAndroid) {
