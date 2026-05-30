@@ -654,7 +654,7 @@ canvas{display:block;position:absolute;top:0;left:0}
       <button class="quiz-action-btn" onclick="startReviewSpeaking()" style="background:linear-gradient(135deg,#42a5f5,#7c4dff)">🎤 朗读句子</button>
       <button class="quiz-action-btn" onclick="showSentenceTyping()" style="background:linear-gradient(135deg,#f44336,#d32f2f);font-size:18px;font-weight:700;padding:12px 24px">✏️ 语音不行？点我打字输入</button>
     </div>
-    <div id="s-typing-area" style="display:none;margin-top:10px;text-align:center">
+    <div id="s-typing-area" style="margin-top:10px;text-align:center">
       <input type="text" id="s-typing-input" placeholder="输入英文句子..." style="width:90%;padding:14px;font-size:18px;border-radius:10px;border:3px solid #ffd700;text-align:center" onkeydown="if(event.key==='Enter')checkSentenceTyping()">
       <button class="quiz-action-btn" onclick="checkSentenceTyping()" style="display:block;margin:10px auto;background:linear-gradient(135deg,#4caf50,#2e7d32);font-size:20px;font-weight:700;padding:14px 36px">✅ 提交答案</button>
     </div>
@@ -2878,7 +2878,6 @@ function speakReviewSentence() {
 }
 
 function showSentenceTyping() {
-  document.getElementById('s-typing-area').style.display = 'block';
   document.getElementById('s-typing-input').value = '';
   document.getElementById('s-typing-input').focus();
 }
