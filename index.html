@@ -655,8 +655,8 @@ canvas{display:block;position:absolute;top:0;left:0}
       <button class="quiz-action-btn" onclick="showSentenceTyping()" style="background:linear-gradient(135deg,#f44336,#d32f2f);font-size:18px;font-weight:700;padding:12px 24px">✏️ 语音不行？点我打字输入</button>
     </div>
     <div id="s-typing-area" style="display:none;margin-top:10px;text-align:center">
-      <input type="text" id="s-typing-input" placeholder="输入英文句子..." style="width:85%;padding:10px;font-size:16px;border-radius:8px;border:2px solid #ccc;text-align:center" onkeydown="if(event.key==='Enter')checkSentenceTyping()">
-      <button class="quiz-action-btn" onclick="checkSentenceTyping()" style="display:block;margin:8px auto;background:linear-gradient(135deg,#66bb6a,#43a047)">✅ 提交</button>
+      <input type="text" id="s-typing-input" placeholder="输入英文句子..." style="width:90%;padding:14px;font-size:18px;border-radius:10px;border:3px solid #ffd700;text-align:center" onkeydown="if(event.key==='Enter')checkSentenceTyping()">
+      <button class="quiz-action-btn" onclick="checkSentenceTyping()" style="display:block;margin:10px auto;background:linear-gradient(135deg,#4caf50,#2e7d32);font-size:20px;font-weight:700;padding:14px 36px">✅ 提交答案</button>
     </div>
     <div class="quiz-speech-result" id="s-speech-result" style="margin-top:10px;min-height:24px"></div>
     <button class="quiz-speak" id="s-replay-btn" style="display:none;margin:8px auto" onclick="_playMyRecording()">🔊 听我的发音</button>
@@ -2868,6 +2868,8 @@ function showReviewSentence(idx) {
 
   // Auto-play pronunciation
   setTimeout(() => speakReviewSentence(), 500);
+  // Android: voice unreliable → auto-show typing input immediately
+  if (_isAndroid) { setTimeout(() => showSentenceTyping(), 800); }
 }
 
 function speakReviewSentence() {
