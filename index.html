@@ -629,6 +629,10 @@ canvas{display:block;position:absolute;top:0;left:0}
     <div class="food-mic" id="food-mic">🎤</div>
     <div class="food-mic-status" id="food-mic-status">请朗读上面的句子</div>
     <div class="food-speech-result" id="food-speech-result"></div>
+    <div id="food-typing-area" style="margin-top:10px;text-align:center">
+      <input type="text" id="food-typing-input" placeholder="输入英文句子..." style="width:85%;padding:12px;font-size:16px;border-radius:10px;border:3px solid #ff9800;text-align:center" onkeydown="if(event.key==='Enter')checkFoodTyping()">
+      <button class="quiz-action-btn" onclick="checkFoodTyping()" style="display:block;margin:8px auto;background:linear-gradient(135deg,#66bb6a,#43a047)">✅ 提交答案</button>
+    </div>
     <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap">
       <button class="quiz-action-btn" onclick="startFoodRecognition()" style="background:linear-gradient(135deg,#ff9800,#f44336)">🎤 开始朗读</button>
       <button class="quiz-action-btn secondary" id="food-retry-btn" style="display:none" onclick="retryFoodSpeaking()">🔄 再试一次</button>
@@ -1382,6 +1386,8 @@ function openFoodQuiz() {
   document.getElementById('food-retry-btn').style.display = 'none';
   document.getElementById('food-close-btn').style.display = 'none';
   document.getElementById('food-replay-btn').style.display = 'none';
+  document.getElementById('food-typing-area').style.display = 'block';
+  document.getElementById('food-typing-input').value = '';
   document.getElementById('food-sentence-div').classList.add('show');
   overlay.classList.add('show');
   // Auto-play food sentence pronunciation
@@ -1399,6 +1405,42 @@ function closeFoodQuiz() {
   foodQuizActive = false;
   quizPhase = 'listen';
   resumeBgMusic();
+}
+
+function checkFoodTyping() {
+  var input = document.getElementById('food-typing-input').value.trim();
+  if (!input || !currentFood) return;
+  var fw = currentFood.en.toLowerCase();
+  var ts = (_currentFoodSentence && _currentFoodSentence.en) ? _currentFoodSentence.en.toLowerCase().replace(/[^a-z\s]/g,'').trim() : fw;
+  var tw = ts.split(/\s+/).filter(function(w) { return w.length >= 2; });
+  var inputClean = input.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+  var containsFood = inputClean.indexOf(fw) !== -1;
+  var matchedWords = 0;
+  for (var twi = 0; twi < tw.length; twi++) {
+    if (inputClean.indexOf(tw[twi]) !== -1) matchedWords++;
+  }
+  var sentenceMatch = matchedWords >= Math.ceil(tw.length * 0.5);
+  var isCorrect = containsFood && (sentenceMatch || tw.length <= 2);
+  var resultEl = document.getElementById('food-speech-result');
+  if (isCorrect) {
+    resultEl.textContent = '✅ 很棒！吃到了 ' + currentFood.emoji + '！';
+    resultEl.className = 'quiz-speech-result correct';
+    document.getElementById('food-mic-status').textContent = '+50 体力恢复！';
+    playerStamina = Math.min(MAX_STAMINA, playerStamina + 50);
+    sfxCollect();
+    updateHUD();
+    updateFoodButton();
+    document.getElementById('food-retry-btn').style.display = 'none';
+    document.getElementById('food-close-btn').style.display = 'inline-block';
+    document.getElementById('food-replay-btn').style.display = 'none';
+    document.getElementById('food-typing-area').style.display = 'none';
+  } else {
+    resultEl.textContent = '❌ 不对哦，请说完整句子: ' + ts;
+    resultEl.className = 'quiz-speech-result wrong';
+    sfxWrong();
+    document.getElementById('food-typing-input').value = '';
+    document.getElementById('food-typing-input').focus();
+  }
 }
 
 function startFoodRecognition() {
@@ -1424,6 +1466,7 @@ function startFoodRecognition() {
         if (!blob) {
           foodRecognitionActive = false;
           document.getElementById('food-mic').classList.remove('listening');
+          document.getElementById('food-typing-area').style.display = 'block';
           document.getElementById('food-mic-status').textContent = '录音失败，请重试';
           document.getElementById('food-retry-btn').style.display = 'inline-block';
           return;
@@ -1448,6 +1491,7 @@ function startFoodRecognition() {
             var micEl = document.getElementById('food-mic');
             var statusEl = document.getElementById('food-mic-status');
             if (isCorrect) {
+              document.getElementById('food-typing-area').style.display = 'none';
               resultEl.textContent = '✅ 很棒！吃到了 ' + currentFood.emoji + '！';
               resultEl.className = 'quiz-speech-result correct';
               micEl.className = 'quiz-mic success';
@@ -1517,6 +1561,7 @@ function startFoodRecognition() {
 
     if (isCorrect) {
       foodRecognitionActive = false;
+      document.getElementById('food-typing-area').style.display = 'none';
       resultEl.textContent = '✅ 很棒！吃到了 ' + currentFood.emoji + '！';
       resultEl.className = 'quiz-speech-result correct';
       micEl.className = 'quiz-mic success';
@@ -1533,6 +1578,7 @@ function startFoodRecognition() {
       resultEl.className = 'quiz-speech-result wrong';
       micEl.className = 'quiz-mic';
       statusEl.textContent = '请说出完整句子，再试一次';
+      document.getElementById('food-typing-area').style.display = 'block';
       document.getElementById('food-retry-btn').style.display = 'inline-block';
       sfxWrong();
     }
