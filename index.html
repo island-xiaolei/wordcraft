@@ -6491,7 +6491,7 @@ function drawHouse() {
 function drawChristmasTree() {
   if (!_treeImg || !_treeImg.complete || _treeImg.naturalWidth === 0) return;
 
-  var treeOffsetX = TILE * 3.5; // offset tree right of house
+  var treeOffsetX = TILE * 5.5; // offset tree right of house (was 3.5, still overlapping)
   var cx = (WORLD_W / 2) * TILE + TILE / 2 + treeOffsetX - camera.x;
   var cy = (WORLD_H / 2) * TILE + TILE / 2 - camera.y;
 
