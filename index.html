@@ -2440,6 +2440,7 @@ function startNewDay() {
   _inHouse = false;
   _houseFailCount = 0;
   _saveHouseStage();
+  _markHouseTiles(); // block house area so creatures/items don't spawn inside
   // Respawn creatures for the new daily words
   spawnCreatures();
   // Close all overlays and restore quiz HTML (was destroyed by showWinScreen)
@@ -2476,6 +2477,7 @@ function completeWord(en) {
   if (newStage !== _houseStage) {
     _houseStage = newStage;
     _saveHouseStage();
+    _markHouseTiles(); // update door walkability
     if (_houseStage >= 5) {
       showToast('🏠 房子建好了！快去地图中央躲进去吧！');
     } else {
@@ -3098,6 +3100,7 @@ function wolfBreaksIn() {
   // Revert house door (stage 4 — door broken)
   _houseStage = 4;
   _saveHouseStage();
+  _markHouseTiles(); // door broken → unwalkable again
   // Dramatic overlay
   document.getElementById('quiz-overlay').innerHTML =
     '<div class="quiz-card" style="text-align:center;border-color:rgba(244,67,54,0.6)">' +
@@ -6258,6 +6261,21 @@ function _saveHouseStage() {
 
 // Check if a pixel position collides with the house walls
 // House is 5x5 tiles; at stage 5 the center door tile is walkable
+// Mark house tiles as unwalkable so creatures never spawn inside
+function _markHouseTiles() {
+  for (var ty = HOUSE_TY1; ty < HOUSE_TY1 + HOUSE_TILES; ty++) {
+    for (var tx = HOUSE_TX1; tx < HOUSE_TX1 + HOUSE_TILES; tx++) {
+      if (ty >= 0 && ty < WORLD_H && tx >= 0 && tx < WORLD_W) {
+        worldMap[ty][tx].walkable = false;
+      }
+    }
+  }
+  // Door tile at stage 5: walkable so player can stand at entrance
+  if (_houseStage >= 5) {
+    worldMap[HOUSE_CY][HOUSE_CX].walkable = true;
+  }
+}
+
 function _houseCollides(px, py) {
   var tx = Math.floor(px / TILE);
   var ty = Math.floor(py / TILE);
@@ -8132,6 +8150,7 @@ function init() {
   } catch(e) {}
   currentLayout = savedLayout;
   generateWorld(savedLayout);
+  _markHouseTiles(); // block house area for creature spawning
   loadGame();
   // Daily task — must run before spawnCreatures
   if (!loadDailyTask()) {
