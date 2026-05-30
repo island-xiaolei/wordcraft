@@ -660,6 +660,11 @@ canvas{display:block;position:absolute;top:0;left:0}
     <div class="s-actions">
       <button class="quiz-speak" onclick="speakReviewSentence()">🔊 听发音</button>
       <button class="quiz-action-btn" onclick="startReviewSpeaking()" style="background:linear-gradient(135deg,#42a5f5,#7c4dff)">🎤 朗读句子</button>
+      <button class="quiz-action-btn secondary" onclick="showSentenceTyping()" style="background:linear-gradient(135deg,#78909c,#546e7a)">✏️ 打字输入</button>
+    </div>
+    <div id="s-typing-area" style="display:none;margin-top:10px;text-align:center">
+      <input type="text" id="s-typing-input" placeholder="输入英文句子..." style="width:85%;padding:10px;font-size:16px;border-radius:8px;border:2px solid #ccc;text-align:center" onkeydown="if(event.key==='Enter')checkSentenceTyping()">
+      <button class="quiz-action-btn" onclick="checkSentenceTyping()" style="display:block;margin:8px auto;background:linear-gradient(135deg,#66bb6a,#43a047)">✅ 提交</button>
     </div>
     <div class="quiz-speech-result" id="s-speech-result" style="margin-top:10px;min-height:24px"></div>
     <button class="quiz-speak" id="s-replay-btn" style="display:none;margin:8px auto" onclick="_playMyRecording()">🔊 听我的发音</button>
@@ -2862,6 +2867,7 @@ function showReviewSentence(idx) {
   document.getElementById('s-replay-btn').style.display = 'none';
   document.getElementById('s-next-btn').style.display = 'none';
   document.getElementById('s-finish-btn').style.display = 'none';
+  document.getElementById('s-typing-area').style.display = 'none';
 
   document.getElementById('sentence-overlay').classList.add('show');
 
@@ -2872,6 +2878,46 @@ function showReviewSentence(idx) {
 function speakReviewSentence() {
   if (!reviewActive || reviewIndex >= reviewSentences.length) return;
   _speakEnglish(reviewSentences[reviewIndex].en);
+}
+
+function showSentenceTyping() {
+  document.getElementById('s-typing-area').style.display = 'block';
+  document.getElementById('s-typing-input').value = '';
+  document.getElementById('s-typing-input').focus();
+}
+
+function checkSentenceTyping() {
+  var input = document.getElementById('s-typing-input').value.trim();
+  if (!input) return;
+  var target = reviewSentences[reviewIndex].en.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+  var inputClean = input.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+  var targetWords = target.split(/\s+/);
+  var inputWords = inputClean.split(/\s+/);
+  var matchCount = 0;
+  for (var i = 0; i < targetWords.length; i++) {
+    if (inputWords.some(function(w) { return fuzzyMatch(w, targetWords[i]); })) matchCount++;
+  }
+  var ratio = matchCount / targetWords.length;
+  var resultEl = document.getElementById('s-speech-result');
+  if (ratio >= 0.5) {
+    resultEl.textContent = '✅ 正确！';
+    resultEl.className = 'quiz-speech-result correct';
+    sfxCollect();
+    document.getElementById('s-typing-area').style.display = 'none';
+    document.getElementById('s-replay-btn').style.display = 'none';
+    document.getElementById('s-next-btn').style.display = 'inline-block';
+    if (reviewIndex >= reviewSentences.length - 1) {
+      document.getElementById('s-finish-btn').style.display = 'inline-block';
+      document.getElementById('s-next-btn').style.display = 'none';
+    }
+  } else {
+    resultEl.textContent = '❌ 不对哦！试试：' + reviewSentences[reviewIndex].en;
+    resultEl.className = 'quiz-speech-result wrong';
+    sfxWrong();
+    _houseWrongAnswer();
+    document.getElementById('s-typing-input').value = '';
+    document.getElementById('s-typing-input').focus();
+  }
 }
 
 function startReviewSpeaking() {
