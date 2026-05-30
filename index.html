@@ -2868,8 +2868,8 @@ function showReviewSentence(idx) {
 
   // Auto-play pronunciation
   setTimeout(() => speakReviewSentence(), 500);
-  // Android: voice unreliable → auto-show typing input immediately
-  if (_isAndroid) { setTimeout(() => showSentenceTyping(), 800); }
+  // Mobile voice unreliable → always show typing input immediately
+  setTimeout(() => showSentenceTyping(), 800);
 }
 
 function speakReviewSentence() {
