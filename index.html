@@ -386,13 +386,6 @@ canvas{display:block;position:absolute;top:0;left:0}
 #food-btn .hint-text{display:none;font-size:14px;font-weight:700;color:#fff;text-shadow:0 0 6px rgba(255,0,0,0.6)}
 #food-btn.no-stamina .hint-text{display:inline}
 #food-btn:hover{transform:scale(1.15)}
-#home-btn{position:fixed;z-index:16;display:none;align-items:center;justify-content:center;gap:4px;
-  width:auto;height:auto;border-radius:28px;background:rgba(255,180,0,0.9);border:3px solid #ffd700;
-  color:#fff;font-size:20px;font-weight:700;cursor:pointer;pointer-events:auto;
-  animation:homePulse 0.8s ease-in-out infinite alternate;
-  box-shadow:0 4px 20px rgba(255,215,0,0.6);padding:10px 20px;white-space:nowrap}
-@keyframes homePulse{0%{box-shadow:0 4px 20px rgba(255,215,0,0.6)}100%{box-shadow:0 4px 32px rgba(255,215,0,0.9),0 0 44px rgba(255,200,0,0.4)}}
-#home-btn:active{transform:scale(0.9)}
 #food-btn:active{transform:scale(0.9)}
 @keyframes foodBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
@@ -621,7 +614,6 @@ canvas{display:block;position:absolute;top:0;left:0}
 
 <!-- Food button - floating near player -->
 <button id="food-btn" onclick="collectFood()" title="点击收集食物恢复体力"><span class="hint-text">点击食物补充体力</span>🍎</button>
-<button id="home-btn" onclick="enterHouse()">🏠 回家躲起来！</button>
 
 <!-- Food quiz overlay -->
 <div id="food-overlay">
@@ -2492,7 +2484,7 @@ function completeWord(en) {
     _saveHouseStage();
     _markHouseTiles(); // update door walkability
     if (_houseStage >= 5) {
-      showToast('🏠 房子建好了！快去右上角(HOME)躲进去！按空格进入', 4000);
+      showToast('🏠 房子建好了！快去地图右上角，点击房子回家！', 4000);
       _clearHouseDoorArea(); // move any creatures blocking the entrance
     } else {
       var stageNames = ['地基', '框架', '砌墙', '盖顶', '装门', '完成'];
@@ -6549,9 +6541,18 @@ function drawHouse() {
     ctx.fillStyle = '#6B3A2A'; ctx.beginPath(); ctx.roundRect(doorX5, doorY5, 28, 38, 4); ctx.fill();
     ctx.strokeStyle = '#f1c40f'; ctx.lineWidth = 1.5; ctx.stroke();
     ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(doorX5+22, doorY5+20, 3, 0, Math.PI*2); ctx.fill();
-    // "ENTER" label
-    ctx.fillStyle = '#ffd700'; ctx.font = (_isMobile ? 'bold 11px' : 'bold 14px') + ' sans-serif';
-    ctx.textAlign = 'center'; ctx.fillText('🚪 ENTER', hx, doorY5 - 10); ctx.textAlign = 'start';
+    // Big bouncing "快回家!" label above house
+    var labelBounce = Math.sin(_waveTime * 3) * 4;
+    var labelY = top - 18 + labelBounce;
+    // Background pill
+    var labelW = _isMobile ? 100 : 120;
+    ctx.fillStyle = 'rgba(255,60,30,0.85)';
+    ctx.beginPath(); ctx.roundRect(hx - labelW/2, labelY - 12, labelW, 24, 12); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = (_isMobile ? 'bold 14px' : 'bold 16px') + ' sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🏠 快回家!', hx, labelY + 5);
+    ctx.textAlign = 'start';
   }
 
   // ── Build progress label ──
@@ -7691,17 +7692,6 @@ function update(dt) {
     foodBtn.style.display = 'none';
   }
 
-  // 🏠 Home button — show when near completed house
-  var homeBtn = document.getElementById('home-btn');
-  if (_houseStage >= 5 && _playerNearHouseDoor() && !_inHouse && !quizActive) {
-    homeBtn.style.display = 'flex';
-    homeBtn.style.left = '50%';
-    homeBtn.style.top = '10px';
-    homeBtn.style.bottom = 'auto';
-    homeBtn.style.transform = 'translateX(-50%)';
-  } else {
-    homeBtn.style.display = 'none';
-  }
 }
 
 function drawJoystick() {
