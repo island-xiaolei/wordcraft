@@ -7696,7 +7696,8 @@ function update(dt) {
   if (_houseStage >= 5 && _playerNearHouseDoor() && !_inHouse && !quizActive) {
     homeBtn.style.display = 'flex';
     homeBtn.style.left = '50%';
-    homeBtn.style.bottom = '100px';
+    homeBtn.style.top = '10px';
+    homeBtn.style.bottom = 'auto';
     homeBtn.style.transform = 'translateX(-50%)';
   } else {
     homeBtn.style.display = 'none';
