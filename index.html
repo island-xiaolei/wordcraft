@@ -7240,17 +7240,17 @@ function drawMinimap() {
   var homeMY = mmY + HOUSE_PY * scale;
   var homePulse = 1 + Math.sin(_waveTime * 3) * 0.3;
   // Outer glow
-  ctx.fillStyle = 'rgba(255,60,60,' + (0.5 * homePulse) + ')';
+  ctx.fillStyle = 'rgba(0,200,80,' + (0.5 * homePulse) + ')';
   ctx.beginPath();
   ctx.arc(homeMX, homeMY, 9 * homePulse, 0, Math.PI*2);
   ctx.fill();
   // Mid glow
-  ctx.fillStyle = 'rgba(255,200,0,' + (0.7 * homePulse) + ')';
+  ctx.fillStyle = 'rgba(0,255,100,' + (0.7 * homePulse) + ')';
   ctx.beginPath();
   ctx.arc(homeMX, homeMY, 6 * homePulse, 0, Math.PI*2);
   ctx.fill();
   // House icon
-  ctx.fillStyle = '#ff3333';
+  ctx.fillStyle = '#00cc44';
   ctx.fillRect(homeMX - 4, homeMY - 4, 8, 8);
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
   ctx.strokeRect(homeMX - 4, homeMY - 4, 8, 8);
