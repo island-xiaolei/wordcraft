@@ -652,7 +652,7 @@ canvas{display:block;position:absolute;top:0;left:0}
     <div class="s-actions">
       <button class="quiz-speak" onclick="speakReviewSentence()">🔊 听发音</button>
       <button class="quiz-action-btn" onclick="startReviewSpeaking()" style="background:linear-gradient(135deg,#42a5f5,#7c4dff)">🎤 朗读句子</button>
-      <button class="quiz-action-btn secondary" onclick="showSentenceTyping()" style="background:linear-gradient(135deg,#78909c,#546e7a)">✏️ 打字输入</button>
+      <button class="quiz-action-btn" onclick="showSentenceTyping()" style="background:linear-gradient(135deg,#f44336,#d32f2f);font-size:18px;font-weight:700;padding:12px 24px">✏️ 语音不行？点我打字输入</button>
     </div>
     <div id="s-typing-area" style="display:none;margin-top:10px;text-align:center">
       <input type="text" id="s-typing-input" placeholder="输入英文句子..." style="width:85%;padding:10px;font-size:16px;border-radius:8px;border:2px solid #ccc;text-align:center" onkeydown="if(event.key==='Enter')checkSentenceTyping()">
@@ -2514,6 +2514,7 @@ function completeWord(en) {
 // ==================== SENTENCE REVIEW SYSTEM ====================
 let reviewSentences = [];
 let reviewIndex = 0;
+let _sFailCount = 0; // sentence speech failures, auto-switch to typing after 2
 let reviewActive = false;
 let reviewRecognition = null;
 
@@ -2861,6 +2862,7 @@ function showReviewSentence(idx) {
   document.getElementById('s-next-btn').style.display = 'none';
   document.getElementById('s-finish-btn').style.display = 'none';
   document.getElementById('s-typing-area').style.display = 'none';
+  _sFailCount = 0; // reset speech fail counter for new sentence
 
   document.getElementById('sentence-overlay').classList.add('show');
 
@@ -2968,6 +2970,7 @@ function startReviewSpeaking() {
       resultEl.className = 'quiz-speech-result wrong';
       sfxWrong();
       _houseWrongAnswer();
+      _sFailCount++; if (_sFailCount >= 2) showSentenceTyping();
     }
   };
 
